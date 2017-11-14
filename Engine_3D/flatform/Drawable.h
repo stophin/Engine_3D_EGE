@@ -1,0 +1,29 @@
+#pragma once
+
+#include "../flatform/EPaint.h"
+
+#include <wingdi.h>
+#include <comdef.h>
+#include <gdiplus.h>
+using namespace Gdiplus;
+#pragma comment(lib, "gdiplus.lib")
+
+#define DEBUG_GRADE_1	0x01
+#define DEBUG_GRADE_2	0x02
+#define DEBUG_GRADE_3	0x03
+#define DEBUG_GRADE_4	0x04
+
+VOID Initialize();
+VOID onPaint(HWND hWnd);
+VOID onTimer();
+VOID onClose();
+VOID onKeyDown(WPARAM wParam);
+VOID onKeyUp(WPARAM wParam);
+VOID onResize(FLOAT width, FLOAT height);
+VOID onScroll(FLOAT delta);
+VOID onMenu(FLOAT x, FLOAT y, INT mode);
+VOID onDrag(FLOAT x, FLOAT y, INT mode);
+
+#include "Device.h"
+
+void render(VObj * range, VObj * range0, VObj * range1);

@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\platform">
+      <UniqueIdentifier>{be345aed-6c11-4488-b1f1-07f9bbedb738}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\platform">
+      <UniqueIdentifier>{17050d29-1e05-4671-8c65-5a80695e27c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\common">
+      <UniqueIdentifier>{4bc2f4b0-b202-466d-a9c9-6a42ebdb9c48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\common">
+      <UniqueIdentifier>{c2be007c-2ab7-46b8-aed4-14ed2a6eaaf1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\math3d">
+      <UniqueIdentifier>{59d1395f-305e-4fdb-876c-d258b65feb68}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="flatform\ELibrary.h">
+      <Filter>头文件\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="flatform\EPaint.h">
+      <Filter>头文件\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="flatform\Drawable.h">
+      <Filter>头文件\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="common\EPoint.h">
+      <Filter>头文件\common</Filter>
+    </ClInclude>
+    <ClInclude Include="math3d\Trans3D.h">
+      <Filter>头文件\math3d</Filter>
+    </ClInclude>
+    <ClInclude Include="math3d\Vert3D.h">
+      <Filter>头文件\math3d</Filter>
+    </ClInclude>
+    <ClInclude Include="math3d\Mat3D.h">
+      <Filter>头文件\math3d</Filter>
+    </ClInclude>
+    <ClInclude Include="math3d\Camera3D.h">
+      <Filter>头文件\math3d</Filter>
+    </ClInclude>
+    <ClInclude Include="common\MultiLinkList.h">
+      <Filter>头文件\common</Filter>
+    </ClInclude>
+    <ClInclude Include="math3d\Manager3D.h">
+      <Filter>头文件\math3d</Filter>
+    </ClInclude>
+    <ClInclude Include="math3d\Object3D.h">
+      <Filter>头文件\math3d</Filter>
+    </ClInclude>
+    <ClInclude Include="math3d\Matrix3D.h">
+      <Filter>头文件\math3d</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine_3D.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="flatform\EPaint.cpp">
+      <Filter>源文件\platform</Filter>
+    </ClCompile>
+    <ClCompile Include="flatform\Drawable.cpp">
+      <Filter>源文件\platform</Filter>
+    </ClCompile>
+    <ClCompile Include="common\EPoint.cpp">
+      <Filter>源文件\common</Filter>
+    </ClCompile>
+    <ClCompile Include="common\MultiLinkList.cpp">
+      <Filter>源文件\common</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="math3d\Light3D.h">
+      <Filter>头文件\math3d</Filter>
+    </None>
+  </ItemGroup>
+</Project>
