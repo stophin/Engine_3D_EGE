@@ -96,20 +96,26 @@ VOID Initialize()
 	INT t1 = tman.addTexture(L"1.jpg");
 	INT t2 = tman.addTexture(L"2.jpg");
 	INT t3 = tman.addTexture(L"3.jpg");
-	INT t4 = tman.addTexture(16, 16);
+	INT t4 = tman.addTexture(64, 64);
+
 
 	man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
-		.scale(10, 10, 10).move(0, -30, -300).setColor(GREEN).setTexture(tman, t3);
+		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
+		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
+		.scale(10, 10, 10).move(100, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t4);
 
-	man.addReflectionObject(1000).addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
-		.scale(10, 10, 10).rotate(90, 90, 0).move(100, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t1);
+	man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
+		.scale(10, 10, 10).move(0, -30, -300).setColor(GREEN).setTexture(tman, t1);
 
 	man.addTransparentObject(1.01).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
 		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
-		.scale(0.5, 0.5, 0.5).move(-15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t2);
+		.scale(0.5, 0.5, 0.5).move(-15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t3);
 	man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
 		.scale(10, 10, 10).rotate(-90, -90, 180).move(-100, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t3);
+
+	man.addReflectionObject(1000).addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
+		.scale(10, 10, 10).rotate(90, 90, 0).move(100, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t1);
 
 	int count = 2;
 	int c = 30;
@@ -404,18 +410,18 @@ VOID onKeyDown(WPARAM wParam)
 		case 'S':
 			wParam = 'N';
 			break;
-		case 'Q':
-			if (lean == 0) {
-				lean = -scale * 4;
-				man.rotateCamera(0, 0, lean);
-			}
-			break;
-		case 'E':
-			if (lean == 0) {
-				lean = scale * 4;
-				man.rotateCamera(0, 0, lean);
-			}
-			break;
+		//case 'Q':
+		//	if (lean == 0) {
+		//		lean = -scale * 4;
+		//		man.rotateCamera(0, 0, lean);
+		//	}
+		//	break;
+		//case 'E':
+		//	if (lean == 0) {
+		//		lean = scale * 4;
+		//		man.rotateCamera(0, 0, lean);
+		//	}
+		//	break;
 		}
 	}
 	Object3D * obj = (Object3D *)man.objs.link;

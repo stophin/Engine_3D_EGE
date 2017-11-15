@@ -37,7 +37,6 @@ public:
 	Vert3D lookat;
 
 
-	Mat3D proj;
 	void initialize(int type) {
 		if (type == 1) {
 			proj.mx.set(2 * znear / width, 0, -(rt.x + lb.x) / width, 0);
@@ -70,12 +69,6 @@ public:
 
 	}
 
-	void project(Vert3D &v) {
-		EFTYPE z = 1.0 / v.z;
-		v * proj;
-		v * z;
-	}
-
 	int normalize(Vert3D& v) {
 		if (this->lookat.z > 0 && (EP_GTZERO(v.z - zfar) || EP_GTZERO(v.z - znear))) {
 			return -2;
@@ -99,6 +92,13 @@ public:
 			project(v);
 		}
 		return 0;
+	}
+
+	Mat3D proj;
+	void project(Vert3D &v) {
+		EFTYPE z = 1.0 / v.z;
+		v * proj;
+		v * z;
 	}
 
 	Mat3D proj_1;

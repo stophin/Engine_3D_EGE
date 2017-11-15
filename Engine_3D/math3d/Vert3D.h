@@ -181,6 +181,9 @@ struct Vert3D {
 	static EFTYPE getZ(const Vert3D& n, EFTYPE x0, EFTYPE y0, EFTYPE z0, EFTYPE x, EFTYPE y) {
 		return (-n.x * (x - x0) - n.y * (y - y0)) / n.z + z0;
 	}
+	static EFTYPE getXFromY(const Vert3D& v0, const Vert3D& v1, EFTYPE y) {
+		return ((y - v0.y) / (v1.y - v0.y)) * (v1.x - v0.x) + v0.x;
+	}
 
 	static EFTYPE cross(const Vert3D& a, const Vert3D& b, const Vert3D& p) {
 		return (b.x - a.x)*(p.y - a.y) - (b.y - a.y)*(p.x - a.x);

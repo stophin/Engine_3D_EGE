@@ -61,6 +61,7 @@ public:
 	Vert3D n_r;
 	Vert3D n_d;
 	Vert3D n_z;
+	Vert3D n_1_z;
 
 	EFTYPE zz;
 
@@ -98,7 +99,7 @@ typedef class Object3D Object3D;
 class Object3D {
 public:
 	Object3D() : 
-		_M(&M, NULL, 1), texture(NULL),
+		_M(&M, &M_1, 1), texture(NULL),
 		cam(NULL), verts(0), verts_r(1), verts_f(2), transparent(0), reflection(0), v0(NULL), v1(NULL), render_aabb(0){
 		center.init();
 		center_r.init();
@@ -361,6 +362,10 @@ public:
 							v->n_z.set(v0->x - v->x, v0->y - v->y, v0->zz - v->zz);
 							this->center_r.set(v1->x - v->x, v1->y - v->y, v1->zz - v->zz);
 							v->n_z * this->center_r;
+							v->n_1_z.set(v0->x - v->x, v0->y - v->y, v0->z - v->z);
+							this->center_r.set(v1->x - v->x, v1->y - v->y, v1->z - v->z);
+							v->n_1_z * this->center_r;
+							
 
 							// get render range
 							v->xs = max(Vert3D::get_minx(v0->v_s, v1->v_s, v->v_s), 0);

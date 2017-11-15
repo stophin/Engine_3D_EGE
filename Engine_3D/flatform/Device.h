@@ -26,7 +26,7 @@ struct Device {
 	EPoint e, s, v, c;
 	Vert3D p;
 	ege_colpoint cps[3];
-	Vert3D n, n_1, n_2, n0, n1, n2, r;
+	Vert3D n, n_1, n_2, n0, n1, n2, n3, r;
 	DWORD * _tango, *_image, *_trans, *_mirror;
 	DWORD * __image, *__tango, *__trans, *__mirror;
 	FLOAT *__depth, *__shade;
@@ -402,8 +402,34 @@ struct Device {
 									index = 0;
 									xs = _range == v ? v->xs : max(_range->xs, v->xs); ys = _range == v ? v->ys : max(_range->ys, v->ys);
 									xe = _range == v ? v->xe : min(_range->xe, v->xe); ye = _range == v ? v->ye : min(_range->ye, v->ye);
-									for (i = ys; i <= ye && i < height; i++) {
-										for (j = xs; j <= xe && j < width; j++) {
+									for (i = ys; i <= ye && i < height; i += 1) {
+										//TODO
+										cam = obj->cam;
+										if (!cam) {
+											break;
+										}
+										EFTYPE y_s = (i - cam->offset_h) / cam->scale_h;
+										n0.set((v0->x0 - cam->offset_w) / cam->scale_w, (v0->y0 - cam->offset_h) / cam->scale_h, 0);
+										n1.set((v1->x0 - cam->offset_w) / cam->scale_w, (v1->y0 - cam->offset_h) / cam->scale_h, 0);
+										n2.set((v->x0 - cam->offset_w) / cam->scale_w, (v->y0 - cam->offset_h) / cam->scale_h, 0);
+										//EFTYPE y_s = i;
+										//n0.set(v0->x0, v0->y0, v0->z0);
+										//n1.set(v1->x0, v1->y0, v1->z0);
+										//n2.set(v->x0, v->y0, v->z0);
+										EFTYPE xl = Vert3D::getXFromY(n2, n0, y_s);
+										EFTYPE xr = Vert3D::getXFromY(n2, n1, y_s);
+										EFTYPE o_z_t = 1 / v->z0;
+										EFTYPE o_z_b_l = 1 / v0->z0;
+										EFTYPE o_z_l = (y_s - n2.y) * (o_z_b_l - o_z_t) / (n0.y - n2.y) + o_z_t;
+										EFTYPE o_z_b_r = 1 / v1->z0;
+										EFTYPE o_z_r = (y_s - n2.y) * (o_z_b_r - o_z_t) / (n1.y - n2.y) + o_z_t;
+										EFTYPE o_z_s = (o_z_r - o_z_l) / (xr - xl);
+										EFTYPE x_s = xl, o_z = o_z_l;
+										for (j = xs; j <= xe && j < width; j += 1) {
+											//TODO
+											++x_s;
+											o_z += o_z_s;
+
 											index = i * width + j;
 											if (render_linear < 0) {
 												__image = &_image[index];
@@ -425,9 +451,22 @@ struct Device {
 											//step2: depth test
 											if (*__image != BLACK) {
 												__depth = &depth[index];
+
+												//TODO
+												//EFTYPE oj = (j - cam->offset_w) / cam->scale_w;
+												EFTYPE oz = 1 / o_z;
+												EFTYPE ox = -x_s * oz / cam->znear;
+												EFTYPE oy = -y_s * oz / cam->znear;
+
 												// get depth
 												//(-n.x * ((FLOAT)j - v.x) - n.y * ((FLOAT)i - v.y)) / n.z + v->z
-												z = Vert3D::getZ(v->n_d, v->x0, v->y0, v->z, (EFTYPE)j, (EFTYPE)i);
+												//n3.set(v->x0, v->y0, v->z);
+												//n3 * (1 / n3.z);
+												n0.set((j - cam->offset_w) / cam->scale_w, (i - cam->offset_h) / cam->scale_h, 0, 1);
+												z = Vert3D::getZ(v->n_d, v->x0, v->y0, v->z0, (EFTYPE)j, (EFTYPE)i);
+												//z = Vert3D::getZ(v->n_1_z, v->x, v->y, v->z, n0.x, n0.y);
+												//z = Vert3D::getZ(v->n_d, n3.x, n3.y, n3.z, (EFTYPE)j, (EFTYPE)i);
+												//z = oz;
 												if (EP_ISZERO(*__depth)) {
 													*__depth = z;
 												}
@@ -453,18 +492,37 @@ struct Device {
 													}
 
 													//step3: render light
-													cam = obj->cam;
 													if (cam) {
 														n0.set((j - cam->offset_w) / cam->scale_w, (i - cam->offset_h) / cam->scale_h, z, 1);
+														//n0.set(ox, oy, oz, 1);
 														// get position
 														//(-n_1.x * (n0.x - v->x) - n_1.y * (n0.y - v->y)) / n_1.z + v->zz;
-														zz = Vert3D::getZ(v->n_z, v->x, v->y, v->zz, n0.x, n0.y);
-														man.cams.link->anti_normalize(n0, zz);
-														n1.set(n0) * cam->M_1;
+														//n0 *  (1 / n0.z);
+														//n3.set(v->x, v->y, v->z);
+														//n3 * (1 / n3.z);
+														//zz = Vert3D::getZ(v->n_z, v->x, v->y, v->zz, n0.x, n0.y);
+														//n0 * (1 / z);
+														//n0 * (1 / z);
+														n0 * man.cams.link->proj_1;
+														//zz = Vert3D::getZ(v->n_1_z, n3.x, n3.y, n3.z, n0.x, n0.y);
+														zz = Vert3D::getZ(v->n_r, v->v_c.x, v->v_c.y, v->v_c.z, n0.x, n0.y);
+														n0 * zz;// *z;
+														n0.z = zz;
+														//zz = 1 / ((1 / v0->z) + (j - xs) * ((1 / v1->z) - (1 / v0->z)));
+														//n0 * (zz);
+														//n3.set(n0);
+														//man.cams.link->anti_normalize(n0, zz);
+														n1.set(n0)* cam->M_1;
 
 														//set texture 
-														n2.set(n1) * obj->M;
-														*__image = obj->getTexture(n2.x, n2.y);
+														//n2.set(n3)*(1 / zz);
+														//man.cams.link->anti_normalize(n2, zz);
+														//n2*obj->M_1;
+														//n2 * (zz);
+														n2.set(n1)*obj->M_1;
+														//n2.normalize();
+														//man.cams.link->project(n2);
+														*__image = obj->getTexture(n2.x * obj->t_w, n2.y* obj->t_h);
 
 														lgt = man.lgts.link;
 														f = 0;
@@ -524,12 +582,12 @@ struct Device {
 														cam = man.cams.link;
 														lgt = man.lgts.link;
 														n2.set(n1) * lgt->M_1;
-														man.cams.link->project(n1);
-														_j = (int)(n1.x * cam->scale_w + cam->offset_w), _i = (int)(n1.y * cam->scale_h + cam->offset_h);
+														man.cams.link->project(n2);
+														_j = (int)(n2.x * cam->scale_w + cam->offset_w), _i = (int)(n2.y * cam->scale_h + cam->offset_h);
 
 														if (!(_i < 0 || _i > height - 1 || _j < 0 || _j > width - 1)) {
 															_index = _i * width + _j;
-															if (render_proj > 0) {
+															if (0 && render_proj > 0) {
 																_tango[_index] = RED;// obj->color;
 															}
 
@@ -542,13 +600,16 @@ struct Device {
 
 														if (render_proj > 0) {
 															cam = man.cams.link;
-															n2.set(n1) * cam->M;
-															man.cams.link->project(n1);
-															_j = (int)(n1.x * cam->scale_w + cam->offset_w), _i = (int)(n1.y * cam->scale_h + cam->offset_h);
+															n2.set(n0) * cam->M_1*obj->M_1 * obj->M * cam->M;
+															man.cams.link->project(n2);
+
+															INT __j = (int)(n2.x * cam->scale_w + cam->offset_w), __i = (int)(n2.y * cam->scale_h + cam->offset_h);
+															//Draw_Line(_tango, width, height, __j, __i, _j, _i, RED);
+															_j = __j, _i = __i;
 
 															if (!(_i < 0 || _i > height - 1 || _j < 0 || _j > width - 1)) {
 																_index = _i * width + _j;
-																_tango[_index] = BLUE;// obj->color;
+																_tango[_index] = WHITE;// obj->color
 															}
 														}
 													}
@@ -619,7 +680,7 @@ struct Device {
 	int Draw_Line(DWORD* vb_start, int lpitch, int height,
 		int x1, int y1, // 起始点
 		int x2, int y2, // 终点
-		unsigned char color // 颜色像素
+		DWORD color // 颜色像素
 		) // video buffer and memory pitch
 	{
 		// this function draws a line from xo,yo to x1,y1 using differential error
