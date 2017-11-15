@@ -57,7 +57,7 @@ VOID onPaint(HWND hWnd)
 	}
 	device.ClearBeforeRender();
 	device.Render(man, NULL, NULL, NULL);
-	device.RenderMirror(man, move_light);
+	device.RenderMirror(man);
 	//Blt buffer to window buffer
 	DWORD * _tango = EP_GetImageBuffer();
 	int i, j, index;
@@ -102,17 +102,18 @@ VOID Initialize()
 	man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
 		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
-		.scale(10, 10, 10).move(100, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t4);
+		.scale(5, 5, 5).move(100, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t4);
 
 	man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
-		.scale(10, 10, 10).move(0, -30, -300).setColor(GREEN).setTexture(tman, t1);
+		.scale(10, 10, 10).move(0, -30, -300).setColor(GREEN).setTexture(tman, t2);
+
 
 	man.addTransparentObject(1.01).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
 		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
 		.scale(0.5, 0.5, 0.5).move(-15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t3);
 	man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
-		.scale(10, 10, 10).rotate(-90, -90, 180).move(-100, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t3);
+		.scale(10, 10, 10).rotate(-90, -90, 180).move(-100, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t4);
 
 	man.addReflectionObject(1000).addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
 		.scale(10, 10, 10).rotate(90, 90, 0).move(100, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t1);

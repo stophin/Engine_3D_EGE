@@ -62,7 +62,7 @@ public:
 				if (j % d == 0) {
 					s = -s;
 				}
-				texture[j * width + i] = s > 0 ? RED : GREEN;
+				texture[j * width + i] = s > 0 ? DARKGRAY : LIGHTGRAY;
 			}
 		}
 	}
