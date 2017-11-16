@@ -11,6 +11,7 @@ int main(int argc, char* argv[])
 	Initialize();
 
 	INT count = 0;
+	char str[100];
 	EP_RenderStart();
 	do
 	{
@@ -71,6 +72,8 @@ int main(int argc, char* argv[])
 		}
 		//delay_ms(100);
 		EP_RenderFlush();
+		sprintf_s(str, "%f", getfps());
+		::SetWindowText(getHWnd(), str);
 	} while (1);
 	onClose();
 	closegraph();
