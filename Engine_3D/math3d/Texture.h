@@ -41,7 +41,7 @@ public:
 		for (int y = 0; y < height; y++){
 			for (int x = 0; x < width; x++)
 			{
-				index = height * width - x - y * width;
+				index = x + y * width;
 				texture[index] = buffer[index];
 			}
 		}
