@@ -417,6 +417,8 @@ struct Device {
 										if (cam == NULL) {
 											break;
 										}
+										//little trick^_^
+										int line_state = 0;
 										for (j = xs; j <= xe && j < width; j += 1) {
 
 											index = i * width + j;
@@ -425,16 +427,24 @@ struct Device {
 											}
 											else {
 												// linear interpolation
-												res = Vert3D::IsInTriangle(v0->v_s, v1->v_s, v->v_s, p.set((FLOAT)j, (FLOAT)i, 0));
+												if (line_state <= 2) {
+													res = Vert3D::IsInTriangle(v0->v_s, v1->v_s, v->v_s, p.set((FLOAT)j, (FLOAT)i, 0));
+												}
+												else {
+													//trick here: double edge then do not test is in triangle
+													res = -1;
+												}
 												if (res > 0) {
 													*__image = obj->color;
 													//*__image = obj->line;
+													line_state++;
 												}
 												else if (res < 0) {
 													*__image = obj->color;
 												}
 												else{
 													*__image = BLACK;
+													line_state = 0;
 												}
 											}
 											//step2: depth test
@@ -633,13 +643,6 @@ struct Device {
 												if (render_linear < 0) {
 													*__image = BLACK;
 												}
-											}
-										}
-									}
-									if (render_linear < 0) {
-										for (i = v->ys; i <= v->ye && i < height; i++) {
-											for (j = v->xs; j <= v->xe && j < width; j++) {
-												_image[i * width + j] = BLACK;
 											}
 										}
 									}

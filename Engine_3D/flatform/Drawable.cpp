@@ -89,7 +89,7 @@ VOID Initialize()
 	man.addReflectionCamera();
 
 	//man.addLight(9, -51, -60);
-	man.addLight(5, 8, 220);
+	man.addLight(5, 100, 220);
 	//man.addLight(-1000, 100, 100);
 
 	/*
@@ -115,6 +115,18 @@ VOID Initialize()
 	EFTYPE r = 10;
 	EFTYPE x_1, x_2, r_1, r_2, p_1 = PI / ((EFTYPE)c), p_2 = 2 * PI / ((EFTYPE)c);
 
+	man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
+		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
+		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
+		.scale(5, 5, 5).move(100, 10, 50).setColor(RED).setLineColor(BLUE).setTexture(tman, t2);
+
+	for (int i = 0; i < 15; i++) {
+		for (int j = 0; j < 15; j++) {
+			man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
+				.scale(2, 2, 2).rotate(0, 0, 180).move(300 - 40 * j, -40, 300 - 40 * i).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t4);
+		}
+	}
+
 	c = 50;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
 	count = 1;
@@ -136,10 +148,6 @@ VOID Initialize()
 		}
 	}
 
-	man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
-		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
-		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
-		.scale(5, 5, 5).move(100, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t2);
 
 	man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.scale(10, 10, 10).move(0, -30, -300).setColor(GREEN).setTexture(tman, t3);
@@ -205,13 +213,6 @@ VOID Initialize()
 		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
 		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
 		.scale(0.5, 0.5, 0.5).move(0, 0, -50).setColor(BLUE).setLineColor(BLUE);
-
-	for (int i = 0; i < 15; i++) {
-		for (int j = 0; j < 15; j++) {
-			man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
-				.scale(2, 2, 2).rotate(0, 0, 180).move(300 - 40 * j, -40, 300 - 40 * i).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t4);
-		}
-	}
 
 	for (int i = 0; i < 5; i++) {
 		for (int j = 0; j < 15; j++) {
@@ -448,7 +449,7 @@ VOID onKeyDown(WPARAM wParam)
 		//	break;
 		}
 	}
-	Object3D * obj = (Object3D *)man.tras.link;
+	Object3D * obj = (Object3D *)man.objs.link;
 	if (obj == NULL) {
 		return;
 	}
