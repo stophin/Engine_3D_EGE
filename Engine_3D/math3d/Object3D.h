@@ -34,6 +34,8 @@ public:
 			this->prev[i] = NULL;
 			this->next[i] = NULL;
 		}
+		aabb[0].set(-EP_MAX, -EP_MAX, -EP_MAX, 1);
+		aabb[1].set(EP_MAX, EP_MAX, EP_MAX, 1);
 	}
 	Vert3D v;
 	Vert3D v_c;
@@ -74,6 +76,8 @@ public:
 	Mat3D R_r;
 
 	EFTYPE backface;
+
+	Vert3D aabb[2];
 
 	// for multilinklist
 	INT uniqueID;
@@ -131,19 +135,20 @@ public:
 		return *this;
 	}
 
-	DWORD getTexture(INT x, INT y) {
+	DWORD getTexture(EFTYPE x, EFTYPE y) {
 		if (NULL == texture) {
 			return this->color;
 		}
-		x %= t_w;
-		y %= t_h;
-		if (x < 0) {
-			x = t_w + x;
+		INT u = x * t_w, v = y * t_h;
+		u %= t_w;
+		v %= t_h;
+		if (u < 0) {
+			u = t_w + u;
 		}
-		if (y < 0) {
-			y = t_h + y;
+		if (v < 0) {
+			v = t_h + v;
 		}
-		return texture[x + y * t_w];
+		return texture[u + v * t_w];
 	}
 
 	Camera3D * cam;
@@ -205,6 +210,29 @@ public:
 
 			//this->verts.insertLink(new VObj(*v1));
 			//this->verts.insertLink(new VObj(*v0));
+
+			//aabb test
+			for (int i = 0; i < 3; i++) {
+				VObj * _v = NULL;
+				if (i == 0) {
+					_v = this->v0;
+				}
+				else if (i == 1) {
+					_v = this->v1;
+				}
+				else {
+					_v = v;
+				}
+				//max
+				if (v->aabb[0].x < _v->v.x) v->aabb[0].x = _v->v.x;
+				if (v->aabb[0].y < _v->v.y) v->aabb[0].y = _v->v.y;
+				if (v->aabb[0].z < _v->v.z) v->aabb[0].z = _v->v.z;
+
+				//min
+				if (v->aabb[1].x > _v->v.x) v->aabb[1].x = _v->v.x;
+				if (v->aabb[1].y > _v->v.y) v->aabb[1].y = _v->v.y;
+				if (v->aabb[1].z > _v->v.z) v->aabb[1].z = _v->v.z;
+			}
 
 			this->v0 = this->v1;
 			this->v1 = v;

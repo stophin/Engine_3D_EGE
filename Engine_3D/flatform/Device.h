@@ -478,28 +478,32 @@ struct Device {
 													n1.set(n0)* cam->M_1;
 
 													//set texture 
-													n2.set(n1)*obj->M_1 * 10;
-													//n2.normalize();
+													n2.set(n1)*obj->M_1;
 													//*__image = obj->getTexture(n2.y * obj->t_w, n2.z * obj->t_h);
 													//get the max projection coordinate? xy or yz or xz?
-													EFTYPE sxy = n3.set(0, 0, 1) ^ (v->n), syz = n3.set(1, 0, 0) ^ (v->n), sxz = n3.set(0, 1, 0) ^ (v->n);
+													EFTYPE mx = v->aabb[0].x - v->aabb[1].x, my = v->aabb[0].y - v->aabb[1].y, mz = v->aabb[0].z - v->aabb[1].z;
+													//EFTYPE sxy = n3.set(0, 0, 1) ^ (v->n), syz = n3.set(1, 0, 0) ^ (v->n), sxz = n3.set(0, 1, 0) ^ (v->n);
+													EFTYPE sxy = mx * my, syz = my * mz, sxz = mx * mz;
 													if (sxy < 0) sxy = -sxy;
 													if (syz < 0) syz = -syz;
 													if (sxz < 0) sxz = -sxz;
+													if (mx < 0) mx = -mx;
+													if (my < 0) my = -my;
+													if (mz < 0) mz = -mz;
 													if (sxy > sxz) {
 														if (sxy > syz) {
-															*__image = obj->getTexture(n2.x, n2.y);
+															*__image = obj->getTexture(n2.x / mx, n2.y / my);
 														}
 														else {
-															*__image = obj->getTexture(n2.y, n2.z);
+															*__image = obj->getTexture(n2.y / my, n2.z / mz);
 														}
 													}
 													else {
 														if (sxz > syz) {
-															*__image = obj->getTexture(n2.x, n2.z);
+															*__image = obj->getTexture(n2.x / mx, n2.z / mz);
 														}
 														else {
-															*__image = obj->getTexture(n2.y, n2.z);
+															*__image = obj->getTexture(n2.y / my, n2.z / mz);
 														}
 													}
 
