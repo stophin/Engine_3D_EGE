@@ -3,7 +3,6 @@
 
 #include "./flatform/Drawable.h"
 
-
 int main(int argc, char* argv[])
 {
 	EP_Init(800, 600);

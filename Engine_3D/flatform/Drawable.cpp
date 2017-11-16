@@ -9,6 +9,7 @@ TextureManage tman;
 int DEBUG_MODE = DEBUG_GRADE_2;
 
 INT isresize = -1;
+INT isrefresh = -1;
 INT width;
 INT height;
 INT draw_line = 1;
@@ -48,6 +49,10 @@ VOID onPaint(HWND hWnd)
 
 		man.setCameraRange(org.x, org.y, scalex, scaley);
 	}
+	if (isrefresh < 1) {
+		return;
+	}
+	isrefresh = -1;
 	// Place draw code here
 	setcolor(BLACK);
 	cleardevice();
@@ -100,6 +105,8 @@ VOID Initialize()
 	INT t4 = tman.addTexture(64, 64, 8);
 	INT t5 = tman.addTexture(64, 64, 2);
 	INT t6 = tman.addTexture(L"6.jpg");
+	INT t7 = tman.addTexture(L"7.jpg");
+	INT t8 = tman.addTexture(L"8.jpg");
 
 
 	int count = 2;
@@ -107,7 +114,28 @@ VOID Initialize()
 	int i, j, k;
 	EFTYPE r = 10;
 	EFTYPE x_1, x_2, r_1, r_2, p_1 = PI / ((EFTYPE)c), p_2 = 2 * PI / ((EFTYPE)c);
-	
+
+	c = 50;
+	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
+	count = 1;
+	for (k = 0; k < count; k++) {
+		EFTYPE x = rand() % 300 - 150;
+		EFTYPE z = rand() % 300 - 150;
+		EFTYPE y = rand() % 100;
+		for (i = 0; i < c; i++) {
+			x_1 = r * cos(i * p_1);
+			r_1 = r * sin(i * p_1);
+			x_2 = r * cos((i + 1) * p_1);
+			r_2 = r * sin((i + 1) * p_1);
+			Object3D& obj = man.addTransparentObject(-0.51).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
+			for (j = 1; j < c; j++) {
+				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
+					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
+			}
+			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(10, 10, 10).move(x, y, z).rotate(0, 0, 0).setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 1);
+		}
+	}
+
 	man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
 		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
@@ -152,32 +180,12 @@ VOID Initialize()
 			r_1 = r * sin(i * p_1);
 			x_2 = r * cos((i + 1) * p_1);
 			r_2 = r * sin((i + 1) * p_1);
-			Object3D& obj = man.addTransparentObject(-0.51).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
-			for (j = 1; j < c; j++) {
-				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
-					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
-			}
-			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(10, 10, 10).move(x, y, z).rotate(0, 0, 0).setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 1);
-		}
-	}
-	c = 50;
-	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
-	count = 1;
-	for (k = 0; k < count; k++) {
-		EFTYPE x = rand() % 300 - 150;
-		EFTYPE z = rand() % 300 - 150;
-		EFTYPE y = rand() % 100;
-		for (i = 0; i < c; i++) {
-			x_1 = r * cos(i * p_1);
-			r_1 = r * sin(i * p_1);
-			x_2 = r * cos((i + 1) * p_1);
-			r_2 = r * sin((i + 1) * p_1);
 			Object3D& obj = man.addObject().renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
 			for (j = 1; j < c; j++) {
 				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
 					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
 			}
-			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(5, 5, 5).move(x, y, z).rotate(0, 0, 0).setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 1);
+			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(5, 5, 5).move(x, y, z).rotate(0, 0, 0).setColor(GREEN).setLineColor(RED).setTexture(tman, t8, 1);
 		}
 	}
 
@@ -276,6 +284,8 @@ VOID onScroll(FLOAT delta) {
 				man.moveCamera(0, 0, -scale);
 			}
 		}
+
+		isrefresh = 1;
 	}
 }
 
@@ -299,6 +309,8 @@ VOID onMenu(FLOAT x, FLOAT y, INT mode)
 			}
 			menu.X = x;
 			menu.Y = y;
+
+			isrefresh = 1;
 		}
 	}
 	else	// mouse up
@@ -328,6 +340,8 @@ VOID onDrag(FLOAT x, FLOAT y, INT mode)
 			}
 			drag.X = x;
 			drag.Y = y;
+
+			isrefresh = 1;
 		}
 	}
 	else	// mouse up
@@ -387,6 +401,8 @@ VOID onKeyUp(WPARAM wParam) {
 		}
 		break;
 	}
+
+	isrefresh = 1;
 }
 VOID onKeyDown(WPARAM wParam)
 {
@@ -432,7 +448,7 @@ VOID onKeyDown(WPARAM wParam)
 		//	break;
 		}
 	}
-	Object3D * obj = (Object3D *)man.objs.link;
+	Object3D * obj = (Object3D *)man.tras.link;
 	if (obj == NULL) {
 		return;
 	}
@@ -540,4 +556,6 @@ VOID onKeyDown(WPARAM wParam)
 		}
 		break;
 	}
+
+	isrefresh = 1;
 }
