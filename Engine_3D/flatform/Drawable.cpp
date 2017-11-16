@@ -99,8 +99,15 @@ VOID Initialize()
 	INT t3 = tman.addTexture(L"3.jpg");
 	INT t4 = tman.addTexture(64, 64, 8);
 	INT t5 = tman.addTexture(64, 64, 2);
+	INT t6 = tman.addTexture(L"6.jpg");
 
 
+	int count = 2;
+	int c = 30;
+	int i, j, k;
+	EFTYPE r = 10;
+	EFTYPE x_1, x_2, r_1, r_2, p_1 = PI / ((EFTYPE)c), p_2 = 2 * PI / ((EFTYPE)c);
+	
 	man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
 		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
@@ -120,12 +127,6 @@ VOID Initialize()
 	man.addReflectionObject(1000).addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
 		.scale(10, 10, 10).rotate(90, 90, 0).move(100, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t1);
 
-	int count = 2;
-	int c = 30;
-	int i, j, k;
-	EFTYPE r = 10;
-	EFTYPE x_1, x_2, r_1, r_2, p_1 = PI / ((EFTYPE)c), p_2 = 2 * PI / ((EFTYPE)c);
-
 	for (i = 0; i < c; i++) {
 		x_1 = r * cos(i * p_1);
 		r_1 = r * sin(i * p_1);
@@ -139,6 +140,9 @@ VOID Initialize()
 		obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).move(0, 0, 50).rotate(0, 0, 0).setColor(GREEN).setLineColor(RED);
 	}
 
+	c = 50;
+	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
+	count = 1;
 	for (k = 0; k < count; k++) {
 		EFTYPE x = rand() % 300 - 150;
 		EFTYPE z = rand() % 300 - 150;
@@ -153,10 +157,12 @@ VOID Initialize()
 				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
 					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
 			}
-			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).move(x, y, z).rotate(0, 0, 0).setColor(GREEN).setLineColor(RED);
+			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(10, 10, 10).move(x, y, z).rotate(0, 0, 0).setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 1);
 		}
 	}
-
+	c = 50;
+	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
+	count = 1;
 	for (k = 0; k < count; k++) {
 		EFTYPE x = rand() % 300 - 150;
 		EFTYPE z = rand() % 300 - 150;
@@ -171,10 +177,9 @@ VOID Initialize()
 				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
 					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
 			}
-			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).move(x, y, z).rotate(0, 0, 0).setColor(GREEN).setLineColor(RED);
+			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(5, 5, 5).move(x, y, z).rotate(0, 0, 0).setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 1);
 		}
 	}
-
 
 	man.addObject().renderAABB().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)

@@ -221,6 +221,10 @@ struct Device {
 		if (NULL == cam || NULL == cur_cam) {
 			return;
 		}
+		Light3D * lgt = man.lgts.link;
+		if (NULL == lgt) {
+			return;
+		}
 		cam->M.set(cur_cam->M);
 		cam->M_1.set(cur_cam->M_1);
 
@@ -234,8 +238,8 @@ struct Device {
 
 		if (obj) {
 			//set camera matrix to anti-light matrix
-			cur_cam->M.set(man.lgts.link->M_1);
-			cur_cam->M_1.set(man.lgts.link->M);
+			cur_cam->M.set(lgt->M_1);
+			cur_cam->M_1.set(lgt->M);
 			man.refresh(cur_cam);
 
 			int render_trans = 0;
@@ -309,6 +313,8 @@ struct Device {
 					} while (v && v != obj->verts_r.link);
 				}
 
+				//first do objects till end
+				//then do transparent object
 				if (render_trans == 0) {
 					obj = man.objs.next(obj);
 					if (!(obj && obj != man.objs.link)) {
@@ -477,36 +483,61 @@ struct Device {
 													n0.w = 1;
 													n1.set(n0)* cam->M_1;
 
-													//set texture 
-													n2.set(n1)*obj->M_1;
-													//*__image = obj->getTexture(n2.y * obj->t_w, n2.z * obj->t_h);
-													//get the max projection coordinate? xy or yz or xz?
-													EFTYPE mx = v->aabb[0].x - v->aabb[1].x, my = v->aabb[0].y - v->aabb[1].y, mz = v->aabb[0].z - v->aabb[1].z;
-													//EFTYPE sxy = n3.set(0, 0, 1) ^ (v->n), syz = n3.set(1, 0, 0) ^ (v->n), sxz = n3.set(0, 1, 0) ^ (v->n);
-													EFTYPE sxy = mx * my, syz = my * mz, sxz = mx * mz;
-													if (sxy < 0) sxy = -sxy;
-													if (syz < 0) syz = -syz;
-													if (sxz < 0) sxz = -sxz;
-													if (mx < 0) mx = -mx;
-													if (my < 0) my = -my;
-													if (mz < 0) mz = -mz;
-													if (sxy > sxz) {
-														if (sxy > syz) {
-															*__image = obj->getTexture(n2.x / mx, n2.y / my);
+													if (obj->type == 0) {
+														//set texture 
+														n2.set(n1)*obj->M_1;
+
+														//*__image = obj->getTexture(n2.y * obj->t_w, n2.z * obj->t_h);
+														//get the max projection coordinate? xy or yz or xz?
+														EFTYPE mx = v->aabb[0].x - v->aabb[1].x, my = v->aabb[0].y - v->aabb[1].y, mz = v->aabb[0].z - v->aabb[1].z;
+														//EFTYPE mx = obj->aabb[0].x - obj->aabb[6].x, my = obj->aabb[0].y - obj->aabb[6].y, mz = obj->aabb[0].z - obj->aabb[6].z;
+														EFTYPE sxy = n3.set(0, 0, 1) ^ (v->n), syz = n3.set(1, 0, 0) ^ (v->n), sxz = n3.set(0, 1, 0) ^ (v->n);
+														//EFTYPE sxy = mx * my, syz = my * mz, sxz = mx * mz;
+														if (sxy < 0) sxy = -sxy;
+														if (syz < 0) syz = -syz;
+														if (sxz < 0) sxz = -sxz;
+														if (mx < 0) mx = -mx;
+														if (my < 0) my = -my;
+														if (mz < 0) mz = -mz;
+														if (sxy > sxz) {
+															if (sxy > syz) {
+																*__image = obj->getTexture(n2.x / mx, n2.y / my);
+															}
+															else {
+																*__image = obj->getTexture(n2.y / my, n2.z / mz);
+															}
 														}
 														else {
-															*__image = obj->getTexture(n2.y / my, n2.z / mz);
+															if (sxz > syz) {
+																*__image = obj->getTexture(n2.x / mx, n2.z / mz);
+															}
+															else {
+																*__image = obj->getTexture(n2.y / my, n2.z / mz);
+															}
 														}
 													}
-													else {
-														if (sxz > syz) {
-															*__image = obj->getTexture(n2.x / mx, n2.z / mz);
-														}
-														else {
-															*__image = obj->getTexture(n2.y / my, n2.z / mz);
-														}
+													else if (obj->type == 1) {
+														//sphere map
+														// reflection vector
+														// R = I - 2 ( I * N ) N
+														n2.set(n0);// .normalize();
+														n3.set(v->n_r);
+														n3 * (n2 ^ n3) * 2;
+														n2 - n3;
+														// transition vector
+														// m = r + cam(0, 0, 1)
+														n2 + cam->lookat;
+														//n2.z += 1;
+														n2.normalize();
+
+														n2.x = n2.x * 0.5 + 0.5;
+														n2.y = n2.y * 0.5 + 0.5;
+														n2.z = n2.z * 0.5 + 0.5;
+
+														*__image = obj->getTexture(n2.x, n2.y);
 													}
 
+													//calculate sumption of light factors
 													lgt = man.lgts.link;
 													f = 0;
 													if (lgt) {
@@ -547,8 +578,10 @@ struct Device {
 																*__trans = Light3D::multi(*__image, f);
 															}
 															if (*__trans == BLACK) {
-																*__trans++;
+																//*__trans++;
+																*__trans = *__image;
 															}
+															//get transparent range
 															if (trans_w1 < j) trans_w1 = j;
 															if (trans_h1 < i) trans_h1 = i;
 															if (trans_w0 > j) trans_w0 = j;
@@ -558,7 +591,6 @@ struct Device {
 													else {
 														*__image = Light3D::multi(*__image, f);
 														*__tango = *__image;
-														*__trans = BLACK;
 													}
 
 													//step5: render shadow map
@@ -628,6 +660,8 @@ struct Device {
 					} while (v && v != obj->verts_r.link);
 				}
 
+				//first do objects till end
+				//then do transparent object
 				if (render_trans == 0) {
 					obj = man.objs.next(obj);
 					if (!(obj && obj != man.objs.link)) {
@@ -639,6 +673,7 @@ struct Device {
 					obj = man.tras.next(obj);
 					render_trans++;
 					if (!(obj && obj != man.tras.link)) {
+						//render transparent after all transparent objects were done
 						index = 0;
 						for (i = trans_h0; i <= trans_h1 && i < height; i++) {
 							for (j = trans_w0; j <= trans_w1 && j < width; j++) {

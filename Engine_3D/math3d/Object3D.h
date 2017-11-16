@@ -120,8 +120,12 @@ public:
 	DWORD *texture;
 	INT t_w;
 	INT t_h;
+	// texture type
+	// 0: normal texture
+	// 1: SphereMap 
+	INT type;
 
-	Object3D&   setTexture(TextureManage& tman, INT uID) {
+	Object3D&   setTexture(TextureManage& tman, INT uID, INT t = 0) {
 		Texture * ptexture = tman.textures.getLink(uID);
 
 		if (NULL == ptexture) {
@@ -131,6 +135,7 @@ public:
 		t_w = ptexture->width;
 		t_h = ptexture->height;
 		texture = ptexture->texture;
+		type = t;
 
 		return *this;
 	}
@@ -372,6 +377,7 @@ public:
 
 						// get normal vector
 						v->n_r.set(v->n) ^ CM;
+						v->n_r.normalize();
 						// set x0 for all vertexes
 						v->v_s.set(v->x * this->cam->scale_w + this->cam->offset_w, v->y * this->cam->scale_h + this->cam->offset_h, v->z);
 
