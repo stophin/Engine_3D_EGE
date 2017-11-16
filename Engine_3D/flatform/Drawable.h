@@ -2,12 +2,6 @@
 
 #include "../flatform/EPaint.h"
 
-#include <wingdi.h>
-#include <comdef.h>
-#include <gdiplus.h>
-using namespace Gdiplus;
-#pragma comment(lib, "gdiplus.lib")
-
 #define DEBUG_GRADE_1	0x01
 #define DEBUG_GRADE_2	0x02
 #define DEBUG_GRADE_3	0x03

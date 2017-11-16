@@ -60,7 +60,7 @@ void EP_Rectangle(const EPoint& p,const EPoint& w)
 	rectangle(p.x,p.y-w.y,p.x+w.x,p.y);
 }
 
-void EP_Rectangle(const RectF& p)
+void EP_Rectangle(const ERectF& p)
 {
 	rectangle(p.X, p.Y, p.X + p.Width, p.Y + p.Height);
 }
@@ -111,7 +111,7 @@ void EP_Line(EPTYPE sx,EPTYPE sy,EPTYPE ex,EPTYPE ey)
 	line(sx,sy,ex,ey);
 }
 
-void EP_Lines(PointF * points, int count)
+void EP_Lines(EPointF * points, int count)
 {
 	for (int i = 0; i < count - 1; i++)
 	{

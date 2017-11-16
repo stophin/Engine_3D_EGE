@@ -11,11 +11,18 @@
 
 #include <graphics.h>
 
-#include <wingdi.h>
-#include <comdef.h>
-#include <gdiplus.h>
-using namespace Gdiplus;
-#pragma comment(lib, "gdiplus.lib")
+
+struct EPointF {
+	FLOAT X;
+	FLOAT Y;
+};
+
+struct ERectF {
+	FLOAT X;
+	FLOAT Y;
+	FLOAT Width;
+	FLOAT Height;
+};
 
 #endif	//end of _ELIBRARY_H_
 //end of file

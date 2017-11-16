@@ -99,14 +99,14 @@ VOID Initialize()
 
 	//load resource
 	INT t0 = tman.addTexture(480, 480, 10);
-	INT t1 = tman.addTexture(L"1.jpg");
-	INT t2 = tman.addTexture(L"2.jpg");
-	INT t3 = tman.addTexture(L"3.jpg");
+	INT t1 = tman.addTexture("1.jpg");
+	INT t2 = tman.addTexture("2.jpg");
+	INT t3 = tman.addTexture("3.jpg");
 	INT t4 = tman.addTexture(64, 64, 8);
 	INT t5 = tman.addTexture(64, 64, 2);
-	INT t6 = tman.addTexture(L"6.jpg");
-	INT t7 = tman.addTexture(L"7.jpg");
-	INT t8 = tman.addTexture(L"8.jpg");
+	INT t6 = tman.addTexture("6.jpg");
+	INT t7 = tman.addTexture("7.jpg");
+	INT t8 = tman.addTexture("8.jpg");
 
 
 	int count = 2;
@@ -290,7 +290,7 @@ VOID onScroll(FLOAT delta) {
 	}
 }
 
-PointF menu;
+EPointF menu;
 VOID onMenu(FLOAT x, FLOAT y, INT mode)
 {
 	if (mode == 1) // mouse down
@@ -321,7 +321,7 @@ VOID onMenu(FLOAT x, FLOAT y, INT mode)
 	}
 }
 
-PointF drag;
+EPointF drag;
 VOID onDrag(FLOAT x, FLOAT y, INT mode)
 {
 	if (mode == 1) // mouse down

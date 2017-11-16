@@ -24,23 +24,25 @@ public:
 	INT width;
 	INT height;
 	DWORD *texture;
+	EIMAGE image;
 
-	void LoadTexture(wchar_t * filename) {
+	void LoadTexture(char * filename) {
 		if (texture) {
 			return;
 		}
-		wstring infilename(filename);
-		Bitmap* bmp = new Bitmap(infilename.c_str());
-		height = bmp->GetHeight();
-		width = bmp->GetWidth();
+		EFTYPE w = 0, h = 0;
+		EP_LoadImage(image, filename, w, h);
+		height = EP_GetImageHeight(image);
+		width = EP_GetImageWidth(image);
 
-		Color color;
 		texture = new DWORD[sizeof(DWORD)* height * width];
+		DWORD * buffer = EP_GetImageBuffer(image);
+		INT index;
 		for (int y = 0; y < height; y++){
 			for (int x = 0; x < width; x++)
 			{
-				bmp->GetPixel(x, y, &color);
-				texture[height * width - x - y * width] = color.ToCOLORREF();
+				index = height * width - x - y * width;
+				texture[index] = buffer[index];
 			}
 		}
 	}
@@ -99,7 +101,7 @@ public:
 
 	MultiLinkList<Texture> textures;
 
-	INT addTexture(wchar_t * filename) {
+	INT addTexture(char * filename) {
 		Texture * texture = new Texture();
 		texture->uniqueID = this->textures.linkcount;
 		texture->LoadTexture(filename);

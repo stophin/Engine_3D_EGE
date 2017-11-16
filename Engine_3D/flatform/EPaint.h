@@ -32,7 +32,7 @@ void EP_Refresh();
 void EP_Refresh(ECOLOR c);
 
 void EP_Rectangle(const EPoint& p, const EPoint& w);
-void EP_Rectangle(const RectF& p);
+void EP_Rectangle(const ERectF& p);
 void EP_Rectangle(EPTYPE sx,EPTYPE sy,EPTYPE ex,EPTYPE ey);
 void EP_FillRectangle(EPTYPE sx,EPTYPE sy,EPTYPE ex,EPTYPE ey);
 void EP_InverseRect(const EPoint& lt,const EPoint& rb);
@@ -52,7 +52,7 @@ EPBOOL EP_TruncImage(EPTYPE x, EPTYPE y, EIMAGE image, EIMAGE image_bk, ECOLOR c
 void EP_TruncImage(EPTYPE x,EPTYPE y,EIMAGE image,ECOLOR c=WHITE,int mode=0);
 void EP_Line(const EPoint& s,const EPoint& e);
 void EP_Line(EPTYPE sx,EPTYPE sy,EPTYPE ex,EPTYPE ey);
-void EP_Lines(PointF * points, int count);
+void EP_Lines(EPointF * points, int count);
 
 void EP_SetColor(ECOLOR c);
 void EP_SetFillColor(ECOLOR c);

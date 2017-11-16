@@ -20,7 +20,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -41,13 +41,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\ege15.04\include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\ege15.04\lib\vc2013\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>E:\ege15.04\include;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\ege15.04\lib\vc2013\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>D:\ege15.04\include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\ege15.04\lib\vc2013\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>E:\ege15.04\include;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\ege15.04\lib\vc2013\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
