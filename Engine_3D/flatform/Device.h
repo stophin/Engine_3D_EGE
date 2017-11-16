@@ -481,7 +481,27 @@ struct Device {
 													n2.set(n1)*obj->M_1 * 10;
 													//n2.normalize();
 													//*__image = obj->getTexture(n2.y * obj->t_w, n2.z * obj->t_h);
-													*__image = obj->getTexture(n2.x, n2.z );
+													//get the max projection coordinate? xy or yz or xz?
+													EFTYPE sxy = n3.set(0, 0, 1) ^ (v->n), syz = n3.set(1, 0, 0) ^ (v->n), sxz = n3.set(0, 1, 0) ^ (v->n);
+													if (sxy < 0) sxy = -sxy;
+													if (syz < 0) syz = -syz;
+													if (sxz < 0) sxz = -sxz;
+													if (sxy > sxz) {
+														if (sxy > syz) {
+															*__image = obj->getTexture(n2.x, n2.y);
+														}
+														else {
+															*__image = obj->getTexture(n2.y, n2.z);
+														}
+													}
+													else {
+														if (sxz > syz) {
+															*__image = obj->getTexture(n2.x, n2.z);
+														}
+														else {
+															*__image = obj->getTexture(n2.y, n2.z);
+														}
+													}
 
 													lgt = man.lgts.link;
 													f = 0;

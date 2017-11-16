@@ -217,10 +217,12 @@ public:
 		}
 
 		if (this->render_aabb) {
+			//max
 			if (this->aabb[0].x < v->v.x) this->aabb[0].x = v->v.x;
 			if (this->aabb[0].y < v->v.y) this->aabb[0].y = v->v.y;
 			if (this->aabb[0].z < v->v.z) this->aabb[0].z = v->v.z;
 
+			//min
 			if (this->aabb[6].x > v->v.x) this->aabb[6].x = v->v.x;
 			if (this->aabb[6].y > v->v.y) this->aabb[6].y = v->v.y;
 			if (this->aabb[6].z > v->v.z) this->aabb[6].z = v->v.z;
@@ -253,6 +255,7 @@ public:
 
 			if (this->render_aabb > 0) {
 				this->render_aabb = -this->render_aabb;
+				//8 quadrants
 				this->aabb[1].set(this->aabb[0].x, this->aabb[6].y, this->aabb[0].z, 1);
 				this->aabb[2].set(this->aabb[6].x, this->aabb[6].y, this->aabb[0].z, 1);
 				this->aabb[3].set(this->aabb[6].x, this->aabb[6].y, this->aabb[0].z, 1);
@@ -272,6 +275,7 @@ public:
 					}
 				}
 				if (i == 8) {
+					//not in camera
 					this->verts_r.clearLink();
 					this->verts_f.clearLink();
 					return;
