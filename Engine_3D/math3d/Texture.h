@@ -45,14 +45,15 @@ public:
 		}
 	}
 
-	void LoadTexture(INT w, INT h){
+	void LoadTexture(INT w, INT h, INT n){
 		if (texture) {
 			return;
 		}
 		width = w;
 		height = h;
 		texture = new DWORD[sizeof(DWORD)* width * height];
-		int d = width / 2;
+		if (0 == n) n = 2;
+		int d = width / n;
 		int s = 1;
 		for (int i = 0; i < width; i++) {
 			if (i % d == 0) {
@@ -108,10 +109,10 @@ public:
 		return texture->uniqueID;
 	}
 
-	INT addTexture(INT w, INT h) {
+	INT addTexture(INT w, INT h, INT n) {
 		Texture * texture = new Texture();
 		texture->uniqueID = this->textures.linkcount;
-		texture->LoadTexture(w, h);
+		texture->LoadTexture(w, h, n);
 
 		this->textures.insertLink(texture);
 

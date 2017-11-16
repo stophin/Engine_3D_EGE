@@ -80,7 +80,8 @@ VOID Initialize()
 {
 	man.addCamera(50, 50, 50, 1000, 90, 90).move(0, 0, -200);
 	man.addCamera(30, 30, 60, 600, 30, 30).move(0, 0, -100);
-	man.addShadowCamera(50, 50, 60, 1000, 120, 120);
+	man.addShadowCamera();
+	man.addReflectionCamera();
 
 	//man.addLight(9, -51, -60);
 	man.addLight(5, 8, 220);
@@ -92,28 +93,29 @@ VOID Initialize()
 		*/
 
 	//load resource
-	INT t0 = tman.addTexture(480, 480);
+	INT t0 = tman.addTexture(480, 480, 10);
 	INT t1 = tman.addTexture(L"1.jpg");
 	INT t2 = tman.addTexture(L"2.jpg");
 	INT t3 = tman.addTexture(L"3.jpg");
-	INT t4 = tman.addTexture(64, 64);
+	INT t4 = tman.addTexture(64, 64, 8);
+	INT t5 = tman.addTexture(64, 64, 2);
 
 
 	man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
 		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
-		.scale(5, 5, 5).move(100, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t4);
+		.scale(5, 5, 5).move(100, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t2);
 
 	man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
-		.scale(10, 10, 10).move(0, -30, -300).setColor(GREEN).setTexture(tman, t2);
+		.scale(10, 10, 10).move(0, -30, -300).setColor(GREEN).setTexture(tman, t3);
 
 
+	man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
+		.scale(10, 10, 10).rotate(-90, -90, 180).move(-100, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t0);
 	man.addTransparentObject(1.01).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
 		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
 		.scale(0.5, 0.5, 0.5).move(-15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t3);
-	man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
-		.scale(10, 10, 10).rotate(-90, -90, 180).move(-100, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t4);
 
 	man.addReflectionObject(1000).addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
 		.scale(10, 10, 10).rotate(90, 90, 0).move(100, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t1);
@@ -201,7 +203,7 @@ VOID Initialize()
 	for (int i = 0; i < 5; i++) {
 		for (int j = 0; j < 15; j++) {
 			man.addObject().addVert(-10, -10, 0).addVert(10, -10, 0).addVert(-10, 10, 0).addVert(10, 10, 0, -1)
-				.scale(2, 2, 2).move(0, -60, -600).move(300 - 40 * j, 200 - 40 * i, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t0);
+				.scale(2, 2, 2).move(0, -60, -600).move(300 - 40 * j, 200 - 40 * i, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t5);
 		}
 	}
 
@@ -466,6 +468,7 @@ VOID onKeyDown(WPARAM wParam)
 		break;
 	case 'P':
 		man.nextCamera();
+		man.setCameraRange(org.x, org.y, scalex, scaley);
 		break;
 	case 'X':
 		draw_line = -draw_line;

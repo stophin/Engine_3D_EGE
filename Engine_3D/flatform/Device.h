@@ -104,20 +104,25 @@ struct Device {
 
 	//must be called after depth was rendered
 	void RenderMirror(Manager3D & man) {
+		//switch to the reflection camera
+		Camera3D * cur_cam = man.cams.link;
+		Camera3D * cam = man.getCamera(2);
+		if (NULL == cam || NULL == cur_cam) {
+			return;
+		}
+		//set cam parameters to current camera
+		cam->M.set(cur_cam->M);
+		cam->M_1.set(cur_cam->M_1);
 
 		Obj3D * obj = man.refl.link, *temp = NULL;
-		Mat3D mm, mm_1, mml, mml_1;
 		if (obj) {
-			// save original camera matrix
-			mm.set(obj->cam->M);
-			mm_1.set(obj->cam->M_1);
 			do {
 
 				VObj * v = obj->verts_f.link;
 				VObj * v0 = NULL, *v1 = NULL;
 				if (v && obj->verts_f.linkcount > 0) {
 
-					// do not refresh relection surfaces
+					// do not refresh relection surfaces to aviod dead loop
 					temp = man.refl.link;
 					man.refl.link = NULL;
 					do {
@@ -126,9 +131,9 @@ struct Device {
 							if (v->backface > 0) {
 
 								// set camera matrix to vertex's reflection matrix
-								obj->cam->M.set(mm) * v->R;
-								obj->cam->M_1.set(v->R_r) * mm_1;
-								man.refresh(0);
+								cur_cam->M.set(cam->M) * v->R;
+								cur_cam->M_1.set(v->R_r) * cam->M_1;
+								man.refresh(cur_cam);
 
 								// get reflection projection to array mirror
 								// need to change target device and depth array
@@ -200,30 +205,25 @@ struct Device {
 
 				obj = man.refl.next(obj);
 			} while (obj && obj != man.refl.link);
-			// restore original camera matrix
-			obj->cam->M.set(mm);
-			obj->cam->M_1.set(mm_1);
-			man.refresh(0);
 		}
+
+		// restore current camera and refresh
+		cur_cam->M.set(cam->M);
+		cur_cam->M_1.set(cam->M_1);
+		man.refresh(NULL);
 	}
 
 
 	void RenderShade(Manager3D& man) {
 		//switch to the shadow camera
-		Camera3D * old_cam = man.cams.link;
-		for (int i = 0; i < man.cams.linkcount; i++) {
-			if (man.cams.link && man.cams.link->type == 1) {
-				break;
-			}
-			man.nextCamera();
-		}
-		Camera3D * cam = man.cams.link;
-		if (NULL == cam) {
+		Camera3D * cur_cam = man.cams.link;
+		Camera3D * cam = man.getCamera(1);
+		if (NULL == cam || NULL == cur_cam) {
 			return;
 		}
-		if (((Cam3D*)cam)->type != 1) {
-			return;
-		}
+		cam->M.set(cur_cam->M);
+		cam->M_1.set(cur_cam->M_1);
+
 		memset(shade, 0, width * height * sizeof(FLOAT));
 
 		Mat3D mm, mm_1;
@@ -233,9 +233,10 @@ struct Device {
 		Obj3D * obj = man.objs.link;
 
 		if (obj) {
-			cam->M.set(man.lgts.link->M_1);
-			cam->M_1.set(man.lgts.link->M);
-			man.refresh(0);
+			//set camera matrix to anti-light matrix
+			cur_cam->M.set(man.lgts.link->M_1);
+			cur_cam->M_1.set(man.lgts.link->M);
+			man.refresh(cur_cam);
 
 			int render_trans = 0;
 			int trans_w0 = EP_MAX, trans_h0 = EP_MAX;
@@ -279,7 +280,9 @@ struct Device {
 												__shade = &shade[index];
 												// get shade
 												//(-n.x * ((FLOAT)j - v.x) - n.y * ((FLOAT)i - v.y)) / n.z + v->z
-												z = Vert3D::getZ(v->n_d, v->x0, v->y0, v->z, (EFTYPE)j, (EFTYPE)i);
+												n0.set((j - cam->offset_w) / cam->scale_w, (i - cam->offset_h) / cam->scale_h, 0, 1);
+												//z = Vert3D::getZ(v->n_d, v->x0, v->y0, v->z0, (EFTYPE)j, (EFTYPE)i);
+												z = Vert3D::getZ(v->n_1_z, v->x, v->y, v->z, n0.x, n0.y);
 												if (EP_ISZERO(*__shade)) {
 													*__shade = z;
 												}
@@ -323,13 +326,10 @@ struct Device {
 			} while (obj && obj != man.objs.link);
 		}
 
-		//restore original camera
-		for (int i = 0; i < man.cams.linkcount; i++) {
-			if (man.cams.link == old_cam) {
-				break;
-			}
-			man.nextCamera();
-		}
+		// restore current camera and refresh
+		cur_cam->M.set(cam->M);
+		cur_cam->M_1.set(cam->M_1);
+		man.refresh(NULL);
 	}
 
 	void ClearBeforeRender() {
@@ -407,7 +407,7 @@ struct Device {
 									xs = _range == v ? v->xs : max(_range->xs, v->xs); ys = _range == v ? v->ys : max(_range->ys, v->ys);
 									xe = _range == v ? v->xe : min(_range->xe, v->xe); ye = _range == v ? v->ye : min(_range->ye, v->ye);
 									for (i = ys; i <= ye && i < height; i += 1) {
-										cam = man.cams.link;
+										cam = obj->cam;
 										if (cam == NULL) {
 											break;
 										}
@@ -569,13 +569,14 @@ struct Device {
 
 													if (!(_i < 0 || _i > height - 1 || _j < 0 || _j > width - 1)) {
 														_index = _i * width + _j;
-														if (0 && render_proj > 0) {
+														__shade = &shade[_index];
+														if (render_proj > 0) {
 															_tango[_index] = RED;// obj->color;
 														}
 
 														//shadow
-														if (EP_GTZERO(shade[_index] - z - 1e-1)) {
-															*__tango = Light3D::multi(*__image, f / 10);
+														if (EP_GTZERO(*__shade - n2.z - 1e-1)) {
+															*__tango = Light3D::multi(*__image, f / 5);
 														}
 
 													}

@@ -11,6 +11,10 @@
 typedef class Cam3D Cam3D;
 class Cam3D : public Camera3D {
 public:
+	Cam3D() :
+		Camera3D(50, 50, 50, 1000, 90, 90), type(0) {
+		initialize();
+	}
 	Cam3D(EFTYPE width, EFTYPE height, EFTYPE znear, EFTYPE zfar, EFTYPE angle_width, EFTYPE angle_height) :
 		Camera3D(width, height, znear, zfar, angle_width, angle_height), type(0) {
 		initialize();
@@ -22,6 +26,10 @@ public:
 			this->next[i] = NULL;
 		}
 	}
+	// camera type
+	// 0 : normal camera
+	// 1 : shadow camera
+	// 2 : reflection camera
 	int type;
 
 	INT uniqueID;
@@ -148,12 +156,36 @@ public:
 
 		return *((Camera3D*)cam);
 	}
-	Camera3D& addShadowCamera(EFTYPE width, EFTYPE height, EFTYPE znear, EFTYPE zfar, EFTYPE angle_width, EFTYPE angle_height) {
-		Cam3D * cam = new Cam3D(width, height, znear, zfar, angle_width, angle_height);
+	Camera3D& addShadowCamera() {
+		Cam3D * cam = new Cam3D();
 		cam->type = 1;
 		this->cams.insertLink(cam);
 
 		return *((Camera3D*)cam);
+	}
+	Camera3D& addReflectionCamera() {
+		Cam3D * cam = new Cam3D();
+		cam->type = 2;
+		this->cams.insertLink(cam);
+
+		return *((Camera3D*)cam);
+	}
+
+	Camera3D * getCamera(int type) {
+		Cam3D * cam = this->cams.link;
+		if (cam) {
+			do {
+				if (cam->type == type) {
+					break;
+				}
+
+				cam = this->cams.next(cam);
+			} while (cam && cam != this->cams.link);
+		}
+		if (cam->type != type) {
+			return NULL;
+		}
+		return (Camera3D*)cam;
 	}
 
 	Object3D& addObject() {
@@ -209,7 +241,7 @@ public:
 		if (this->cams.link) {
 			this->cams.link->move(x, y, z);
 
-			this->refresh(0);
+			this->refresh(NULL);
 		}
 	}
 
@@ -217,25 +249,30 @@ public:
 		if (this->cams.link) {
 			this->cams.link->rotate(ax, ay, az);
 
-			this->refresh(0);
+			this->refresh(NULL);
 		}
 	}
 
 	void nextCamera() {
 
-		if (this->cams.link) {
-			Cam3D * cam = this->cams.removeLink(this->cams.link);
-			this->cams.insertLink(cam);
+		do {
+			if (this->cams.link) {
+				Cam3D * cam = this->cams.removeLink(this->cams.link);
+				this->cams.insertLink(cam);
+			}
+		} while (this->cams.link->type != 0);
 
-			this->refresh(1);
-		}
+		this->refresh(NULL);
 	}
 
-	void refresh(int mode) {
+	void refresh(Camera3D * cam) {
 		Obj3D * obj = this->objs.link;
 		if (obj) {
 			do {
-				if (mode) {
+				if (cam) {
+					obj->cam = cam;
+				}
+				else {
 					obj->cam = this->cams.link;
 				}
 				obj->render_normalize();
@@ -246,7 +283,10 @@ public:
 		obj = this->tras.link;
 		if (obj) {
 			do {
-				if (mode) {
+				if (cam) {
+					obj->cam = cam;
+				}
+				else {
 					obj->cam = this->cams.link;
 				}
 				obj->render_normalize();
@@ -257,7 +297,10 @@ public:
 		obj = this->refl.link;
 		if (obj) {
 			do {
-				if (mode) {
+				if (cam) {
+					obj->cam = cam;
+				}
+				else {
 					obj->cam = this->cams.link;
 				}
 				obj->render_normalize();
@@ -268,7 +311,10 @@ public:
 		Lgt3D * lgt = this->lgts.link;
 		if (lgt) {
 			do {
-				if (mode) {
+				if (cam) {
+					lgt->cam = cam;
+				}
+				else {
 					lgt->cam = this->cams.link;
 				}
 				lgt->render_normalize();

@@ -36,7 +36,6 @@ public:
 	Vert3D rt;
 	Vert3D lookat;
 
-
 	void initialize(int type) {
 		if (type == 1) {
 			proj.mx.set(2 * znear / width, 0, -(rt.x + lb.x) / width, 0);
