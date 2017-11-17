@@ -24,6 +24,7 @@ public:
 		this->n_z.init();
 		this->v_w.init();
 		this->n_w.init();
+		this->n_1_z.init();
 
 		initialize();
 	}
@@ -81,8 +82,8 @@ public:
 
 	// for multilinklist
 	INT uniqueID;
-	VObj * prev[3];
-	VObj * next[3];
+	VObj * prev[4];
+	VObj * next[4];
 	void operator delete(void * _ptr){
 		if (_ptr == NULL)
 		{
@@ -104,7 +105,7 @@ class Object3D {
 public:
 	Object3D() : 
 		_M(&M, &M_1, 1), texture(NULL),
-		cam(NULL), verts(0), verts_r(1), verts_f(2), transparent(0), reflection(0), v0(NULL), v1(NULL), render_aabb(0),
+		cam(NULL), indice(3), verts(0), verts_r(1), verts_f(2), transparent(0), reflection(0), v0(NULL), v1(NULL), render_aabb(0),
 		texture_type(0), vertex_type(0){
 		center.init();
 		center_r.init();
@@ -114,8 +115,10 @@ public:
 		aabb[6].set(EP_MAX, EP_MAX, EP_MAX, 1);
 	}
 	~Object3D() {
+		this->indice.~MultiLinkList();
 		this->verts.~MultiLinkList();
 		this->verts_r.~MultiLinkList();
+		this->verts_f.~MultiLinkList();
 	}
 
 	DWORD *texture;
@@ -175,6 +178,7 @@ public:
 
 	Camera3D * cam;
 
+	MultiLinkList<VObj> indice;
 	MultiLinkList<VObj> verts;
 	MultiLinkList<VObj> verts_r;
 	MultiLinkList<VObj> verts_f;
@@ -217,33 +221,32 @@ public:
 	int vertex_type;
 	//add vertex to object
 	Object3D& addVert(EFTYPE x, EFTYPE y, EFTYPE z, int anti_n) {
-		this->addVert(x, y, z);
+		VObj * v = new VObj(x, y, z);
+
+		this->addVert(v);
 
 		//force normal vector to be negative
 		//so that this point is not in backface
 		if (anti_n < 0) {
-			VObj * v = this->verts.prev(this->verts.link);
-			if (v) v->n.negative();
+			v->n.negative();
 		}
 
 		return *this;
 	}
 
-	Object3D& addVert(EFTYPE x, EFTYPE y, EFTYPE z) {
-		VObj * v = new VObj(x, y, z);
-
+	Object3D& addVert(VObj *v) {
+		if (NULL == v) {
+			return *this;
+		}
 		if (this->v0 && this->v1) {
-
 			// get normal vector 
-			v->n.set(v0->v) - v->v;
-			v->n_r.set(v1->v) - v->v;
-			v->n * v->n_r;
-			v->n.normalize();
-
-			//this->verts.insertLink(new VObj(*v1));
-			//this->verts.insertLink(new VObj(*v0));
-
-			//aabb test
+			if (EP_ISZERO(v->n.x + v->n.y + v->n.z)) {
+				v->n.set(v0->v) - v->v;
+				v->n_r.set(v1->v) - v->v;
+				v->n * v->n_r;
+				v->n.normalize();
+			}
+			// vertex aabb test
 			for (int i = 0; i < 3; i++) {
 				VObj * _v = NULL;
 				if (i == 0) {
@@ -264,8 +267,14 @@ public:
 				if (v->aabb[1].x > _v->v.x) v->aabb[1].x = _v->v.x;
 				if (v->aabb[1].y > _v->v.y) v->aabb[1].y = _v->v.y;
 				if (v->aabb[1].z > _v->v.z) v->aabb[1].z = _v->v.z;
-			}
 
+				//set other 2 vertexes' normal vector
+				if (vertex_type == 1) {
+					if (EP_ISZERO(_v->n.x + _v->n.y + _v->n.z)) {
+						_v->n.set(v->n);
+					}
+				}
+			}
 			if (vertex_type == 1) {
 				this->v0 = NULL;
 				this->v1 = NULL;
@@ -295,6 +304,56 @@ public:
 		}
 
 		this->verts.insertLink(v);
+
+		return *this;
+	}
+
+
+	Object3D& addVert(EFTYPE x, EFTYPE y, EFTYPE z, EFTYPE nx = 0, EFTYPE ny = 0, EFTYPE nz = 0) {
+		VObj * v = new VObj(x, y, z);
+		if (!EP_ISZERO(nx + ny + nz)) {
+			v->n.set(nx, ny, nz);
+		}
+
+		return addVert(v);
+	}
+
+	Object3D& addIndice(EFTYPE x, EFTYPE y, EFTYPE z, EFTYPE nx = 0, EFTYPE ny = 0, EFTYPE nz = 0) {
+		VObj * v = new VObj(x, y, z);
+		if (!EP_ISZERO(nx + ny + nz)) {
+			v->n.set(nx, ny, nz);
+		}
+
+		this->indice.insertLink(v);
+
+		return *this;
+	}
+
+	Object3D& setIndice(INT pv, INT pv0, INT pv1) {
+		if (this->indice.linkcount < 3) {
+			return *this;
+		}
+		VObj * _v = this->indice.getPos(pv);
+		VObj * _v0 = this->indice.getPos(pv0);
+		VObj * _v1 = this->indice.getPos(pv1);
+
+		if (NULL != _v && NULL != _v0 && NULL != _v1) {
+			for (int i = 0; i < 3; i++) {
+				VObj * __v = NULL;
+				if (i == 0) {
+					__v = _v0;
+				}
+				else if (i == 1) {
+					__v = _v1;
+				}
+				else {
+					__v = _v;
+				}
+
+				addVert(__v->v.x, __v->v.y, __v->v.z, __v->n.x, __v->n.y, __v->n.z);
+				//addVert(__v);
+			}
+		}
 
 		return *this;
 	}
@@ -399,6 +458,7 @@ public:
 					v->R_r.mz.set(-2 * nx * nz, -2 * ny * nz, 1 - 2 * nz * nz, -2 * d * nz);
 					v->R_r.mw.set(0, 0, 0, 1);
 				}
+
 				// object coordinate -> world coordinate -> camera coordinate
 				v->v_c.set(v->v) * CM;
 				v->zz = v->v_c.z;

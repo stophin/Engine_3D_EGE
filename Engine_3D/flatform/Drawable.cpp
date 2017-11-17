@@ -97,12 +97,18 @@ VOID Initialize()
 	// generate teapot
 	Object3D& obj = man.addObject().renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
 	int normal = -1;
-	int vercount = 0;
-	for (int i = 0; i < g_teapotPositionNum - 3; i += 3) {
-		vercount++;
-		obj.addVert(g_teapotPositions[i], g_teapotPositions[i + 1], g_teapotPositions[i + 2]);
+	int vertex_count = 0;
+	int triangle_count = 0;
+	for (int i = 0; i <= g_teapotPositionNum - 3; i += 3) {
+		vertex_count++;
+		obj.addIndice(g_teapotPositions[i], g_teapotPositions[i + 1], g_teapotPositions[i + 2]);
+			//,g_teapotNormals[i], g_teapotNormals[i + 1], g_teapotNormals[i + 2]);
 	}
-
+	for (int i = 0; i <= g_teapotIndicesNum - 3; i += 3) {
+		triangle_count++;
+		obj.setIndice(g_teapotIndices[i], g_teapotIndices[i + 1], g_teapotIndices[i + 2]);
+	}
+	obj.move(50, -30, 0).scale(2, 2, 2).rotate(-90, 30, 0);
 
 	//for (int i = 0; i < 1; i++) {
 	//	for (int j = 0; j < 1; j++) {
@@ -144,11 +150,12 @@ VOID Initialize()
 	for (int i = 0; i < 15; i++) {
 		for (int j = 0; j < 15; j++) {
 			man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
-				.scale(8, 2, 2).rotate(0, 0, 180).move(300 - 40 * j, -40, 300 - 40 * i).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t4);
+				.scale(4, 2, 2).rotate(0, 0, 180).move(300 - 80 * j, -40, 300 - 40 * i).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t4);
 		}
 	}
 
 
+	return;
 	c = 50;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
 	count = 1;
