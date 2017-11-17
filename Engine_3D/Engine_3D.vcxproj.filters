@@ -81,6 +81,9 @@
     <ClInclude Include="math3d\Texture.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="teapot.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

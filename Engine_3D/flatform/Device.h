@@ -214,8 +214,14 @@ struct Device {
 									}
 								}
 							}
-							v0 = v1;
-							v1 = v;
+							if (obj->vertex_type == 1) {
+								v0 = NULL;
+								v1 = NULL;
+							}
+							else {
+								v0 = v1;
+								v1 = v;
+							}
 						}
 						else if (v0 == NULL) {
 							v0 = v;
@@ -348,8 +354,14 @@ struct Device {
 								}
 							}
 
-							v0 = v1;
-							v1 = v;
+							if (obj->vertex_type == 1) {
+								v0 = NULL;
+								v1 = NULL;
+							}
+							else {
+								v0 = v1;
+								v1 = v;
+							}
 						}
 						else if (v0 == NULL) {
 							v0 = v;
@@ -426,7 +438,8 @@ struct Device {
 						//there must be three points
 						if (v0 && v1) {
 							// back face cull
-							if (v->backface > 0) {
+							if (v->backface > 0) 
+							{
 
 								_range = NULL;
 								if (range) {
@@ -525,7 +538,7 @@ struct Device {
 													n0.w = 1;
 													n1.set(n0)* cam->M_1;
 
-													if (obj->type == 0) {
+													if (obj->texture_type == 0) {
 														//set texture 
 														n2.set(n1)*obj->M_1;
 
@@ -558,7 +571,7 @@ struct Device {
 															}
 														}
 													}
-													else if (obj->type == 1) {
+													else if (obj->texture_type == 1) {
 														//sphere map
 														// reflection vector
 														// R = I - 2 ( I * N ) N
@@ -683,8 +696,14 @@ struct Device {
 								}
 							}
 
-							v0 = v1;
-							v1 = v;
+							if (obj->vertex_type == 1) {
+								v0 = NULL;
+								v1 = NULL;
+							}
+							else {
+								v0 = v1;
+								v1 = v;
+							}
 						}
 						else if (v0 == NULL) {
 							v0 = v;

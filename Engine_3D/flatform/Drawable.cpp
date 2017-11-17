@@ -80,6 +80,8 @@ VOID onPaint(HWND hWnd)
 	//BitBlt(hdc, 0, 0, nWidth, nHeight, memHdc, 0, 0, SRCCOPY);
 }
 
+#include "../teapot.h"
+
 Object3D * cur_op = NULL;
 VOID Initialize()
 {
@@ -91,6 +93,15 @@ VOID Initialize()
 	//man.addLight(9, -51, -60);
 	man.addLight(5, 100, 220);
 	//man.addLight(-1000, 100, 100);
+
+	// generate teapot
+	Object3D& obj = man.addObject().renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
+	int normal = -1;
+	int vercount = 0;
+	for (int i = 0; i < g_teapotPositionNum - 3; i += 3) {
+		vercount++;
+		obj.addVert(g_teapotPositions[i], g_teapotPositions[i + 1], g_teapotPositions[i + 2]);
+	}
 
 
 	//for (int i = 0; i < 1; i++) {
@@ -136,6 +147,8 @@ VOID Initialize()
 				.scale(8, 2, 2).rotate(0, 0, 180).move(300 - 40 * j, -40, 300 - 40 * i).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t4);
 		}
 	}
+
+
 	c = 50;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
 	count = 1;
@@ -234,6 +247,7 @@ VOID Initialize()
 		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
 		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
 		.move(0, 0, -100).setColor(BROWN).setLineColor(RED);
+
 }
 
 EFTYPE scale = 10.0;

@@ -104,7 +104,8 @@ class Object3D {
 public:
 	Object3D() : 
 		_M(&M, &M_1, 1), texture(NULL),
-		cam(NULL), verts(0), verts_r(1), verts_f(2), transparent(0), reflection(0), v0(NULL), v1(NULL), render_aabb(0){
+		cam(NULL), verts(0), verts_r(1), verts_f(2), transparent(0), reflection(0), v0(NULL), v1(NULL), render_aabb(0),
+		texture_type(0), vertex_type(0){
 		center.init();
 		center_r.init();
 		center_w.init();
@@ -123,7 +124,7 @@ public:
 	// texture type
 	// 0: normal texture
 	// 1: SphereMap 
-	INT type;
+	INT texture_type;
 	INT u;
 	INT v;
 
@@ -144,7 +145,7 @@ public:
 		t_w = ptexture->width;
 		t_h = ptexture->height;
 		texture = ptexture->texture;
-		type = t;
+		texture_type = t;
 
 		this->setUV(0, 0);
 
@@ -204,6 +205,16 @@ public:
 		return *this;
 	}
 
+	Object3D& setVertexType(int type) {
+		this->vertex_type = type;
+
+		return *this;
+	}
+
+	//vertext type :
+	//0: triangle strip
+	//1: triangle
+	int vertex_type;
 	//add vertex to object
 	Object3D& addVert(EFTYPE x, EFTYPE y, EFTYPE z, int anti_n) {
 		this->addVert(x, y, z);
@@ -255,8 +266,14 @@ public:
 				if (v->aabb[1].z > _v->v.z) v->aabb[1].z = _v->v.z;
 			}
 
-			this->v0 = this->v1;
-			this->v1 = v;
+			if (vertex_type == 1) {
+				this->v0 = NULL;
+				this->v1 = NULL;
+			}
+			else {
+				this->v0 = this->v1;
+				this->v1 = v;
+			}
 		}
 		else if (this->v0 == NULL) {
 			this->v0 = v;
@@ -427,8 +444,14 @@ public:
 							v->ys = max(Vert3D::get_miny(v0->v_s, v1->v_s, v->v_s), 0);
 							v->ye = max(Vert3D::get_maxy(v0->v_s, v1->v_s, v->v_s), v->ys);
 
-							this->v0 = this->v1;
-							this->v1 = v;
+							if (vertex_type == 1) {
+								this->v0 = NULL;
+								this->v1 = NULL;
+							}
+							else {
+								this->v0 = this->v1;
+								this->v1 = v;
+							}
 						}
 						else if (this->v0 == NULL) {
 							this->v0 = v;
