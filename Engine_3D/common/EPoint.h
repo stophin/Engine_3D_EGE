@@ -89,6 +89,9 @@ public:
 	bool RectIsIn(const EPoint& gm,const EPoint& lp,const EPoint& rbgm,E_RectType mode=E_RectLtRb) const;
 	void GeometryCut(const EPoint& geom,const EPoint& objgeom);
 	void GeometryLimit(const EPoint& lp,const EPoint& rbgm,const EPoint& objgm,E_RectType mode=E_RectLtRb);
+
+
+	static bool RectIsIntersect(EFTYPE xs, EFTYPE ys, EFTYPE xe, EFTYPE ye, EFTYPE oxs, EFTYPE oys, EFTYPE oxe, EFTYPE oye);
 	
 	EFTYPE GetAngle(const EPoint& p) const;
 	

@@ -115,6 +115,12 @@ struct Device {
 		cam->M_1.set(cur_cam->M_1);
 
 		Obj3D * obj = man.refl.link, *temp = NULL;
+
+		DWORD *__tango;
+		INT index = 0;
+		EFTYPE z;
+		INT line_state = 0;
+		INT line_l = 0, line_r = 0;
 		if (obj) {
 			do {
 
@@ -147,43 +153,67 @@ struct Device {
 								_depth = ___depth;
 								_tango = ___tango;
 
-								DWORD * __trans, *__tango;
-								INT index = 0, index_r = 0;
+								Draw_Line(_image, width, height, v0->x0, v0->y0, v1->x0, v1->y0, WHITE);
+								Draw_Line(_image, width, height, v1->x0, v1->y0, v->x0, v->y0, WHITE);
+								Draw_Line(_image, width, height, v->x0, v->y0, v0->x0, v0->y0, WHITE);
+
 								for (int i = v->ys; i <= v->ye && i < height; i++) {
+									//little trick^_^
+									line_state = 0;
+									line_l = 0; 
+									line_r = 0;
+									//trick: pre-judge
+									___image = BLACK;
+									for (int j = v->xs; j <= v->xe && j < width; j += 1) {
+										__image = &_image[i * width + j];
+										//up pulse
+										if (*__image != BLACK && ___image == BLACK) {
+											line_state++;
+											if (line_state == 1) {
+												line_l = j;
+											}
+											else {
+												line_r = j;
+												break;
+											}
+										}
+										___image = *__image;
+									}
 									for (int j = v->xs; j <= v->xe && j < width; j++) {
 										index = i * width + j;
 										__mirror = &_mirror[index];
-										if (*__mirror != BLACK) 
-										{
-											EFTYPE z = Vert3D::getZ(v->n_d, v->x0, v->y0, v->z, (EFTYPE)j, (EFTYPE)i);
-											__depth = &depth[index];
+
+										__image = &_image[index];
+										if (j >= line_l && j <= line_r) {
+											*__image = obj->color;
+										}
+										if (*__image != BLACK) {
+											__depth = &_depth[index];
+
+											// get depth
+											//(-n.x * ((FLOAT)j - v.x) - n.y * ((FLOAT)i - v.y)) / n.z + v->z
+											n0.set((j - cam->offset_w) / cam->scale_w, (i - cam->offset_h) / cam->scale_h, 0, 1);
+											//z = Vert3D::getZ(v->n_d, v->x0, v->y0, v->z0, (EFTYPE)j, (EFTYPE)i);
+											z = Vert3D::getZ(v->n_1_z, v->x, v->y, v->z, n0.x, n0.y);
 											if (EP_ISZERO(*__depth)) {
 												*__depth = z;
 											}
 											if (*__depth <= z) {
-												int res = Vert3D::IsInTriangle(v0->v_s, v1->v_s, v->v_s, p.set((FLOAT)j, (FLOAT)i, 0));
-												if (res) {
-													__tango = &_tango[index];
-													//adding light reduction in reflection
-													*__tango = Light3D::multi(*__mirror, 0.8);
-													*__depth = z;
-												}
+												*__depth = z;
+
+												__tango = &_tango[index];
+												//adding light reduction in reflection
+												*__tango = Light3D::multi(*__mirror, 0.8);
 											}
-											*__mirror = BLACK;
 										}
 										//clear reflection depth at the same time
 										deptr[index] = 0;
+										//clear drawing
+										*__mirror = BLACK;
+										*__image = BLACK;
 									}
 								}
 							}
-
-							//ege::setcolor(RED);
-							//ege::line(v0->x0, v0->y0, v1->x0, v1->y0);
-							//ege::line(v1->x0, v1->y0, v->x0, v->y0);
-							//ege::line(v->x0, v->y0, v0->x0, v0->y0);
-							Draw_Line(_tango, width, height, v0->x0, v0->y0, v1->x0, v1->y0, WHITE);
-							Draw_Line(_tango, width, height, v1->x0, v1->y0, v->x0, v->y0, WHITE);
-							Draw_Line(_tango, width, height, v->x0, v->y0, v0->x0, v0->y0, WHITE);
 							v0 = v1;
 							v1 = v;
 						}
@@ -236,6 +266,11 @@ struct Device {
 
 		Obj3D * obj = man.objs.link;
 
+		EFTYPE z;
+		INT index = 0, _index = 0;
+		INT xs, xe, ys, ye;
+		INT line_state = 0;
+		INT line_l = 0, line_r = 0;
 		if (obj) {
 			//set camera matrix to anti-light matrix
 			cur_cam->M.set(lgt->M_1);
@@ -257,27 +292,40 @@ struct Device {
 								_range = v;
 								// in range
 								if (_range) {
-									__image = &___image;
+									//draw triangle contour
+									Draw_Line(_image, width, height, v0->x0, v0->y0, v1->x0, v1->y0, WHITE);
+									Draw_Line(_image, width, height, v1->x0, v1->y0, v->x0, v->y0, WHITE);
+									Draw_Line(_image, width, height, v->x0, v->y0, v0->x0, v0->y0, WHITE);
 
-									EFTYPE z;
-									INT index = 0;
-									INT xs = _range == v ? v->xs : max(_range->xs, v->xs), ys = _range == v ? v->ys : max(_range->ys, v->ys),
-										xe = _range == v ? v->xe : min(_range->xe, v->xe), ye = _range == v ? v->ye : min(_range->ye, v->ye);
+									index = 0;
+									xs = v->xs; xe = v->xe; ys = v->ys; ye = v->ye;
 									for (int i = ys; i <= ye && i < height; i++) {
+
+										//little trick^_^
+										line_state = 0;
+										line_l = 0, line_r = 0;
+										//trick: pre-judge
+										___image = BLACK;
+										for (int j = xs; j <= xe && j < width; j += 1) {
+											__image = &_image[i * width + j];
+											//up pulse
+											if (*__image != BLACK && ___image == BLACK) {
+												line_state++;
+												if (line_state == 1) {
+													line_l = j;
+												}
+												else {
+													line_r = j;
+													break;
+												}
+											}
+											___image = *__image;
+										}
 										for (int j = xs; j <= xe && j < width; j++) {
 											index = i * width + j;
-
-											// linear interpolation
-											int res = Vert3D::IsInTriangle(v0->v_s, v1->v_s, v->v_s, p.set((FLOAT)j, (FLOAT)i, 0));
-											if (res > 0) {
+											__image = &_image[index];
+											if (j >= line_l && j <= line_r) {
 												*__image = obj->color;
-												//*__image = obj->line;
-											}
-											else if (res < 0) {
-												*__image = obj->color;
-											}
-											else{
-												*__image = BLACK;
 											}
 
 											if (*__image != BLACK) {
@@ -294,6 +342,7 @@ struct Device {
 													*__shade = z;
 												}
 											}
+											*__image = BLACK;
 										}
 									}
 								}
@@ -366,6 +415,9 @@ struct Device {
 			Lgt3D * lgt;
 			FLOAT zz;
 			EFTYPE f, t, transparent, _i, _j;
+			INT line_state = 0;
+			INT line_l = 0, line_r = 0;
+			int inrange;
 			do {
 				v = obj->verts_r.link;
 				if (v && obj->verts_r.linkcount > 0) {
@@ -378,73 +430,68 @@ struct Device {
 
 								_range = NULL;
 								if (range) {
-									//if (Vert3D::CrossRect(range->xs, range->xe, range->ys, range->ye,v->xs, v->xe, v->ys, v->ye))
 									_range = range;
 								}
 								else {
 									_range = v;
 								}
 								// in range
-								if (_range) {
-									if (render_linear < 0) {
-										cps[0].x = v0->x0; cps[0].y = v0->y0; cps[0].color = RED;
-										cps[1].x = v1->x0; cps[1].y = v1->y0; cps[1].color = BLUE;
-										cps[2].x = v->x0; cps[2].y = v->y0; cps[2].color = GREEN;
-
-										// draw poly
-										//ege::fillpoly_gradient(3, cps, image);
-										// draw outline
-										if (draw_line > 0) {
-											Draw_Line(_image, width, height, v0->x0, v0->y0, v1->x0, v1->y0, WHITE);
-											Draw_Line(_image, width, height, v1->x0, v1->y0, v->x0, v->y0, WHITE);
-											Draw_Line(_image, width, height, v->x0, v->y0, v0->x0, v0->y0, WHITE);
-											//ege::setcolor(WHITE);
-											//ege::line(v0->x0, v0->y0, v1->x0, v1->y0, image);
-											//ege::line(v1->x0, v1->y0, v->x0, v->y0, image);
-											//ege::line(v->x0, v->y0, v0->x0, v0->y0, image);
-										}
-									}
-									else {
-										__image = &___image;
-									}
+								inrange = true;
+								if (_range != v) {
+									inrange = EPoint::RectIsIntersect(v->xs, v->ys, v->xe, v->ye, _range->xs, _range->ys, _range->xe, _range->ye);
+									//inrange = Vert3D::CrossRect(v->xs, v->ys, v->xe, v->ye, _range->xs, _range->ys, _range->xe, _range->ye);
+								}
+								if (_range && inrange) {
 
 									//step1: render the triangle
 									index = 0;
-									xs = _range == v ? v->xs : max(_range->xs, v->xs); ys = _range == v ? v->ys : max(_range->ys, v->ys);
-									xe = _range == v ? v->xe : min(_range->xe, v->xe); ye = _range == v ? v->ye : min(_range->ye, v->ye);
+									xs = v->xs; xe = v->xe; ys = v->ys; ye = v->ye;
+									//xs = _range == v ? v->xs : max(_range->xs, v->xs); ys = _range == v ? v->ys : max(_range->ys, v->ys);
+									//xe = _range == v ? v->xe : min(_range->xe, v->xe); ye = _range == v ? v->ye : min(_range->ye, v->ye);
+									//draw triangle contour
+									Draw_Line(_image, width, height, v0->x0, v0->y0, v1->x0, v1->y0, WHITE);
+									Draw_Line(_image, width, height, v1->x0, v1->y0, v->x0, v->y0, WHITE);
+									Draw_Line(_image, width, height, v->x0, v->y0, v0->x0, v0->y0, WHITE);
+
 									for (i = ys; i <= ye && i < height; i += 1) {
 										cam = obj->cam;
 										if (cam == NULL) {
 											break;
 										}
 										//little trick^_^
-										int line_state = 0;
-										for (j = xs; j <= xe && j < width; j += 1) {
-
+										line_state = 0;
+										line_l = 0, line_r = 0;
+										if (render_linear < 0) {
+											line_l = xs;
+											line_r = xe;
+										}
+										else {
+											//trick: pre-judge
+											___image = BLACK;
+											for (j = xs; j <= xe && j < width; j += 1) {
+												__image = &_image[i * width + j];
+												//up pulse
+												if (*__image != BLACK && ___image == BLACK) {
+													line_state++;
+													if (line_state == 1) {
+														line_l = j;
+													}
+													else {
+														line_r = j;
+														break;
+													}
+												}
+												___image = *__image;
+											}
+										}
+										for (j = xs; j <= xe  && j < width; j += 1) {
 											index = i * width + j;
+											__image = &_image[index];
 											if (render_linear < 0) {
-												__image = &_image[index];
 											}
 											else {
-												// linear interpolation
-												if (line_state <= 2) {
-													res = Vert3D::IsInTriangle(v0->v_s, v1->v_s, v->v_s, p.set((FLOAT)j, (FLOAT)i, 0));
-												}
-												else {
-													//trick here: double edge then do not test is in triangle
-													res = -1;
-												}
-												if (res > 0) {
+												if (j >= line_l && j <= line_r) {
 													*__image = obj->color;
-													//*__image = obj->line;
-													line_state++;
-												}
-												else if (res < 0) {
-													*__image = obj->color;
-												}
-												else{
-													*__image = BLACK;
-													line_state = 0;
 												}
 											}
 											//step2: depth test
@@ -460,25 +507,10 @@ struct Device {
 													*__depth = z;
 												}
 												if (*__depth <= z) {
+													*__depth = z;
+
 													__tango = &_tango[index];
 													__trans = &_trans[index];
-
-													if (render_linear < 0) {
-														// replace gradient color to object's color
-														// 11053224 is white, which changed from the 
-														// setteled value 16579836
-														// when painted in ege::fillpoly_gradient
-														if (*__image == 11053224) {
-															*__image = obj->line;
-															//*__image = obj->color;
-														}
-														else {
-															*__image = obj->color;
-														}
-													}
-													else {
-														//nothing todo
-													}
 
 													//step3: render light
 													//n0.set((j - cam->offset_w) / cam->scale_w, (i - cam->offset_h) / cam->scale_h, z, 1);
@@ -498,7 +530,7 @@ struct Device {
 														n2.set(n1)*obj->M_1;
 
 														//*__image = obj->getTexture(n2.y * obj->t_w, n2.z * obj->t_h);
-														//get the max projection coordinate? xy or yz or xz?
+														//get the max projection plat£º xy or yz or xz?
 														EFTYPE mx = v->aabb[0].x - v->aabb[1].x, my = v->aabb[0].y - v->aabb[1].y, mz = v->aabb[0].z - v->aabb[1].z;
 														//EFTYPE mx = obj->aabb[0].x - obj->aabb[6].x, my = obj->aabb[0].y - obj->aabb[6].y, mz = obj->aabb[0].z - obj->aabb[6].z;
 														EFTYPE sxy = n3.set(0, 0, 1) ^ (v->n), syz = n3.set(1, 0, 0) ^ (v->n), sxz = n3.set(0, 1, 0) ^ (v->n);
@@ -634,15 +666,17 @@ struct Device {
 
 														if (!(_i < 0 || _i > height - 1 || _j < 0 || _j > width - 1)) {
 															_index = _i * width + _j;
-															_tango[_index] = WHITE;// obj->color
+															_tango[_index] = BLUE;// obj->color
 														}
 													}
+												}
+											}
 
-													*__depth = z;
-												}
-												if (render_linear < 0) {
-													*__image = BLACK;
-												}
+											if (render_linear < 0) {
+												_image[index] = BLACK;
+											}
+											else {
+												_image[index] = BLACK;
 											}
 										}
 									}
@@ -703,6 +737,7 @@ struct Device {
 		DWORD color // ÑÕÉ«ÏñËØ
 		) // video buffer and memory pitch
 	{
+
 		// this function draws a line from xo,yo to x1,y1 using differential error
 		// terms (based on Bresenahams work)
 
@@ -764,8 +799,21 @@ struct Device {
 			{
 				// set the pixel
 				if (ddx >= lpitch) {
+					if (ddy >= height * lpitch) {
+					}
+					else if (ddy <= 0) {
+					}
+					else {
+						vb_start[lpitch - 1 + ddy] = color;
+					}
 				}
 				else if (ddx <= 0) {
+					if (ddy >= height * lpitch) {
+					}
+					else if (ddy <= 0) {
+					} else {
+						vb_start[ddy] = color;
+					}
 				}
 				else if (ddy >= height * lpitch) {
 				}
@@ -801,8 +849,22 @@ struct Device {
 			{
 				// set the pixel
 				if (ddx >= lpitch) {
+					if (ddy >= height * lpitch) {
+					}
+					else if (ddy <= 0) {
+					}
+					else {
+						vb_start[lpitch - 1 + ddy] = color;
+					}
 				}
 				else if (ddx <= 0) {
+					if (ddy >= height * lpitch) {
+					}
+					else if (ddy <= 0) {
+					}
+					else {
+						vb_start[ddy] = color;
+					}
 				}
 				else if (ddy >= height * lpitch) {
 				}

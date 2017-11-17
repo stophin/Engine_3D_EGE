@@ -165,6 +165,14 @@ bool EPoint::RectIsIntersect(const EPoint& gm,const EPoint& lp,const EPoint& rbg
 	return ((EP_ABS(c1p.x-c2p.x)<=(gm.x/2+rbgm.x/2))&&(EP_ABS(c1p.y-c2p.y)<=(rbgm.y/2+gm.y/2)));
 }
 
+bool EPoint::RectIsIntersect(EFTYPE xs, EFTYPE ys, EFTYPE xe, EFTYPE ye, EFTYPE oxs, EFTYPE oys, EFTYPE oxe, EFTYPE oye) {
+	EFTYPE gmx = xe - xs, gmy = ye - ys;
+	EFTYPE ogmx = oxe - oxs, ogmy = oye - oys;
+	EFTYPE cpx = xs + gmx / 2, cpy = ys + gmy / 2;
+	EFTYPE ocpx = oxs + ogmx / 2, ocpy = oys + ogmy / 2;
+	return ((EP_ABS(cpx - ocpx) <= (gmx / 2 + ogmx / 2)) && (EP_ABS(cpy - ocpy) <= (ogmy / 2 + gmy / 2)));
+}
+
 bool EPoint::RectIsIn(const EPoint& gm,const EPoint& lp,const EPoint& rbgm,E_RectType mode) const
 {
 	EPoint c1p,c2p;

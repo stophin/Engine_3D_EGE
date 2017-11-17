@@ -124,6 +124,15 @@ public:
 	// 0: normal texture
 	// 1: SphereMap 
 	INT type;
+	INT u;
+	INT v;
+
+	Object3D& setUV(INT u, INT v) {
+		this->u = u;
+		this->v = v;
+
+		return *this;
+	}
 
 	Object3D&   setTexture(TextureManage& tman, INT uID, INT t = 0) {
 		Texture * ptexture = tman.textures.getLink(uID);
@@ -137,6 +146,8 @@ public:
 		texture = ptexture->texture;
 		type = t;
 
+		this->setUV(0, 0);
+
 		return *this;
 	}
 
@@ -144,16 +155,21 @@ public:
 		if (NULL == texture) {
 			return this->color;
 		}
-		INT u = x * t_w, v = y * t_h;
-		u %= t_w;
-		v %= t_h;
-		if (u < 0) {
-			u = t_w + u;
+		INT _u = x * t_w, _v = y * t_h;
+		_u += this->u - t_w / 2;
+		_v += this->v - t_h / 2;
+		_u %= t_w;
+		_v %= t_h;
+		if (_u < 0) {
+			_u = t_w + _u;
 		}
-		if (v < 0) {
-			v = t_h + v;
+		if (_v < 0) {
+			_v = t_h + _v;
 		}
-		return texture[u + v * t_w];
+		if (_u < 0) {
+			_u = 0;
+		}
+		return texture[_u + _v * t_w];
 	}
 
 	Camera3D * cam;

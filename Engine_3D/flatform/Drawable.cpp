@@ -80,7 +80,7 @@ VOID onPaint(HWND hWnd)
 	//BitBlt(hdc, 0, 0, nWidth, nHeight, memHdc, 0, 0, SRCCOPY);
 }
 
-
+Object3D * cur_op = NULL;
 VOID Initialize()
 {
 	man.addCamera(50, 50, 50, 1000, 90, 90).move(0, 0, -200);
@@ -92,10 +92,21 @@ VOID Initialize()
 	man.addLight(5, 100, 220);
 	//man.addLight(-1000, 100, 100);
 
-	/*
-	man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10)
-		.scale(10, 10, 10).move(0, -30, -300).setColor(GREEN);
-		*/
+
+	//for (int i = 0; i < 1; i++) {
+	//	for (int j = 0; j < 1; j++) {
+	//		man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
+	//			.scale(2, 2, 2).rotate(0, 0, 180).move(300 - 40 * j, -40, 300 - 40 * i).setColor(LIGHTGRAY).setLineColor(RED);
+	//	}
+	//}
+
+	//man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10)
+	//	.scale(10, 10, 10).move(0, -30, -300).setColor(GREEN);
+	//man.addObject().addVert(-10, -10, 10).addVert(10, 10, 10).addVert(-10, 10, 10)
+	//	.scale(10, 10, 10).move(0, -30, -100).setColor(GREEN);
+
+	//man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
+	//	.rotate(-90, -90, -90).move(-100, -20, 0).setColor(LIGHTGRAY).setLineColor(RED);
 
 	//load resource
 	INT t0 = tman.addTexture(480, 480, 10);
@@ -108,25 +119,23 @@ VOID Initialize()
 	INT t7 = tman.addTexture("7.jpg");
 	INT t8 = tman.addTexture("8.jpg");
 
-
 	int count = 2;
 	int c = 30;
 	int i, j, k;
 	EFTYPE r = 10;
 	EFTYPE x_1, x_2, r_1, r_2, p_1 = PI / ((EFTYPE)c), p_2 = 2 * PI / ((EFTYPE)c);
 
-	man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
-		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
-		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
-		.scale(5, 5, 5).move(100, 10, 50).setColor(RED).setLineColor(BLUE).setTexture(tman, t2);
+	//man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
+	//	.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
+	//	.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
+	//	.scale(5, 5, 5).move(100, 10, 50).setColor(RED).setLineColor(BLUE).setTexture(tman, t2);
 
 	for (int i = 0; i < 15; i++) {
 		for (int j = 0; j < 15; j++) {
 			man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
-				.scale(2, 2, 2).rotate(0, 0, 180).move(300 - 40 * j, -40, 300 - 40 * i).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t4);
+				.scale(8, 2, 2).rotate(0, 0, 180).move(300 - 40 * j, -40, 300 - 40 * i).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t4);
 		}
 	}
-
 	c = 50;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
 	count = 1;
@@ -149,8 +158,8 @@ VOID Initialize()
 	}
 
 
-	man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
-		.scale(10, 10, 10).move(0, -30, -300).setColor(GREEN).setTexture(tman, t3);
+	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
+		.scale(10, 10, 10).move(0, 100, -300).setColor(GREEN).setTexture(tman, t1);
 
 
 	man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
@@ -161,7 +170,7 @@ VOID Initialize()
 		.scale(0.5, 0.5, 0.5).move(-15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t3);
 
 	man.addReflectionObject(1000).addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
-		.scale(10, 10, 10).rotate(90, 90, 0).move(100, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t1);
+		.scale(10, 10, 10).rotate(90, 90, 0).move(200, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t1);
 
 	for (i = 0; i < c; i++) {
 		x_1 = r * cos(i * p_1);
@@ -429,11 +438,16 @@ VOID onKeyDown(WPARAM wParam)
 		case 'D':
 			wParam = VK_RIGHT;
 			break;
+		//case 'W':
+		//	wParam = 'Y';
+		//	break;
+		//case 'S':
+		//	wParam = 'N';
 		case 'W':
-			wParam = 'Y';
+			wParam = VK_UP;
 			break;
 		case 'S':
-			wParam = 'N';
+			wParam = VK_DOWN;
 			break;
 		//case 'Q':
 		//	if (lean == 0) {
@@ -458,17 +472,37 @@ VOID onKeyDown(WPARAM wParam)
 	case VK_CONTROL:
 		is_control = 1;
 		break;
+	//case VK_LEFT:
+	//	man.moveCamera(-1, 0, 0);
+	//	break;
+	//case VK_RIGHT:
+	//	man.moveCamera(1, 0, 0);
+	//	break;
+	//case VK_UP:
+	//	man.moveCamera(0, 1, 0);
+	//	break;
+	//case VK_DOWN:
+	//	man.moveCamera(0, -1, 0);
+	//	break;
 	case VK_LEFT:
-		man.moveCamera(-1, 0, 0);
+		if (cur_op) {
+			cur_op->setUV(cur_op->u + 1, cur_op->v);
+		}
 		break;
 	case VK_RIGHT:
-		man.moveCamera(1, 0, 0);
+		if (cur_op) {
+			cur_op->setUV(cur_op->u - 1, cur_op->v);
+		}
 		break;
 	case VK_UP:
-		man.moveCamera(0, 1, 0);
+		if (cur_op) {
+			cur_op->setUV(cur_op->u, cur_op->v + 1);
+		}
 		break;
 	case VK_DOWN:
-		man.moveCamera(0, -1, 0);
+		if (cur_op) {
+			cur_op->setUV(cur_op->u, cur_op->v - 1);
+		}
 		break;
 	case 'Y':
 		man.moveCamera(0, 0, 1);
@@ -485,7 +519,7 @@ VOID onKeyDown(WPARAM wParam)
 	case 'M':
 		man.rotateCamera(1, 0, 0);
 		break;
-	case ',':
+	case '/':
 		man.rotateCamera(-1, 0, 0);
 		break;
 	case 'P':
