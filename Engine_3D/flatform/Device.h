@@ -148,6 +148,15 @@ struct Device {
 								FLOAT * ___depth = _depth;
 								_depth = deptr;
 								//memset(depth, 0, width * height * sizeof(FLOAT));
+								//clear reflection depth and drawing
+								for (int i = v->ys; i <= v->ye && i < height; i++) {
+									for (int j = v->xs; j <= v->xe && j < width; j++) {
+										index = i * width + j;
+										_depth[index] = BLACK;
+										_image[index] = BLACK;
+										_mirror[index] = BLACK;
+									}
+								}
 								Render(man, v, v0, v1);
 								// restore target device and depth array
 								_depth = ___depth;
@@ -182,7 +191,6 @@ struct Device {
 									for (int j = v->xs; j <= v->xe && j < width; j++) {
 										index = i * width + j;
 										__mirror = &_mirror[index];
-
 										__image = &_image[index];
 										if (j >= line_l && j <= line_r) {
 											*__image = obj->color;
@@ -207,7 +215,7 @@ struct Device {
 											}
 										}
 										//clear reflection depth at the same time
-										deptr[index] = 0;
+										deptr[index] = BLACK;
 										//clear drawing
 										*__mirror = BLACK;
 										*__image = BLACK;
@@ -283,7 +291,7 @@ struct Device {
 			cur_cam->M_1.set(lgt->M);
 			man.refresh(cur_cam);
 
-			int render_trans = 0;
+			int render_state = 0;
 			int trans_w0 = EP_MAX, trans_h0 = EP_MAX;
 			int trans_w1 = -EP_MAX, trans_h1 = -EP_MAX;
 			do {
@@ -293,7 +301,9 @@ struct Device {
 					do {
 						if (v0 && v1) {
 							// back face cull
-							if (v->backface > 0) {
+							// shade do not need backface cull
+							//if (v->backface > 0) 
+							{
 
 								_range = v;
 								// in range
@@ -376,21 +386,28 @@ struct Device {
 
 				//first do objects till end
 				//then do transparent object
-				if (render_trans == 0) {
+				if (render_state == 0) {
 					obj = man.objs.next(obj);
 					if (!(obj && obj != man.objs.link)) {
+						obj = man.refl.link;
+						render_state = 1;
+					}
+				}
+				else if (render_state == 1) {
+					obj = man.refl.next(obj);
+					if (!(obj && obj != man.refl.link)) {
 						obj = man.tras.link;
-						render_trans = 1;
+						render_state = 2;
 					}
 				}
 				else {
 					obj = man.tras.next(obj);
-					render_trans++;
+					render_state++;
 					if (!(obj && obj != man.tras.link)) {
 						break;
 					}
 				}
-			} while (obj && obj != man.objs.link);
+			} while (obj);
 		}
 
 		// restore current camera and refresh
@@ -413,7 +430,7 @@ struct Device {
 
 		Obj3D * obj = man.objs.link;
 		if (obj) {
-			int render_trans = 0;
+			int render_state = 0;
 			int trans_w0 = EP_MAX, trans_h0 = EP_MAX;
 			int trans_w1 = -EP_MAX, trans_h1 = -EP_MAX;
 			VObj * v, *v0, *v1, *vtemp;
@@ -576,7 +593,7 @@ struct Device {
 														// reflection vector
 														// R = I - 2 ( I * N ) N
 														n2.set(n0);// .normalize();
-														n3.set(v->n_r);
+														n3.set(v->n);// .normalize();
 														n3 * (n2 ^ n3) * 2;
 														n2 - n3;
 														// transition vector
@@ -587,7 +604,7 @@ struct Device {
 
 														n2.x = n2.x * 0.5 + 0.5;
 														n2.y = n2.y * 0.5 + 0.5;
-														n2.z = n2.z * 0.5 + 0.5;
+														//n2.z = n2.z * 0.5 + 0.5;
 
 														*__image = obj->getTexture(n2.x, n2.y);
 													}
@@ -718,16 +735,24 @@ struct Device {
 
 				//first do objects till end
 				//then do transparent object
-				if (render_trans == 0) {
+				if (render_state == 0) {
 					obj = man.objs.next(obj);
 					if (!(obj && obj != man.objs.link)) {
 						obj = man.tras.link;
-						render_trans = 1;
+						render_state = 2;
 					}
+				}
+				else if (render_state == 1) {
+					obj = man.refl.next(obj);
+					if (!(obj && obj != man.refl.link)) {
+						obj = man.tras.link;
+						render_state = 2;
+					}
+
 				}
 				else {
 					obj = man.tras.next(obj);
-					render_trans++;
+					render_state++;
 					if (!(obj && obj != man.tras.link)) {
 						//render transparent after all transparent objects were done
 						index = 0;
@@ -746,7 +771,7 @@ struct Device {
 						break;
 					}
 				}
-			} while (obj && obj != man.objs.link);
+			} while (obj);
 		}
 	}
 

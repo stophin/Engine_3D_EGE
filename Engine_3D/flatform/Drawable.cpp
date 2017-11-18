@@ -146,6 +146,27 @@ VOID Initialize()
 	//	.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
 	//	.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
 	//	.scale(5, 5, 5).move(100, 10, 50).setColor(RED).setLineColor(BLUE).setTexture(tman, t2);
+	c = 50;
+	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
+	count = 1;
+	for (k = 0; k < count; k++) {
+		EFTYPE x = rand() % 300 - 150;
+		EFTYPE z = rand() % 300 - 150;
+		EFTYPE y = rand() % 100;
+		for (i = 0; i < c; i++) {
+			x_1 = r * cos(i * p_1);
+			r_1 = r * sin(i * p_1);
+			x_2 = r * cos((i + 1) * p_1);
+			r_2 = r * sin((i + 1) * p_1);
+			Object3D& obj = man.addObject().renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
+			for (j = 1; j < c; j++) {
+				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
+					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
+			}
+			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(10, 10, 10).move(x, y, z).rotate(0, 0, 0)
+				.setColor(GREEN).setLineColor(RED).setTexture(tman, t7, 1);
+		}
+	}
 
 	for (int i = 0; i < 15; i++) {
 		for (int j = 0; j < 15; j++) {
@@ -154,8 +175,6 @@ VOID Initialize()
 		}
 	}
 
-
-	return;
 	c = 50;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
 	count = 1;
@@ -174,12 +193,14 @@ VOID Initialize()
 					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
 			}
 			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(10, 10, 10).move(x, y, z).rotate(0, 0, 0).setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 1);
+
+			cur_op = &obj;
 		}
 	}
 
 
-	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
-		.scale(10, 10, 10).move(0, 100, -300).setColor(GREEN).setTexture(tman, t1);
+	man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
+		.scale(10, 10, 10).move(0, 100, -300).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
 
 
 	man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
@@ -205,26 +226,6 @@ VOID Initialize()
 		obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).move(0, 0, 50).rotate(0, 0, 0).setColor(GREEN).setLineColor(RED);
 	}
 
-	c = 50;
-	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
-	count = 1;
-	for (k = 0; k < count; k++) {
-		EFTYPE x = rand() % 300 - 150;
-		EFTYPE z = rand() % 300 - 150;
-		EFTYPE y = rand() % 100;
-		for (i = 0; i < c; i++) {
-			x_1 = r * cos(i * p_1);
-			r_1 = r * sin(i * p_1);
-			x_2 = r * cos((i + 1) * p_1);
-			r_2 = r * sin((i + 1) * p_1);
-			Object3D& obj = man.addObject().renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
-			for (j = 1; j < c; j++) {
-				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
-					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
-			}
-			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(5, 5, 5).move(x, y, z).rotate(0, 0, 0).setColor(GREEN).setLineColor(RED).setTexture(tman, t8, 1);
-		}
-	}
 
 	man.addObject().renderAABB().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
@@ -485,6 +486,7 @@ VOID onKeyDown(WPARAM wParam)
 		}
 	}
 	Object3D * obj = (Object3D *)man.objs.link;
+	obj = cur_op;
 	if (obj == NULL) {
 		return;
 	}

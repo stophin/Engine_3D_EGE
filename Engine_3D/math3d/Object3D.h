@@ -160,8 +160,8 @@ public:
 			return this->color;
 		}
 		INT _u = x * t_w, _v = y * t_h;
-		_u += this->u - t_w / 2;
-		_v += this->v - t_h / 2;
+		_u += this->u;// -t_w / 2.0;
+		_v += this->v;// -t_h / 2.0;
 		_u %= t_w;
 		_v %= t_h;
 		if (_u < 0) {
@@ -525,7 +525,12 @@ public:
 								this->verts_f.linkcount = -this->verts_f.linkcount;
 								this->verts_f.clearLink();
 							}
+							if (this->verts_r.linkcount < 0) {
+								this->verts_r.linkcount = -this->verts_r.linkcount;
+								this->verts_r.clearLink();
+							}
 							this->verts_f.insertLink(v);
+							this->verts_r.insertLink(v);
 						}
 						else {
 							if (this->verts_r.linkcount < 0) {
