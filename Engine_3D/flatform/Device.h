@@ -592,9 +592,10 @@ struct Device {
 														//sphere map
 														// reflection vector
 														// R = I - 2 ( I * N ) N
-														n2.set(n0);// .normalize();
-														n3.set(v->n);// .normalize();
-														n3 * (n2 ^ n3) * 2;
+														n2.set(n1);
+														n3.set(n1)*obj->M_1;
+														EFTYPE cross = n2 ^ n3;
+														n3 * cross * 2;
 														n2 - n3;
 														// transition vector
 														// m = r + cam(0, 0, 1)
@@ -606,7 +607,12 @@ struct Device {
 														n2.y = n2.y * 0.5 + 0.5;
 														//n2.z = n2.z * 0.5 + 0.5;
 
-														*__image = obj->getTexture(n2.x, n2.y);
+														EFTYPE dx = 0;
+														if (cross < 0) {
+															dx = 0.5;
+														}
+
+														*__image = obj->getTexture(n2.x + dx, n2.y );
 													}
 
 													//calculate sumption of light factors

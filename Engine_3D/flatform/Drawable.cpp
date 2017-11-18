@@ -94,6 +94,17 @@ VOID Initialize()
 	man.addLight(5, 100, 220);
 	//man.addLight(-1000, 100, 100);
 
+	//load resource
+	INT t0 = tman.addTexture(480, 480, 10);
+	INT t1 = tman.addTexture("1.jpg");
+	INT t2 = tman.addTexture("2.jpg");
+	INT t3 = tman.addTexture("3.jpg");
+	INT t4 = tman.addTexture(64, 64, 8);
+	INT t5 = tman.addTexture(64, 64, 2);
+	INT t6 = tman.addTexture("6.jpg");
+	INT t7 = tman.addTexture("7.jpg");
+	INT t8 = tman.addTexture("8.jpg");
+
 	// generate teapot
 	Object3D& obj = man.addObject().renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
 	int normal = -1;
@@ -108,7 +119,7 @@ VOID Initialize()
 		triangle_count++;
 		obj.setIndice(g_teapotIndices[i], g_teapotIndices[i + 1], g_teapotIndices[i + 2]);
 	}
-	obj.move(50, -30, 0).scale(2, 2, 2).rotate(-90, 30, 0);
+	obj.move(50, -30, 0).scale(2, 2, 2).rotate(-90, 30, 0);// .setTexture(tman, t7, 1);
 
 	//for (int i = 0; i < 1; i++) {
 	//	for (int j = 0; j < 1; j++) {
@@ -125,16 +136,6 @@ VOID Initialize()
 	//man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
 	//	.rotate(-90, -90, -90).move(-100, -20, 0).setColor(LIGHTGRAY).setLineColor(RED);
 
-	//load resource
-	INT t0 = tman.addTexture(480, 480, 10);
-	INT t1 = tman.addTexture("1.jpg");
-	INT t2 = tman.addTexture("2.jpg");
-	INT t3 = tman.addTexture("3.jpg");
-	INT t4 = tman.addTexture(64, 64, 8);
-	INT t5 = tman.addTexture(64, 64, 2);
-	INT t6 = tman.addTexture("6.jpg");
-	INT t7 = tman.addTexture("7.jpg");
-	INT t8 = tman.addTexture("8.jpg");
 
 	int count = 2;
 	int c = 30;
@@ -146,7 +147,7 @@ VOID Initialize()
 	//	.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
 	//	.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
 	//	.scale(5, 5, 5).move(100, 10, 50).setColor(RED).setLineColor(BLUE).setTexture(tman, t2);
-	c = 50;
+	c = 30;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
 	count = 1;
 	for (k = 0; k < count; k++) {
@@ -165,6 +166,8 @@ VOID Initialize()
 			}
 			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(10, 10, 10).move(x, y, z).rotate(0, 0, 0)
 				.setColor(GREEN).setLineColor(RED).setTexture(tman, t7, 1);
+
+			cur_op = &obj;
 		}
 	}
 
@@ -284,7 +287,7 @@ VOID onScroll(FLOAT delta) {
 		else if (move_trans > 0) {
 
 			if (delta > 0) {
-				Obj3D * obj = man.tras.link;
+				Obj3D * obj = man.objs.link;
 				if (obj) {
 					do {
 
@@ -292,11 +295,11 @@ VOID onScroll(FLOAT delta) {
 
 
 						obj = man.objs.next(obj);
-					} while (obj && obj != man.tras.link);
+					} while (obj && obj != man.objs.link);
 				}
 			}
 			else {
-				Obj3D * obj = man.tras.link;
+				Obj3D * obj = man.objs.link;
 				if (obj) {
 					do {
 
@@ -304,7 +307,7 @@ VOID onScroll(FLOAT delta) {
 
 
 						obj = man.objs.next(obj);
-					} while (obj && obj != man.tras.link);
+					} while (obj && obj != man.objs.link);
 				}
 			}
 		}
@@ -509,22 +512,26 @@ VOID onKeyDown(WPARAM wParam)
 	//	break;
 	case VK_LEFT:
 		if (cur_op) {
-			cur_op->setUV(cur_op->u + 1, cur_op->v);
+			//cur_op->setUV(cur_op->u + 1, cur_op->v);
+			cur_op->move(1, 0, 0);
 		}
 		break;
 	case VK_RIGHT:
 		if (cur_op) {
-			cur_op->setUV(cur_op->u - 1, cur_op->v);
+			//cur_op->setUV(cur_op->u - 1, cur_op->v);
+			cur_op->move(-1, 0, 0);
 		}
 		break;
 	case VK_UP:
 		if (cur_op) {
-			cur_op->setUV(cur_op->u, cur_op->v + 1);
+			//cur_op->setUV(cur_op->u, cur_op->v + 1);
+			cur_op->move(0, 1, 0);
 		}
 		break;
 	case VK_DOWN:
 		if (cur_op) {
-			cur_op->setUV(cur_op->u, cur_op->v - 1);
+			//cur_op->setUV(cur_op->u, cur_op->v - 1);
+			cur_op->move(0, -1, 0);
 		}
 		break;
 	case 'Y':

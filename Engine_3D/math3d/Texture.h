@@ -43,7 +43,7 @@ public:
 			{
 				index = x + y * width;
 				index_r = index_t -  index;
-				texture[index] = buffer[index_r];
+				texture[index] = buffer[index];
 			}
 		}
 	}
