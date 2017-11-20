@@ -171,7 +171,7 @@ VOID Initialize()
 			}
 			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(10, 10, 10).move(x, y, z).rotate(0, 0, 0)
 				.setColor(GREEN).setLineColor(RED).setTexture(tman, t10, 2);
-			//cur_op = &obj;
+		//	cur_op = &obj;
 		}
 		man.endGroup();
 	}

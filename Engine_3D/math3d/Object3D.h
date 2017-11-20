@@ -127,7 +127,8 @@ public:
 	// texture type
 	// 0: normal texture
 	// 1: SphereMap(environment reflection)
-	// 2: SphereMap(texture)
+	// 2: SphereMap(object texture)
+	// 3: SphereMap(world texture)
 	INT texture_type;
 	INT u;
 	INT v;
