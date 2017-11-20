@@ -58,6 +58,46 @@ public:
 		initialize();
 	}
 	void initialize() {
+		for (INT i = 0; i < 2; i++)
+		{
+			this->prev[i] = NULL;
+			this->next[i] = NULL;
+		}
+	}
+
+	INT uniqueID;
+	Obj3D * prev[2];
+	Obj3D * next[2];
+	void operator delete(void * _ptr){
+		if (_ptr == NULL)
+		{
+			return;
+		}
+		for (INT i = 0; i < 2; i++)
+		{
+			if (((Obj3D*)_ptr)->prev[i] != NULL || ((Obj3D*)_ptr)->next[i] != NULL)
+			{
+				return;
+			}
+		}
+		delete(_ptr);
+	}
+};
+
+typedef class Group3D Group3D;
+class Group3D {
+public:
+	Group3D(): objs(1) {
+		initialize();
+	}
+
+	~Group3D() {
+		objs.~MultiLinkList();
+	}
+
+	MultiLinkList<Obj3D> objs;
+
+	void initialize() {
 		for (INT i = 0; i < 1; i++)
 		{
 			this->prev[i] = NULL;
@@ -66,8 +106,8 @@ public:
 	}
 
 	INT uniqueID;
-	Obj3D * prev[1];
-	Obj3D * next[1];
+	Group3D * prev[1];
+	Group3D * next[1];
 	void operator delete(void * _ptr){
 		if (_ptr == NULL)
 		{
@@ -75,7 +115,7 @@ public:
 		}
 		for (INT i = 0; i < 1; i++)
 		{
-			if (((Obj3D*)_ptr)->prev[i] != NULL || ((Obj3D*)_ptr)->next[i] != NULL)
+			if (((Group3D*)_ptr)->prev[i] != NULL || ((Group3D*)_ptr)->next[i] != NULL)
 			{
 				return;
 			}
@@ -121,7 +161,8 @@ public:
 typedef class Manager3D Manager3D;
 class Manager3D {
 public:
-	Manager3D() : cams(0), objs(0), lgts(0), tras(0), refl(0){
+	Manager3D() : cams(0), objs(0), lgts(0), tras(0), refl(0), grps(0),
+		group(NULL){
 
 	}
 	~Manager3D() {
@@ -129,6 +170,7 @@ public:
 		this->objs.~MultiLinkList();
 		this->tras.~MultiLinkList();
 		this->refl.~MultiLinkList();
+		this->grps.~MultiLinkList();
 	}
 
 	MultiLinkList<Cam3D> cams;
@@ -136,6 +178,7 @@ public:
 	MultiLinkList<Obj3D> tras;
 	MultiLinkList<Obj3D> refl;
 	MultiLinkList<Lgt3D> lgts;
+	MultiLinkList<Group3D> grps;
 
 	void setCameraRange(EFTYPE o_w, EFTYPE o_h, EFTYPE s_w, EFTYPE s_h) {
 		Cam3D * cam = this->cams.link;
@@ -188,12 +231,36 @@ public:
 		return (Camera3D*)cam;
 	}
 
+	Group3D& addGroup() {
+		Group3D * gp = new Group3D();
+
+		this->grps.insertLink(gp);
+
+		return *gp;
+	}
+
+	Group3D * group;
+	Manager3D& startGroup(INT uniqueID) {
+		this->group = this->grps.getLink(uniqueID);
+
+		return *this;
+	}
+
+	Manager3D& endGroup() {
+		this->group = NULL;
+
+		return *this;
+	}
+
 	Object3D& addObject() {
 		Obj3D * obj = new Obj3D();
 
 		obj->cam = this->cams.link;
 
 		this->objs.insertLink(obj);
+		if (this->group) {
+			this->group->objs.insertLink(obj);
+		}
 
 		return *((Object3D *)obj);
 	}

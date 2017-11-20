@@ -589,31 +589,57 @@ struct Device {
 														}
 													}
 													else if (obj->texture_type == 1) {
-														//sphere map
+														//sphere map(reflection)
 														// reflection vector
 														// R = I -  N * ( dot(I , N)* 2 )
-														n2.set(n1);
-														n3.set(n1) * obj->M_1;
-														//n3.set(v->n_r);
+														//get n3 = N
+														n2.set(0, 0, 0);
+														n2 * obj->M * cam->M;
+														n3.set(n0);
+														n3 - n2;
+														//get n2 = I
+														n2.set(n0);
+														//get n2 = R
 														EFTYPE cross = n2 ^ n3;
 														n3 * (cross * 2);
 														n2 - n3;
 														// transition vector
 														// m = r + cam(0, 0, 1)
-														n2 + cam->lookat;
-														//n2.z += 1;
+														n3.set(cam->lookat);
+														n2 + n3;
+														n2.normalize();
+														
+														n2.x = n2.x * 0.5 + 0.5;
+														n2.y = n2.y * 0.5 + 0.5;
+
+														*__image = obj->getTexture(n2.x, n2.y );
+													}
+													else if (obj->texture_type == 2) {
+														//sphere map(texture)
+														// reflection vector
+														// R = I -  N * ( dot(I , N)* 2 )
+														//get n3 = N
+														n2.set(0, 0, 0);
+														n2 * obj->M;
+														n3.set(n1);
+														n3 - n2;
+														//get n2 = I
+														n2.set(n1);
+														//get n2 = R
+														EFTYPE cross = n2 ^ n3;
+														n3 * (cross * 2);
+														n2 - n3;
+														// transition vector
+														// m = r + cam(0, 0, 1)
+														n3.set(cam->lookat);
+														n2 + n3;
 														n2.normalize();
 
 														n2.x = n2.x * 0.5 + 0.5;
 														n2.y = n2.y * 0.5 + 0.5;
-														//n2.z = n2.z * 0.5 + 0.5;
 
-														EFTYPE dx = 0;
-														if (cross < 0) {
-															//dx = 0.5;
-														}
+														*__image = obj->getTexture(n2.x, n2.y);
 
-														*__image = obj->getTexture(n2.x + dx, n2.y );
 													}
 
 													//calculate sumption of light factors

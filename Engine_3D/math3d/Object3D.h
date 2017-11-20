@@ -126,7 +126,8 @@ public:
 	INT t_h;
 	// texture type
 	// 0: normal texture
-	// 1: SphereMap 
+	// 1: SphereMap(environment reflection)
+	// 2: SphereMap(texture)
 	INT texture_type;
 	INT u;
 	INT v;
@@ -159,7 +160,7 @@ public:
 		if (NULL == texture) {
 			return this->color;
 		}
-		INT _u = x * t_w, _v = y * t_h;
+		INT _u = x *t_w, _v = y * t_h;
 		_u += this->u;// -t_w / 2.0;
 		_v += this->v;// -t_h / 2.0;
 		_u %= t_w;
@@ -169,9 +170,6 @@ public:
 		}
 		if (_v < 0) {
 			_v = t_h + _v;
-		}
-		if (_u < 0) {
-			_u = 0;
 		}
 		return texture[_u + _v * t_w];
 	}

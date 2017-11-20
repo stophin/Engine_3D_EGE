@@ -105,6 +105,7 @@ VOID Initialize()
 	INT t7 = tman.addTexture("7.jpg");
 	INT t8 = tman.addTexture("8.jpg");
 	INT t9 = tman.addTexture("9.jpg");
+	INT t10 = tman.addTexture("10.jpg");
 
 	// generate teapot
 	Object3D& obj = man.addObject().renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
@@ -120,9 +121,8 @@ VOID Initialize()
 		triangle_count++;
 		obj.setIndice(g_teapotIndices[i], g_teapotIndices[i + 1], g_teapotIndices[i + 2]);
 	}
-	obj.move(50, -30, 0).scale(2, 2, 2).rotate(-90, 30, 0).setTexture(tman, t9, 1);// .setTexture(tman, t7, 1);
+	obj.move(50, -30, 0).scale(2, 2, 2).rotate(-90, 30, 0).setTexture(tman, t9, 2);// .setTexture(tman, t7, 1);
 
-	cur_op = &obj;
 
 	//for (int i = 0; i < 1; i++) {
 	//	for (int j = 0; j < 1; j++) {
@@ -157,19 +157,22 @@ VOID Initialize()
 		EFTYPE x = rand() % 300 - 150;
 		EFTYPE z = rand() % 300 - 150;
 		EFTYPE y = rand() % 100;
+		Group3D& gp = man.addGroup();
 		for (i = 0; i < c; i++) {
 			x_1 = r * cos(i * p_1);
 			r_1 = r * sin(i * p_1);
 			x_2 = r * cos((i + 1) * p_1);
 			r_2 = r * sin((i + 1) * p_1);
-			Object3D& obj = man.addObject().renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
+			Object3D& obj = man.startGroup(gp.uniqueID).addObject().renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
 			for (j = 1; j < c; j++) {
 				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
 					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
 			}
 			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(10, 10, 10).move(x, y, z).rotate(0, 0, 0)
-				.setColor(GREEN).setLineColor(RED).setTexture(tman, t7, 1);
+				.setColor(GREEN).setLineColor(RED).setTexture(tman, t10, 1);
+			cur_op = &obj;
 		}
+		man.endGroup();
 	}
 
 	for (int i = 0; i < 15; i++) {
@@ -186,19 +189,23 @@ VOID Initialize()
 		EFTYPE x = rand() % 300 - 150;
 		EFTYPE z = rand() % 300 - 150;
 		EFTYPE y = rand() % 100;
+		Group3D& gp = man.addGroup();
 		for (i = 0; i < c; i++) {
 			x_1 = r * cos(i * p_1);
 			r_1 = r * sin(i * p_1);
 			x_2 = r * cos((i + 1) * p_1);
 			r_2 = r * sin((i + 1) * p_1);
-			Object3D& obj = man.addTransparentObject(-0.51).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
+			Object3D& obj = man.startGroup(gp.uniqueID).addObject().renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
 			for (j = 1; j < c; j++) {
 				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
 					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
 			}
-			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(10, 10, 10).move(x, y, z).rotate(0, 0, 0).setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 1);
+			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(10, 10, 10).move(x, y, z).rotate(0, 0, 0)
+				.setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 1);
 
+			cur_op = &obj;
 		}
+		man.endGroup();
 	}
 
 	man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
@@ -598,16 +605,48 @@ VOID onKeyDown(WPARAM wParam)
 		obj->move(0, 0, 1);
 		break;
 	case 'Q':
-		obj->rotate(1, 0, 0);
+		if (cur_op) {
+			Obj3D * vobj = (Obj3D*)cur_op;
+			do {
+
+				vobj->rotate(1, 0, 0);
+
+				vobj = vobj->next[1];
+			} while (vobj && vobj != cur_op);
+		}
 		break;
 	case 'E':
-		obj->rotate(-1, 0, 0);
+		if (cur_op) {
+			Obj3D * vobj = (Obj3D*)cur_op;
+			do {
+
+				vobj->rotate(-1, 0, 0);
+
+				vobj = vobj->next[1];
+			} while (vobj && vobj != cur_op);
+		}
 		break;
 	case 'Z':
-		obj->rotate(0, 1, 0);
+		if (cur_op) {
+			Obj3D * vobj = (Obj3D*)cur_op;
+			do {
+
+				vobj->rotate(0, 1, 0);
+
+				vobj = vobj->next[1];
+			} while (vobj && vobj != cur_op);
+		}
 		break;
 	case 'C':
-		obj->rotate(0, -1, 0);
+		if (cur_op) {
+			Obj3D * vobj = (Obj3D*)cur_op;
+			do {
+
+				vobj->rotate(0, -1, 0);
+
+				vobj = vobj->next[1];
+			} while (vobj && vobj != cur_op);
+		}
 		break;
 	case 'V':
 		obj->rotate(0, 0, -1);
