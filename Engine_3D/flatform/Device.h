@@ -591,11 +591,12 @@ struct Device {
 													else if (obj->texture_type == 1) {
 														//sphere map
 														// reflection vector
-														// R = I - 2 ( I * N ) N
+														// R = I -  N * ( dot(I , N)* 2 )
 														n2.set(n1);
-														n3.set(n1)*obj->M_1;
+														n3.set(n1) * obj->M_1;
+														//n3.set(v->n_r);
 														EFTYPE cross = n2 ^ n3;
-														n3 * cross * 2;
+														n3 * (cross * 2);
 														n2 - n3;
 														// transition vector
 														// m = r + cam(0, 0, 1)
@@ -609,7 +610,7 @@ struct Device {
 
 														EFTYPE dx = 0;
 														if (cross < 0) {
-															dx = 0.5;
+															//dx = 0.5;
 														}
 
 														*__image = obj->getTexture(n2.x + dx, n2.y );

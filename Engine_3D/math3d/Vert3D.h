@@ -90,6 +90,7 @@ struct Vert3D {
 		return *this;
 	}
 
+	// module of cross product
 	FLOAT operator &(const Vert3D& v) const{
 		EFTYPE x = this->x, y = this->y, z = this->z, w = this->w;
 		//EFTYPE ra = sqrt(x * x + y * y + z * z);
@@ -102,7 +103,7 @@ struct Vert3D {
 		return (x * v.x + y * v.y + z * v.z) * (ra * rb);
 	}
 
-
+	// dot product
 	FLOAT operator ^(const Vert3D& v) const{
 		EFTYPE x = this->x, y = this->y, z = this->z, w = this->w;
 
