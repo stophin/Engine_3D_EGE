@@ -648,13 +648,10 @@ struct Device {
 														if (!(_i < 0 || _i > height - 1 || _j < 0 || _j > width - 1)) {
 															_index = (INT)_i * width + (INT)_j;
 															//if (depth[_index] < z) 
-															if (1)
-															{
-																*__trans = Light3D::add(*__image, _tango[_index], f);
-															}
-															else {
-																*__trans = Light3D::multi(*__image, f);
-															}
+
+															//*__trans = Light3D::multi(*__image, f);
+															*__trans = Light3D::add(*__image, _tango[_index], f);
+
 															if (*__trans == BLACK) {
 																//*__trans++;
 																*__trans = *__image;
