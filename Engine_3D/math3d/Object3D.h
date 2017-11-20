@@ -430,7 +430,7 @@ public:
 					EFTYPE x0, y0, z0;
 					EFTYPE d;
 
-					//any point in this plan(in world->camera coordinate)
+					//any point in this plane(in world->camera coordinate)
 					v->v_w.set(v->v) * CM;
 					x0 = v->v_w.x; y0 = v->v_w.y; z0 = v->v_w.z;
 
@@ -471,7 +471,7 @@ public:
 						// get normal vector
 						v->n_r.set(v->n) ^ CM;
 						v->n_r.normalize();
-						// set x0 for all vertexes
+						// set x0 for all vertexes(this is point which is for render)
 						v->v_s.set(v->x * this->cam->scale_w + this->cam->offset_w, v->y * this->cam->scale_h + this->cam->offset_h, v->z);
 
 						if (this->v0 && this->v1) {
@@ -485,14 +485,14 @@ public:
 							// get normal vector for depth
 							//v->n_d.set(v0->x0 - v->x0, v0->y0 - v->y0, v0->z - v->z);
 							//this->center_r.set(v1->x0 - v->x0, v1->y0 - v->y0, v1->z - v->z);
-							v->n_d.set(v0->v_s) - v->v_s;
-							this->center_r.set(v1->v_s) - v->v_s;
-							v->n_d * this->center_r;
+							//v->n_d.set(v0->v_s) - v->v_s;
+							//this->center_r.set(v1->v_s) - v->v_s;
+							//v->n_d * this->center_r;
 
 							// get normal vector for original z
-							v->n_z.set(v0->x - v->x, v0->y - v->y, v0->zz - v->zz);
-							this->center_r.set(v1->x - v->x, v1->y - v->y, v1->zz - v->zz);
-							v->n_z * this->center_r;
+							//v->n_z.set(v0->x - v->x, v0->y - v->y, v0->zz - v->zz);
+							//this->center_r.set(v1->x - v->x, v1->y - v->y, v1->zz - v->zz);
+							//v->n_z * this->center_r;
 							v->n_1_z.set(v0->x - v->x, v0->y - v->y, v0->z - v->z);
 							this->center_r.set(v1->x - v->x, v1->y - v->y, v1->z - v->z);
 							v->n_1_z * this->center_r;
@@ -546,10 +546,11 @@ public:
 			} while (v && v != this->verts.link);
 			if (this->verts_r.linkcount > 0) {
 				if (!EP_ISZERO(this->transparent)) {
-					this->center_w.set(this->center);
-					this->center_w * M;
-					this->center_r.set(this->center_w);
-					this->center_r * this->cam->M;
+					//this->center_w.set(this->center);
+					//this->center_w * M;
+					//this->center_r.set(this->center_w);
+					//this->center_r * this->cam->M;
+					this->center_r.set(this->center) * CM;
 					if (!this->cam->normalize(this->center_r)) {
 						this->center_r.x = this->center_r.x * this->cam->scale_w + this->cam->offset_w;
 						this->center_r.y = this->center_r.y * this->cam->scale_h + this->cam->offset_h;

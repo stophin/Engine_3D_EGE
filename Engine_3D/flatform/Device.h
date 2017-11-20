@@ -385,7 +385,7 @@ struct Device {
 				}
 
 				//first do objects till end
-				//then do transparent object
+				//then do reflection and then transparent object
 				if (render_state == 0) {
 					obj = man.objs.next(obj);
 					if (!(obj && obj != man.objs.link)) {
@@ -740,11 +740,12 @@ struct Device {
 				}
 
 				//first do objects till end
-				//then do transparent object
+				//then do reflection and then transparent object
 				if (render_state == 0) {
 					obj = man.objs.next(obj);
 					if (!(obj && obj != man.objs.link)) {
 						obj = man.tras.link;
+						//do not render reflection points
 						render_state = 2;
 					}
 				}

@@ -174,7 +174,7 @@ VOID Initialize()
 	for (int i = 0; i < 15; i++) {
 		for (int j = 0; j < 15; j++) {
 			man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
-				.scale(4, 2, 2).rotate(0, 0, 180).move(300 - 80 * j, -40, 300 - 40 * i).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t4);
+				.scale(4, 2, 2).rotate(0, 0, 180).move(300 - 80 * j, -40, 300 - 40 * i).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t0);
 		}
 	}
 
