@@ -273,6 +273,9 @@ public:
 		obj->reflection = t;
 
 		this->refl.insertLink(obj);
+		if (this->group) {
+			this->group->objs.insertLink(obj);
+		}
 
 		return *((Object3D *)obj);
 
@@ -287,6 +290,9 @@ public:
 		obj->transparent = t;
 
 		this->tras.insertLink(obj);
+		if (this->group) {
+			this->group->objs.insertLink(obj);
+		}
 
 		return *((Object3D *)obj);
 
