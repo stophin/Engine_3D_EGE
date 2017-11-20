@@ -561,9 +561,10 @@ struct Device {
 
 														//*__image = obj->getTexture(n2.y * obj->t_w, n2.z * obj->t_h);
 														//get the max projection plat£º xy or yz or xz?
+														EFTYPE sxy = n3.set(0, 0, 1) ^ (v->n), syz = n3.set(1, 0, 0) ^ (v->n), sxz = n3.set(0, 1, 0) ^ (v->n);
+														//get geometry size
 														EFTYPE mx = v->aabb[0].x - v->aabb[1].x, my = v->aabb[0].y - v->aabb[1].y, mz = v->aabb[0].z - v->aabb[1].z;
 														//EFTYPE mx = obj->aabb[0].x - obj->aabb[6].x, my = obj->aabb[0].y - obj->aabb[6].y, mz = obj->aabb[0].z - obj->aabb[6].z;
-														EFTYPE sxy = n3.set(0, 0, 1) ^ (v->n), syz = n3.set(1, 0, 0) ^ (v->n), sxz = n3.set(0, 1, 0) ^ (v->n);
 														//EFTYPE sxy = mx * my, syz = my * mz, sxz = mx * mz;
 														if (sxy < 0) sxy = -sxy;
 														if (syz < 0) syz = -syz;
@@ -667,6 +668,85 @@ struct Device {
 
 														*__image = obj->getTexture(n2.x, n2.y);
 
+													}
+													else if (obj->texture_type == 4) {
+														//sphere map(object texture)
+														// reflection vector
+														// R = I -  N * ( dot(I , N)* 2 )
+														//get n3 = N
+														n2.set(0, 0, 0);
+														//n2 * obj->M;
+														n3.set(n1) * obj->M_1;
+														n3 - n2;
+														//get the max projection plat£º xy or yz or xz?
+														EFTYPE sxy = n2.set(0, 0, 1) ^ n3, syz = n2.set(1, 0, 0) ^ n3, sxz = n2.set(0, 1, 0) ^ n3;
+														//get n2 = I
+														n2.set(n1) * obj->M_1;
+														//get n2 = R
+														EFTYPE cross = n2 ^ n3;
+														n3 * (cross * 2);
+														n2 - n3;
+														// transition vector
+														// m = r + cam(0, 0, 1)
+														n3.set(cam->lookat);
+														n2 + n3;
+														n2.normalize();
+
+														n2.x = n2.x * 0.5 + 0.5;
+														n2.y = n2.y * 0.5 + 0.5;
+														n2.z = n2.z * 0.5 + 0.5;
+
+														//*__image = obj->getTexture(n2.y * obj->t_w, n2.z * obj->t_h);
+														EFTYPE _sxy = sxy, _syz = syz, _sxz = sxz;
+														if (sxy < 0) sxy = -sxy;
+														if (syz < 0) syz = -syz;
+														if (sxz < 0) sxz = -sxz;
+														EFTYPE dw = 1.0 / 4.0, dh = 1.0 / 3.0;
+														EFTYPE _dw = 1 / 4.0, _dh = 1 / 3.0;
+														if (sxy > sxz) {
+															if (sxy > syz) {
+																if (sxy < 0) {
+																	//-z
+																	*__image = obj->getTexture(n2.x * _dw + 0 * dw, n2.y * _dh + 1 * dh);
+																}
+																else {
+																	//+z
+																	*__image = obj->getTexture(n2.x * _dw + 2 * dw, n2.y * _dh + 1 * dh);
+																}
+															}
+															else {
+																if (syz < 0) {
+																	//-x
+																	*__image = obj->getTexture(n2.y * _dw + 1 * dw, n2.z * _dh + 1 * dh);
+																}
+																else {
+																	//+x
+																	*__image = obj->getTexture(n2.y * _dw + 3 * dw, n2.z * _dh + 1 * dh);
+																}
+															}
+														}
+														else {
+															if (sxz > syz) {
+																if (sxz < 0) {
+																	//-y
+																	*__image = obj->getTexture(n2.x * _dw + 2 * dw, n2.z * _dh + 0 * dh);
+																}
+																else {
+																	//+y
+																	*__image = obj->getTexture(n2.x * _dw + 2 * dw, n2.z * _dh + 2 * dh);
+																}
+															}
+															else {
+																if (syz < 0) {
+																	//-x
+																	*__image = obj->getTexture(n2.y * _dw + 1 * dw, n2.z * _dh + 1 * dh);
+																}
+																else {
+																	//+x
+																	*__image = obj->getTexture(n2.y * _dw + 3 * dw, n2.z * _dh + 1 * dh);
+																}
+															}
+														}
 													}
 
 

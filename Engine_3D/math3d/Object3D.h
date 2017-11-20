@@ -129,6 +129,7 @@ public:
 	// 1: SphereMap(environment reflection)
 	// 2: SphereMap(object texture)
 	// 3: SphereMap(world texture)
+	// 4: CubeMap
 	INT texture_type;
 	INT u;
 	INT v;

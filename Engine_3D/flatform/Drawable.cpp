@@ -106,6 +106,7 @@ VOID Initialize()
 	INT t8 = tman.addTexture("8.jpg");
 	INT t9 = tman.addTexture("9.jpg");
 	INT t10 = tman.addTexture("10.jpg");
+	INT t11 = tman.addTexture("11.jpg");
 
 	// generate teapot
 	Object3D& obj = man.addObject().renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
@@ -170,8 +171,8 @@ VOID Initialize()
 					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
 			}
 			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(10, 10, 10).move(x, y, z).rotate(0, 0, 0)
-				.setColor(GREEN).setLineColor(RED).setTexture(tman, t10, 2);
-		//	cur_op = &obj;
+				.setColor(GREEN).setLineColor(RED).setTexture(tman, t11, 4);
+			cur_op = &obj;
 		}
 		man.endGroup();
 	}
@@ -182,6 +183,8 @@ VOID Initialize()
 				.scale(4, 2, 2).rotate(0, 0, 180).move(300 - 80 * j, -40, 300 - 40 * i).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t0);
 		}
 	}
+
+	return;
 
 	c = 50;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
