@@ -171,7 +171,7 @@ VOID Initialize()
 					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
 			}
 			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(10, 10, 10).move(x, y, z).rotate(0, 0, 0)
-				.setColor(GREEN).setLineColor(RED).setTexture(tman, t11, 4);
+				.setColor(GREEN).setLineColor(RED).setTexture(tman, t10, 2);
 			cur_op = &obj;
 		}
 		man.endGroup();
@@ -184,7 +184,10 @@ VOID Initialize()
 		}
 	}
 
-	return;
+	man.addObject(-1).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
+		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
+		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
+		.scale(5, 5, 5).move(-15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t11, 4);
 
 	c = 50;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);

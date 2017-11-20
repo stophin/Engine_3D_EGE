@@ -302,7 +302,7 @@ struct Device {
 						if (v0 && v1) {
 							// back face cull
 							// shade do not need backface cull
-							//if (v->backface > 0) 
+							if (v->backface > 0) 
 							{
 
 								_range = v;
@@ -670,18 +670,17 @@ struct Device {
 
 													}
 													else if (obj->texture_type == 4) {
-														//sphere map(object texture)
+														//sphere map(world texture)
 														// reflection vector
 														// R = I -  N * ( dot(I , N)* 2 )
 														//get n3 = N
 														n2.set(0, 0, 0);
-														//n2 * obj->M;
-														n3.set(n1) * obj->M_1;
+														n2 * obj->M;
+														n3.set(n1);
 														n3 - n2;
-														//get the max projection plat£º xy or yz or xz?
 														EFTYPE sxy = n2.set(0, 0, 1) ^ n3, syz = n2.set(1, 0, 0) ^ n3, sxz = n2.set(0, 1, 0) ^ n3;
 														//get n2 = I
-														n2.set(n1) * obj->M_1;
+														n2.set(n1);
 														//get n2 = R
 														EFTYPE cross = n2 ^ n3;
 														n3 * (cross * 2);
@@ -702,10 +701,10 @@ struct Device {
 														if (syz < 0) syz = -syz;
 														if (sxz < 0) sxz = -sxz;
 														EFTYPE dw = 1.0 / 4.0, dh = 1.0 / 3.0;
-														EFTYPE _dw = 1 / 4.0, _dh = 1 / 3.0;
+														EFTYPE _dw = dw, _dh = dh;
 														if (sxy > sxz) {
 															if (sxy > syz) {
-																if (sxy < 0) {
+																if (_sxy < 0) {
 																	//-z
 																	*__image = obj->getTexture(n2.x * _dw + 0 * dw, n2.y * _dh + 1 * dh);
 																}
@@ -715,7 +714,7 @@ struct Device {
 																}
 															}
 															else {
-																if (syz < 0) {
+																if (_syz < 0) {
 																	//-x
 																	*__image = obj->getTexture(n2.y * _dw + 1 * dw, n2.z * _dh + 1 * dh);
 																}
@@ -727,7 +726,7 @@ struct Device {
 														}
 														else {
 															if (sxz > syz) {
-																if (sxz < 0) {
+																if (_sxz < 0) {
 																	//-y
 																	*__image = obj->getTexture(n2.x * _dw + 2 * dw, n2.z * _dh + 0 * dh);
 																}
@@ -737,7 +736,7 @@ struct Device {
 																}
 															}
 															else {
-																if (syz < 0) {
+																if (_syz < 0) {
 																	//-x
 																	*__image = obj->getTexture(n2.y * _dw + 1 * dw, n2.z * _dh + 1 * dh);
 																}

@@ -252,7 +252,7 @@ public:
 		return *this;
 	}
 
-	Object3D& addObject() {
+	Object3D& addObject(INT anti = 1) {
 		Obj3D * obj = new Obj3D();
 
 		obj->cam = this->cams.link;
@@ -261,6 +261,8 @@ public:
 		if (this->group) {
 			this->group->objs.insertLink(obj);
 		}
+
+		((Object3D *)obj)->anti = anti;
 
 		return *((Object3D *)obj);
 	}
@@ -276,6 +278,7 @@ public:
 		if (this->group) {
 			this->group->objs.insertLink(obj);
 		}
+		((Object3D *)obj)->anti = 1;
 
 		return *((Object3D *)obj);
 
@@ -293,6 +296,7 @@ public:
 		if (this->group) {
 			this->group->objs.insertLink(obj);
 		}
+		((Object3D *)obj)->anti = 1;
 
 		return *((Object3D *)obj);
 

@@ -219,17 +219,16 @@ public:
 	//0: triangle strip
 	//1: triangle
 	int vertex_type;
+
+	int anti;
 	//add vertex to object
 	Object3D& addVert(EFTYPE x, EFTYPE y, EFTYPE z, int anti_n) {
 		VObj * v = new VObj(x, y, z);
 
+		int _anti = this->anti;
+		this->anti *= anti_n;
 		this->addVert(v);
-
-		//force normal vector to be negative
-		//so that this point is not in backface
-		if (anti_n < 0) {
-			v->n.negative();
-		}
+		this->anti = _anti;
 
 		return *this;
 	}
@@ -304,6 +303,12 @@ public:
 		}
 
 		this->verts.insertLink(v);
+
+		//force normal vector to be negative
+		//so that this point is not in backface
+		if (this->anti < 0) {
+			v->n.negative();
+		}
 
 		return *this;
 	}
