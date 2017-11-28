@@ -57,12 +57,12 @@ VOID onPaint(HWND hWnd)
 	if (enter_once < 0) {
 		return;
 	}
-	enter_once--;
+	//enter_once--;
 	// Place draw code here
 	setcolor(BLACK);
 	cleardevice();
 	//Render in device buffer
-	if (0) {
+	if (device.render_linear > 0) {
 		if (move_light > 0) {
 			device.RenderShade(man);
 		}
@@ -137,10 +137,9 @@ VOID Initialize()
 		.scale(10, 10, 10).move(0, 100, -300).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
 
 
-	man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
-		.scale(10, 10, 10).rotate(-90, -90, 180).move(-50, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t0);
+	cur_op = &man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
+		.scale(10, 10, 10).rotate(-90, -90, -90).move(-50, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t0);
 
-	return;
 	int count = 2;
 	int c = 30;
 	int i, j, k;
@@ -176,6 +175,7 @@ VOID Initialize()
 		man.endGroup();
 	}
 
+	return;
 
 	// generate teapot
 	Object3D& obj = man.addObject().renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);

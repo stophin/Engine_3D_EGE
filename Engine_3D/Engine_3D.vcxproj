@@ -41,13 +41,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>E:\ege15.04\include;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\ege15.04\lib\vc2013\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\ege15.04\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\ege15.04\lib\vc2013\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>E:\ege15.04\include;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\ege15.04\lib\vc2013\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\ege15.04\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\ege15.04\lib\vc2013\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -98,6 +98,7 @@
     <ClInclude Include="math3d\Texture.h" />
     <ClInclude Include="math3d\Trans3D.h" />
     <ClInclude Include="math3d\Vert3D.h" />
+    <ClInclude Include="raytracing\Ray.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="teapot.h" />

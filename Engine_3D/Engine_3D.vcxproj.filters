@@ -28,6 +28,9 @@
     <Filter Include="头文件\math3d">
       <UniqueIdentifier>{59d1395f-305e-4fdb-876c-d258b65feb68}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\raytracing">
+      <UniqueIdentifier>{93b9e7f9-3514-468a-b888-151e0098e24f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -83,6 +86,9 @@
     </ClInclude>
     <ClInclude Include="teapot.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="raytracing\Ray.h">
+      <Filter>头文件\raytracing</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

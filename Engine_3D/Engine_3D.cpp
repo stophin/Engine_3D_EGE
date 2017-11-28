@@ -5,7 +5,7 @@
 
 int main(int argc, char* argv[])
 {
-	EP_Init(200, 200);
+	EP_Init(320, 240);
 	//EP_Init(-1, -1);
 
 	Initialize();

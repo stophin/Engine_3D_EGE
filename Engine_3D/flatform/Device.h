@@ -952,6 +952,9 @@ struct Device {
 		FLOAT * _raytracing_depth;
 		EFTYPE trans;
 		MultiLinkList<Verts> raytracing_verts(0);
+		MultiLinkList<Verts> raytracing_verts_accumulated(1);
+		//reflection times
+		INT count;
 		//for each pixel in width * height's screen
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
@@ -981,301 +984,347 @@ struct Device {
 				_raytracing = &raytracing[index];
 				_raytracing_depth = &raytracing_depth[index];
 
-
+				raytracing_verts.clearLink();
+				raytracing_verts_accumulated.clearLink();
 				raytracing_verts.~MultiLinkList();
-				// for each triangle
-				Obj3D * obj = man.objs.link;
-				if (obj) {
-					int render_state = 0;
-					VObj * v, *v0, *v1, *vtemp;
+				raytracing_verts_accumulated.~MultiLinkList();
+				count = 3;
+				do {
+					// for each triangle
+					Obj3D * obj = man.objs.link;
+					if (obj) {
+						int render_state = 0;
+						VObj * v, *v0, *v1, *vtemp;
 
-					do {
-						// use all the verts instead 
-						// of the verts after frustrum culling
-						v = obj->verts_r.link;
-						// more than 3 verts
-						if (v && obj->verts_r.linkcount >= 3) {
-							v0 = NULL; v1 = NULL;
-							do {
-								//there must be three verts
-								if (v0 && v1) {
-									// back face culling
-									if (v->backface > 0) 
-									{
-										//NOTE: ray tracing is in camera coordinate
-										//get intersect point
-										trans = Vert3D::GetLineIntersectPointWithTriangle(v->v_c, v0->v_c, v1->v_c, ray.original, ray.direction, p);
-										if (!EP_ISZERO(trans)) {
-											Verts * verts = new Verts();
-											verts->set(p);
-											verts->trans = trans;
-											raytracing_verts.insertLink(verts);
-											__image = &verts->color;
+						do {
+							// use all the verts instead 
+							// of the verts after frustrum culling
+							v = obj->verts_r.link;
+							// more than 3 verts
+							if (v && obj->verts_r.linkcount >= 3) {
+								v0 = NULL; v1 = NULL;
+								do {
+									//there must be three verts
+									if (v0 && v1) {
+										// back face culling
+										if (v->backface > 0)
+										{
+											//NOTE: ray tracing is in camera coordinate
+											//get intersect point
+											trans = Vert3D::GetLineIntersectPointWithTriangle(v->v_c, v0->v_c, v1->v_c, ray.original, ray.direction, p);
+											if (!EP_ISZERO(trans)) {
+												Verts * verts = new Verts();
+												verts->v.set(p);
+												verts->trans = trans;
+												raytracing_verts.insertLink(verts);
+												__image = &verts->color;
 
-											n0.set(p);
-											n1.set(n0)* cam->M_1;
-											if (obj->texture_type == 0) {
-												//set texture 
-												n2.set(n1)*obj->M_1;
+												n0.set(p);
+												n1.set(n0)* cam->M_1;
+												if (obj->texture_type == 0) {
+													//set texture 
+													n2.set(n1)*obj->M_1;
 
-												//*__image = obj->getTexture(n2.y * obj->t_w, n2.z * obj->t_h);
-												//get the max projection plat£º xy or yz or xz?
-												EFTYPE sxy = n3.set(0, 0, 1) ^ (v->n), syz = n3.set(1, 0, 0) ^ (v->n), sxz = n3.set(0, 1, 0) ^ (v->n);
-												//get geometry size
-												EFTYPE mx = v->aabb[0].x - v->aabb[1].x, my = v->aabb[0].y - v->aabb[1].y, mz = v->aabb[0].z - v->aabb[1].z;
-												//EFTYPE mx = obj->aabb[0].x - obj->aabb[6].x, my = obj->aabb[0].y - obj->aabb[6].y, mz = obj->aabb[0].z - obj->aabb[6].z;
-												//EFTYPE sxy = mx * my, syz = my * mz, sxz = mx * mz;
-												if (sxy < 0) sxy = -sxy;
-												if (syz < 0) syz = -syz;
-												if (sxz < 0) sxz = -sxz;
-												if (mx < 0) mx = -mx;
-												if (my < 0) my = -my;
-												if (mz < 0) mz = -mz;
-												if (sxy > sxz) {
-													if (sxy > syz) {
-														*__image = obj->getTexture(n2.x / mx, n2.y / my);
-													}
-													else {
-														*__image = obj->getTexture(n2.y / my, n2.z / mz);
-													}
-												}
-												else {
-													if (sxz > syz) {
-														*__image = obj->getTexture(n2.x / mx, n2.z / mz);
-													}
-													else {
-														*__image = obj->getTexture(n2.y / my, n2.z / mz);
-													}
-												}
-											}
-											else if (obj->texture_type == 1) {
-												//sphere map(reflection)
-												// reflection vector
-												// R = I -  N * ( dot(I , N)* 2 )
-												//get n3 = N
-												n2.set(0, 0, 0);
-												n2 * obj->M * cam->M;
-												n3.set(n0);
-												n3 - n2;
-												//get n2 = I
-												n2.set(n0);
-												//get n2 = R
-												EFTYPE cross = n2 ^ n3;
-												n3 * (cross * 2);
-												n2 - n3;
-												// transition vector
-												// m = r + cam(0, 0, 1)
-												n3.set(cam->lookat);
-												n2 + n3;
-												n2.normalize();
+													verts->v_n.set(v->n);
 
-												n2.x = n2.x * 0.5 + 0.5;
-												n2.y = n2.y * 0.5 + 0.5;
-
-												*__image = obj->getTexture(n2.x, n2.y);
-											}
-											else if (obj->texture_type == 2) {
-												//sphere map(object texture)
-												// reflection vector
-												// R = I -  N * ( dot(I , N)* 2 )
-												//get n3 = N
-												n2.set(0, 0, 0);
-												//n2 * obj->M;
-												n3.set(n1) * obj->M_1;
-												n3 - n2;
-												//get n2 = I
-												n2.set(n1) * obj->M_1;
-												//get n2 = R
-												EFTYPE cross = n2 ^ n3;
-												n3 * (cross * 2);
-												n2 - n3;
-												// transition vector
-												// m = r + cam(0, 0, 1)
-												n3.set(cam->lookat);
-												n2 + n3;
-												n2.normalize();
-
-												n2.x = n2.x * 0.5 + 0.5;
-												n2.y = n2.y * 0.5 + 0.5;
-
-												*__image = obj->getTexture(n2.x, n2.y);
-
-											}
-											else if (obj->texture_type == 3) {
-												//sphere map(world texture)
-												// reflection vector
-												// R = I -  N * ( dot(I , N)* 2 )
-												//get n3 = N
-												n2.set(0, 0, 0);
-												n2 * obj->M;
-												n3.set(n1);
-												n3 - n2;
-												//get n2 = I
-												n2.set(n1);
-												//get n2 = R
-												EFTYPE cross = n2 ^ n3;
-												n3 * (cross * 2);
-												n2 - n3;
-												// transition vector
-												// m = r + cam(0, 0, 1)
-												n3.set(cam->lookat);
-												n2 + n3;
-												n2.normalize();
-
-												n2.x = n2.x * 0.5 + 0.5;
-												n2.y = n2.y * 0.5 + 0.5;
-
-												*__image = obj->getTexture(n2.x, n2.y);
-
-											}
-											else if (obj->texture_type == 4) {
-												//sphere map(world texture)
-												// reflection vector
-												// R = I -  N * ( dot(I , N)* 2 )
-												//get n3 = N
-												n2.set(0, 0, 0);
-												n2 * obj->M;
-												n3.set(n1);
-												n3 - n2;
-												EFTYPE sxy = n2.set(0, 0, 1) ^ n3, syz = n2.set(1, 0, 0) ^ n3, sxz = n2.set(0, 1, 0) ^ n3;
-												//get n2 = I
-												n2.set(n1);
-												//get n2 = R
-												EFTYPE cross = n2 ^ n3;
-												n3 * (cross * 2);
-												n2 - n3;
-												// transition vector
-												// m = r + cam(0, 0, 1)
-												n3.set(cam->lookat);
-												n2 + n3;
-												n2.normalize();
-
-												n2.x = n2.x * 0.5 + 0.5;
-												n2.y = n2.y * 0.5 + 0.5;
-												n2.z = n2.z * 0.5 + 0.5;
-
-												//*__image = obj->getTexture(n2.y * obj->t_w, n2.z * obj->t_h);
-												EFTYPE _sxy = sxy, _syz = syz, _sxz = sxz;
-												if (sxy < 0) sxy = -sxy;
-												if (syz < 0) syz = -syz;
-												if (sxz < 0) sxz = -sxz;
-												EFTYPE dw = 1.0 / 4.0, dh = 1.0 / 3.0;
-												EFTYPE _dw = dw, _dh = dh;
-												if (sxy > sxz) {
-													if (sxy > syz) {
-														if (_sxy < 0) {
-															//-z
-															*__image = obj->getTexture(n2.x * _dw + 0 * dw, n2.y * _dh + 1 * dh);
+													//*__image = obj->getTexture(n2.y * obj->t_w, n2.z * obj->t_h);
+													//get the max projection plat£º xy or yz or xz?
+													EFTYPE sxy = n3.set(0, 0, 1) ^ (v->n), syz = n3.set(1, 0, 0) ^ (v->n), sxz = n3.set(0, 1, 0) ^ (v->n);
+													//get geometry size
+													EFTYPE mx = v->aabb[0].x - v->aabb[1].x, my = v->aabb[0].y - v->aabb[1].y, mz = v->aabb[0].z - v->aabb[1].z;
+													//EFTYPE mx = obj->aabb[0].x - obj->aabb[6].x, my = obj->aabb[0].y - obj->aabb[6].y, mz = obj->aabb[0].z - obj->aabb[6].z;
+													//EFTYPE sxy = mx * my, syz = my * mz, sxz = mx * mz;
+													if (sxy < 0) sxy = -sxy;
+													if (syz < 0) syz = -syz;
+													if (sxz < 0) sxz = -sxz;
+													if (mx < 0) mx = -mx;
+													if (my < 0) my = -my;
+													if (mz < 0) mz = -mz;
+													if (sxy > sxz) {
+														if (sxy > syz) {
+															*__image = obj->getTexture(n2.x / mx, n2.y / my);
 														}
 														else {
-															//+z
-															*__image = obj->getTexture(n2.x * _dw + 2 * dw, n2.y * _dh + 1 * dh);
+															*__image = obj->getTexture(n2.y / my, n2.z / mz);
 														}
 													}
 													else {
-														if (_syz < 0) {
-															//-x
-															*__image = obj->getTexture(n2.y * _dw + 1 * dw, n2.z * _dh + 1 * dh);
+														if (sxz > syz) {
+															*__image = obj->getTexture(n2.x / mx, n2.z / mz);
 														}
 														else {
-															//+x
-															*__image = obj->getTexture(n2.y * _dw + 3 * dw, n2.z * _dh + 1 * dh);
+															*__image = obj->getTexture(n2.y / my, n2.z / mz);
 														}
 													}
 												}
-												else {
-													if (sxz > syz) {
-														if (_sxz < 0) {
-															//-y
-															*__image = obj->getTexture(n2.x * _dw + 2 * dw, n2.z * _dh + 0 * dh);
+												else if (obj->texture_type == 1) {
+													//sphere map(reflection)
+													// reflection vector
+													// R = I -  N * ( dot(I , N)* 2 )
+													//get n3 = N
+													n2.set(0, 0, 0);
+													n2 * obj->M * cam->M;
+													n3.set(n0);
+													n3 - n2;
+
+													verts->v_n.set(n3);
+
+													//get n2 = I
+													n2.set(n0);
+													//get n2 = R
+													EFTYPE cross = n2 ^ n3;
+													n3 * (cross * 2);
+													n2 - n3;
+													// transition vector
+													// m = r + cam(0, 0, 1)
+													n3.set(cam->lookat);
+													n2 + n3;
+													n2.normalize();
+
+													n2.x = n2.x * 0.5 + 0.5;
+													n2.y = n2.y * 0.5 + 0.5;
+
+													*__image = obj->getTexture(n2.x, n2.y);
+												}
+												else if (obj->texture_type == 2) {
+													//sphere map(object texture)
+													// reflection vector
+													// R = I -  N * ( dot(I , N)* 2 )
+													//get n3 = N
+													n2.set(0, 0, 0);
+													//n2 * obj->M;
+													n3.set(n1) * obj->M_1;
+													n3 - n2;
+
+													verts->v_n.set(n3);
+
+													//get n2 = I
+													n2.set(n1) * obj->M_1;
+													//get n2 = R
+													EFTYPE cross = n2 ^ n3;
+													n3 * (cross * 2);
+													n2 - n3;
+													// transition vector
+													// m = r + cam(0, 0, 1)
+													n3.set(cam->lookat);
+													n2 + n3;
+													n2.normalize();
+
+													n2.x = n2.x * 0.5 + 0.5;
+													n2.y = n2.y * 0.5 + 0.5;
+
+													*__image = obj->getTexture(n2.x, n2.y);
+
+												}
+												else if (obj->texture_type == 3) {
+													//sphere map(world texture)
+													// reflection vector
+													// R = I -  N * ( dot(I , N)* 2 )
+													//get n3 = N
+													n2.set(0, 0, 0);
+													n2 * obj->M;
+													n3.set(n1);
+													n3 - n2;
+
+													verts->v_n.set(n3);
+
+													//get n2 = I
+													n2.set(n1);
+													//get n2 = R
+													EFTYPE cross = n2 ^ n3;
+													n3 * (cross * 2);
+													n2 - n3;
+													// transition vector
+													// m = r + cam(0, 0, 1)
+													n3.set(cam->lookat);
+													n2 + n3;
+													n2.normalize();
+
+													n2.x = n2.x * 0.5 + 0.5;
+													n2.y = n2.y * 0.5 + 0.5;
+
+													*__image = obj->getTexture(n2.x, n2.y);
+
+												}
+												else if (obj->texture_type == 4) {
+													//sphere map(world texture)
+													// reflection vector
+													// R = I -  N * ( dot(I , N)* 2 )
+													//get n3 = N
+													n2.set(0, 0, 0);
+													n2 * obj->M;
+													n3.set(n1);
+													n3 - n2;
+
+													verts->v_n.set(n3);
+
+													EFTYPE sxy = n2.set(0, 0, 1) ^ n3, syz = n2.set(1, 0, 0) ^ n3, sxz = n2.set(0, 1, 0) ^ n3;
+													//get n2 = I
+													n2.set(n1);
+													//get n2 = R
+													EFTYPE cross = n2 ^ n3;
+													n3 * (cross * 2);
+													n2 - n3;
+													// transition vector
+													// m = r + cam(0, 0, 1)
+													n3.set(cam->lookat);
+													n2 + n3;
+													n2.normalize();
+
+													n2.x = n2.x * 0.5 + 0.5;
+													n2.y = n2.y * 0.5 + 0.5;
+													n2.z = n2.z * 0.5 + 0.5;
+
+													//*__image = obj->getTexture(n2.y * obj->t_w, n2.z * obj->t_h);
+													EFTYPE _sxy = sxy, _syz = syz, _sxz = sxz;
+													if (sxy < 0) sxy = -sxy;
+													if (syz < 0) syz = -syz;
+													if (sxz < 0) sxz = -sxz;
+													EFTYPE dw = 1.0 / 4.0, dh = 1.0 / 3.0;
+													EFTYPE _dw = dw, _dh = dh;
+													if (sxy > sxz) {
+														if (sxy > syz) {
+															if (_sxy < 0) {
+																//-z
+																*__image = obj->getTexture(n2.x * _dw + 0 * dw, n2.y * _dh + 1 * dh);
+															}
+															else {
+																//+z
+																*__image = obj->getTexture(n2.x * _dw + 2 * dw, n2.y * _dh + 1 * dh);
+															}
 														}
 														else {
-															//+y
-															*__image = obj->getTexture(n2.x * _dw + 2 * dw, n2.z * _dh + 2 * dh);
+															if (_syz < 0) {
+																//-x
+																*__image = obj->getTexture(n2.y * _dw + 1 * dw, n2.z * _dh + 1 * dh);
+															}
+															else {
+																//+x
+																*__image = obj->getTexture(n2.y * _dw + 3 * dw, n2.z * _dh + 1 * dh);
+															}
 														}
 													}
 													else {
-														if (_syz < 0) {
-															//-x
-															*__image = obj->getTexture(n2.y * _dw + 1 * dw, n2.z * _dh + 1 * dh);
+														if (sxz > syz) {
+															if (_sxz < 0) {
+																//-y
+																*__image = obj->getTexture(n2.x * _dw + 2 * dw, n2.z * _dh + 0 * dh);
+															}
+															else {
+																//+y
+																*__image = obj->getTexture(n2.x * _dw + 2 * dw, n2.z * _dh + 2 * dh);
+															}
 														}
 														else {
-															//+x
-															*__image = obj->getTexture(n2.y * _dw + 3 * dw, n2.z * _dh + 1 * dh);
+															if (_syz < 0) {
+																//-x
+																*__image = obj->getTexture(n2.y * _dw + 1 * dw, n2.z * _dh + 1 * dh);
+															}
+															else {
+																//+x
+																*__image = obj->getTexture(n2.y * _dw + 3 * dw, n2.z * _dh + 1 * dh);
+															}
 														}
 													}
 												}
-											}
 
+											}
+										}
+
+										if (obj->vertex_type == 1) {
+											v0 = NULL;
+											v1 = NULL;
+										}
+										else {
+											v0 = v1;
+											v1 = v;
 										}
 									}
-
-									if (obj->vertex_type == 1) {
-										v0 = NULL;
-										v1 = NULL;
+									else if (v0 == NULL) {
+										v0 = v;
 									}
-									else {
-										v0 = v1;
+									else if (v1 == NULL) {
 										v1 = v;
 									}
-								}
-								else if (v0 == NULL) {
-									v0 = v;
-								}
-								else if (v1 == NULL) {
-									v1 = v;
-								}
 
-								v = obj->verts_r.next(v);
-							} while (v && v != obj->verts_r.link);
-						}
-
-						//first do objects till end
-						//then do reflection and then transparent object
-						if (render_state == 0) {
-							obj = man.objs.next(obj);
-							if (!(obj && obj != man.objs.link)) {
-								obj = man.tras.link;
-								//do not render reflection points
-								render_state = 2;
-							}
-						}
-						else if (render_state == 1) {
-							obj = man.refl.next(obj);
-							if (!(obj && obj != man.refl.link)) {
-								obj = man.tras.link;
-								render_state = 2;
+									v = obj->verts_r.next(v);
+								} while (v && v != obj->verts_r.link);
 							}
 
-						}
-						else {
-							obj = man.tras.next(obj);
-							render_state++;
-							if (!(obj && obj != man.tras.link)) {
-								break;
+							//first do objects till end
+							//then do reflection and then transparent object
+							if (render_state == 0) {
+								obj = man.objs.next(obj);
+								if (!(obj && obj != man.objs.link)) {
+									obj = man.tras.link;
+									//do not render reflection points
+									render_state = 2;
+								}
 							}
-						}
-					} while (obj);
-				}
-				Verts * verts = raytracing_verts.link;
-				Verts * nearest_vert = verts;
+							else if (render_state == 1) {
+								obj = man.refl.next(obj);
+								if (!(obj && obj != man.refl.link)) {
+									obj = man.tras.link;
+									render_state = 2;
+								}
+
+							}
+							else {
+								obj = man.tras.next(obj);
+								render_state++;
+								if (!(obj && obj != man.tras.link)) {
+									break;
+								}
+							}
+						} while (obj);
+					}
+					Verts * verts = raytracing_verts.link;
+					Verts * nearest_vert = verts;
+					if (verts) {
+						do {
+
+							if (verts->trans > nearest_vert->trans) {
+								nearest_vert = verts;
+							}
+
+							verts = raytracing_verts.next(verts);
+						} while (verts && verts != raytracing_verts.link);
+					}
+					if (nearest_vert) {
+						raytracing_verts_accumulated.insertLink(nearest_vert);
+
+						//get reflection ray
+						// reflection vector
+						// R = I -  N * ( dot(I , N)* 2 )
+						//get n3 = N
+						n3.set(nearest_vert->v_n);
+						//get n2 = I
+						n2.set(ray.direction);
+						//get n2 = R
+						EFTYPE cross = n2 ^ n3;
+						n3 * (cross * 2);
+						n2 - n3;
+						//set ray
+						ray.set(nearest_vert->v, n2);
+					}
+					else {
+						break;
+					}
+					raytracing_verts.clearLink();
+					raytracing_verts.~MultiLinkList();
+
+				} while (--count > 0);
+
+				Verts * verts = raytracing_verts_accumulated.link;
+				DWORD color = BLACK;
 				if (verts) {
 					do {
+						color = Light3D::add(color, verts->color, 0.1);
 
-						if (verts->trans > nearest_vert->trans) {
-							nearest_vert = verts;
-						}
-
-						verts = raytracing_verts.next(verts);
-					} while (verts && verts != raytracing_verts.link);
+						verts = raytracing_verts_accumulated.next(verts);
+					} while (verts && verts != raytracing_verts_accumulated.link);
 				}
-				if (nearest_vert) {
-					//if (nearest_vert->trans > *_raytracing_depth) 
-					{
-						//*_raytracing_depth = nearest_vert->trans;
-						*_raytracing = nearest_vert->color;
-					}
-				}
+				*_raytracing = color;
 			}
 		}
 	}
