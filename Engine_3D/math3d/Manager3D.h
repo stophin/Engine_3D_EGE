@@ -32,15 +32,16 @@ public:
 	// 2 : reflection camera
 	int type;
 
+#define MAX_CAM3D_LINK	1
 	INT uniqueID;
-	Cam3D * prev[1];
-	Cam3D * next[1];
+	Cam3D * prev[MAX_CAM3D_LINK];
+	Cam3D * next[MAX_CAM3D_LINK];
 	void operator delete(void * _ptr){
 		if (_ptr == NULL)
 		{
 			return;
 		}
-		for (INT i = 0; i < 1; i++)
+		for (INT i = 0; i < MAX_CAM3D_LINK; i++)
 		{
 			if (((Cam3D*)_ptr)->prev[i] != NULL || ((Cam3D*)_ptr)->next[i] != NULL)
 			{
@@ -65,15 +66,16 @@ public:
 		}
 	}
 
+#define MAX_OBJ3D_LINK	2
 	INT uniqueID;
-	Obj3D * prev[2];
-	Obj3D * next[2];
+	Obj3D * prev[MAX_OBJ3D_LINK];
+	Obj3D * next[MAX_OBJ3D_LINK];
 	void operator delete(void * _ptr){
 		if (_ptr == NULL)
 		{
 			return;
 		}
-		for (INT i = 0; i < 2; i++)
+		for (INT i = 0; i < MAX_OBJ3D_LINK; i++)
 		{
 			if (((Obj3D*)_ptr)->prev[i] != NULL || ((Obj3D*)_ptr)->next[i] != NULL)
 			{
@@ -105,15 +107,16 @@ public:
 		}
 	}
 
+#define MAX_GROUP3D_LINK	1
 	INT uniqueID;
-	Group3D * prev[1];
-	Group3D * next[1];
+	Group3D * prev[MAX_GROUP3D_LINK];
+	Group3D * next[MAX_GROUP3D_LINK];
 	void operator delete(void * _ptr){
 		if (_ptr == NULL)
 		{
 			return;
 		}
-		for (INT i = 0; i < 1; i++)
+		for (INT i = 0; i < MAX_GROUP3D_LINK; i++)
 		{
 			if (((Group3D*)_ptr)->prev[i] != NULL || ((Group3D*)_ptr)->next[i] != NULL)
 			{
@@ -138,15 +141,16 @@ public:
 		}
 	}
 
+#define MAX_LGT3D_LINK	1
 	INT uniqueID;
-	Lgt3D * prev[1];
-	Lgt3D * next[1];
+	Lgt3D * prev[MAX_LGT3D_LINK];
+	Lgt3D * next[MAX_LGT3D_LINK];
 	void operator delete(void * _ptr){
 		if (_ptr == NULL)
 		{
 			return;
 		}
-		for (INT i = 0; i < 1; i++)
+		for (INT i = 0; i < MAX_LGT3D_LINK; i++)
 		{
 			if (((Lgt3D*)_ptr)->prev[i] != NULL || ((Lgt3D*)_ptr)->next[i] != NULL)
 			{

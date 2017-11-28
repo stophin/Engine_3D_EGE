@@ -81,15 +81,16 @@ public:
 	Vert3D aabb[2];
 
 	// for multilinklist
+#define MAX_VOBJ_LINK	4
 	INT uniqueID;
-	VObj * prev[4];
-	VObj * next[4];
+	VObj * prev[MAX_VOBJ_LINK];
+	VObj * next[MAX_VOBJ_LINK];
 	void operator delete(void * _ptr){
 		if (_ptr == NULL)
 		{
 			return;
 		}
-		for (INT i = 0; i < 3; i++)
+		for (INT i = 0; i < MAX_VOBJ_LINK; i++)
 		{
 			if (((VObj*)_ptr)->prev[i] != NULL || ((VObj*)_ptr)->next[i] != NULL)
 			{

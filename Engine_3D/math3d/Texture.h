@@ -72,15 +72,16 @@ public:
 	}
 
 	// for multilinklist
+#define MAX_TEXTURE_LINK	3
 	INT uniqueID;
-	Texture * prev[3];
-	Texture * next[3];
+	Texture * prev[MAX_TEXTURE_LINK];
+	Texture * next[MAX_TEXTURE_LINK];
 	void operator delete(void * _ptr){
 		if (_ptr == NULL)
 		{
 			return;
 		}
-		for (INT i = 0; i < 3; i++)
+		for (INT i = 0; i < MAX_TEXTURE_LINK; i++)
 		{
 			if (((Texture*)_ptr)->prev[i] != NULL || ((Texture*)_ptr)->next[i] != NULL)
 			{

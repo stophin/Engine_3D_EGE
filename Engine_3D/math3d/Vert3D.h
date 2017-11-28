@@ -214,6 +214,68 @@ struct Vert3D {
 		}
 		return -1;
 	}
+
+	static EFTYPE GetLineIntersectPointWithTriangle(const Vert3D& va, const Vert3D& vb, const Vert3D& vc, const Vert3D& vo, const Vert3D& vd, Vert3D& p) {
+		EFTYPE beta, rama, tran;
+		EFTYPE M, M_1;
+		//AB = C
+		//==>
+		//|xa - xb, xa - xc, xd||b|   |xa - xo|
+		//|ya - yb, ya - yc, yd||r| = |ya - ye|
+		//|za - zb, za - zc, zd||t|   |za - ze|
+		//==>
+		//|a d g||b|   |j|
+		//|b e h||r| = |k|
+		//|c f i||t|   |l|
+		//Cramer's rule
+		//M = |A| = a(ei - hf) + b(gf - di) + c(dh - eg)
+		//b =  |xa - xe, xa - xc, xd|
+		//     |ya - ye, ya - yc, yd|
+		//     |za - ze, za - zc, zd| / |A|
+		//==>(j(ei - hf) + k(gf - di) + l(dh - eg)) / M
+		//r =  |xa - xb, xa - xe, xd|
+		//     |ya - yb, ya - ye, yd|
+		//     |za - zb, za - ze, zd| / |A|
+		//==>(i(ak - jb) + h(jc - al) + g(bl - kc)) / M
+		//t =  |xa - xb, xa - xc, xa - xe|
+		//     |ya - yb, ya - yc, ya - ye|
+		//     |za - zb, za - zc, za - ze| / |A|
+		//==>-(f(ak - jb) + e(jc - al) + d(bl - kc)) / M
+		EFTYPE a = va.x - vb.x, b = va.y - vb.y, c = va.z - vb.z;
+		EFTYPE d = va.x - vc.x, e = va.y - vc.y, f = va.z - vc.z;
+		EFTYPE g = vd.x, h = vd.y, i = vd.z;
+		EFTYPE j = va.x - vo.x, k = va.y - vo.y, l = va.z - vo.z;
+		//make sure M is not zero
+		if (EP_ISZERO(a) && EP_ISZERO(b) && EP_ISZERO(c) /*||
+			EP_ISZERO(d) || EP_ISZERO(e) || EP_ISZERO(f) ||
+			EP_ISZERO(g) || EP_ISZERO(h) || EP_ISZERO(i) ||
+			EP_ISZERO(j) || EP_ISZERO(k) || EP_ISZERO(l)*/) {
+			return 0;
+		}
+
+		EFTYPE temp1 = e * i - h * f, temp2 = a * k - j * b,
+			temp3 = g * f - d * i, temp4 = j * c - a * l,
+			temp5 = d * h - e * g, temp6 = b * l - k * c;
+		M = a * (temp1)+b * (temp3)+c * (temp5);
+		M_1 = 1.0 / M;
+		tran = -(f * (temp2)+e * (temp4)+d * (temp6)) * M_1;
+		if (tran < 0 || tran > 1000) {
+			//return 0;
+		}
+		rama = (i * (temp2)+h * (temp4)+g * (temp6)) * M_1;
+		if (rama < 0 || rama > 1) {
+			return 0;
+		}
+		beta = (j * (temp1)+k * (temp3)+l * (temp5)) * M_1;
+		if (beta < 0 || beta > 1 - rama) {
+			return 0;
+		}
+		p.set(vd);
+		p * tran;
+		p + vo;
+		p.w = 1;
+		return tran;
+	}
 };
 
 #endif
