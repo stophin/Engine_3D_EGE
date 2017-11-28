@@ -943,11 +943,15 @@ struct Device {
 		memset(raytracing, 0, width * height * sizeof(DWORD));
 		memset(raytracing_depth, 0, width * height * sizeof(FLOAT));
 
+		Lgt3D * lgt;
+		EFTYPE f;
 		Vert3D n0, n1, n2;
 		EFTYPE z;
 		Ray ray;
 		Vert3D p;
 		INT index;
+		EFTYPE _i, _j;
+		INT _index;
 		DWORD * _raytracing;
 		FLOAT * _raytracing_depth;
 		EFTYPE trans;
@@ -988,7 +992,7 @@ struct Device {
 				raytracing_verts_accumulated.clearLink();
 				raytracing_verts.~MultiLinkList();
 				raytracing_verts_accumulated.~MultiLinkList();
-				count = 3;
+				count = 2;
 				do {
 					// for each triangle
 					Obj3D * obj = man.objs.link;
@@ -1228,6 +1232,38 @@ struct Device {
 													}
 												}
 
+												//calculate sumption of light factors
+												lgt = man.lgts.link;
+												f = 0;
+												if (lgt) {
+													do {
+														f += lgt->getFactor(v->n_r, n0);
+
+														if (render_light < 0) {
+															break;
+														}
+
+														lgt = man.lgts.next(lgt);
+													} while (lgt && lgt != man.lgts.link);
+												}
+												*__image = Light3D::multi(*__image, f);
+
+												//step5: render shadow map
+												lgt = man.lgts.link;
+												n2.set(n1) * lgt->M_1;
+												cam->project(n2);
+												_j = (int)(n2.x * cam->scale_w + cam->offset_w), _i = (int)(n2.y * cam->scale_h + cam->offset_h);
+
+												if (!(_i < 0 || _i > height - 1 || _j < 0 || _j > width - 1)) {
+													_index = _i * width + _j;
+													__shade = &shade[_index];
+
+													//shadow
+													if (EP_GTZERO(*__shade - n2.z - 1e-1)) {
+														*__image = Light3D::multi(*__image, f / 5);
+													}
+
+												}
 											}
 										}
 

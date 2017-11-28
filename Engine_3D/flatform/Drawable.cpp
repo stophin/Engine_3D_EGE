@@ -175,8 +175,6 @@ VOID Initialize()
 		man.endGroup();
 	}
 
-	return;
-
 	// generate teapot
 	Object3D& obj = man.addObject().renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
 	int normal = -1;
@@ -193,6 +191,8 @@ VOID Initialize()
 	}
 	obj.move(50, -30, 0).scale(2, 2, 2).rotate(-90, 30, 0).setTexture(tman, t9, 2).setUV(0, -300);// .setTexture(tman, t7, 1);
 	cur_op = &obj;
+
+	return;
 
 	//for (int i = 0; i < 1; i++) {
 	//	for (int j = 0; j < 1; j++) {
