@@ -110,6 +110,9 @@
     <ClCompile Include="common\MultiLinkList.cpp">
       <Filter>源文件\common</Filter>
     </ClCompile>
+    <ClCompile Include="raytracing\Ray.cpp">
+      <Filter>头文件\raytracing</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="math3d\Light3D.h">

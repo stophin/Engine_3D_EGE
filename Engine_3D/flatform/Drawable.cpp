@@ -132,24 +132,58 @@ VOID Initialize()
 	INT t10 = tman.addTexture("10.jpg");
 	INT t11 = tman.addTexture("11.jpg");
 
-
-	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
-		.scale(10, 10, 10).move(0, 100, -300).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
-
-
-	cur_op = &man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
-		.scale(10, 10, 10).rotate(-90, -90, -90).move(-50, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t0);
-
 	int count = 2;
 	int c = 30;
 	int i, j, k;
 	EFTYPE r = 10;
 	EFTYPE x_1, x_2, r_1, r_2, p_1 = PI / ((EFTYPE)c), p_2 = 2 * PI / ((EFTYPE)c);
 
-	//man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
-	//	.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
-	//	.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
-	//	.scale(5, 5, 5).move(100, 10, 50).setColor(RED).setLineColor(BLUE).setTexture(tman, t2);
+	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
+		.scale(10, 10, 10).move(0, 100, -300).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
+
+	cur_op = &man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
+		.scale(10, 10, 10).rotate(-90, -90, -90).move(-50, -80, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t0);
+
+	cur_op = &man.addReflectionObject(1000).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
+		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
+		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
+		.scale(5, 5, 5).move(-15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t3);
+
+
+	return;
+
+	c = 30;
+	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
+	count = 1;
+	for (k = 0; k < count; k++) {
+		EFTYPE x = rand() % 300 - 150;
+		EFTYPE z = rand() % 300 - 150;
+		EFTYPE y = rand() % 100;
+		Group3D& gp = man.addGroup();
+		for (i = 0; i < c; i++) {
+			x_1 = r * cos(i * p_1);
+			r_1 = r * sin(i * p_1);
+			x_2 = r * cos((i + 1) * p_1);
+			r_2 = r * sin((i + 1) * p_1);
+			Object3D& obj = man.startGroup(gp.uniqueID).addReflectionObject(1000).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
+			for (j = 1; j < c; j++) {
+				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
+					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
+			}
+			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(10, 10, 10).move(x, y, z).rotate(0, 0, 0)
+				.setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 3);
+
+			//cur_op = &obj;
+		}
+		man.endGroup();
+	}
+
+	return;
+
+
+	man.addReflectionObject(1000).addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
+		.scale(10, 10, 10).rotate(90, 90, 0).move(200, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t1);
+
 	c = 30;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
 	count = 1;
@@ -175,6 +209,7 @@ VOID Initialize()
 		man.endGroup();
 	}
 
+	return;
 	// generate teapot
 	Object3D& obj = man.addObject().renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
 	int normal = -1;
@@ -183,7 +218,7 @@ VOID Initialize()
 	for (int i = 0; i <= g_teapotPositionNum - 3; i += 3) {
 		vertex_count++;
 		obj.addIndice(g_teapotPositions[i], g_teapotPositions[i + 1], g_teapotPositions[i + 2]);
-			//,g_teapotNormals[i], g_teapotNormals[i + 1], g_teapotNormals[i + 2]);
+		//,g_teapotNormals[i], g_teapotNormals[i + 1], g_teapotNormals[i + 2]);
 	}
 	for (int i = 0; i <= g_teapotIndicesNum - 3; i += 3) {
 		triangle_count++;
@@ -194,6 +229,11 @@ VOID Initialize()
 
 	return;
 
+	//man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
+	//	.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
+	//	.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
+	//	.scale(5, 5, 5).move(100, 10, 50).setColor(RED).setLineColor(BLUE).setTexture(tman, t2);
+	
 	//for (int i = 0; i < 1; i++) {
 	//	for (int j = 0; j < 1; j++) {
 	//		man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
@@ -222,39 +262,7 @@ VOID Initialize()
 		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
 		.scale(5, 5, 5).move(-15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t11, 4);
 
-	c = 50;
-	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
-	count = 1;
-	for (k = 0; k < count; k++) {
-		EFTYPE x = rand() % 300 - 150;
-		EFTYPE z = rand() % 300 - 150;
-		EFTYPE y = rand() % 100;
-		Group3D& gp = man.addGroup();
-		for (i = 0; i < c; i++) {
-			x_1 = r * cos(i * p_1);
-			r_1 = r * sin(i * p_1);
-			x_2 = r * cos((i + 1) * p_1);
-			r_2 = r * sin((i + 1) * p_1);
-			Object3D& obj = man.startGroup(gp.uniqueID).addTransparentObject(1.01).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
-			for (j = 1; j < c; j++) {
-				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
-					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
-			}
-			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(10, 10, 10).move(x, y, z).rotate(0, 0, 0)
-				.setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 1);
 
-			//cur_op = &obj;
-		}
-		man.endGroup();
-	}
-
-	man.addTransparentObject(1.01).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
-		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
-		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
-		.scale(0.5, 0.5, 0.5).move(-15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t3);
-
-	man.addReflectionObject(1000).addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
-		.scale(10, 10, 10).rotate(90, 90, 0).move(200, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t1);
 
 	for (i = 0; i < c; i++) {
 		x_1 = r * cos(i * p_1);
