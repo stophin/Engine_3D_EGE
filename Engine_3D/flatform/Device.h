@@ -20,9 +20,10 @@ struct Device {
 	DWORD *raytracing;//Ray Tracing buffer
 
 	INT draw_line = 1;
-	INT render_linear = 1;
+	INT render_linear = -1;
 	INT render_proj = -1;
 	INT render_light = -1;
+	INT render_raytracing = -1;
 
 	EPoint e, s, v, c;
 	Vert3D p;

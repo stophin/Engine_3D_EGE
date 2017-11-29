@@ -54,15 +54,45 @@ VOID onPaint(HWND hWnd)
 		return;
 	}
 	isrefresh = -1;
-	if (enter_once < 0) {
-		return;
-	}
-	//enter_once--;
 	// Place draw code here
 	setcolor(BLACK);
 	cleardevice();
 	//Render in device buffer
-	if (device.render_linear > 0) {
+	if (device.render_raytracing > 0) {
+		if (enter_once < 0) {
+			//Blt buffer to window buffer
+			DWORD * _tango = EP_GetImageBuffer();
+			int i, j, index;
+			for (i = 0; i < device.width; i++) {
+				for (j = 0; j < device.height; j++){
+					index = j *  device.width + i;
+					if (device.raytracing[index] != BLACK)
+					{
+						//::SetPixel(memHDC, i, j, device.tango[index]);
+						_tango[index] = device.raytracing[index];
+					}
+				}
+			}
+			return;
+		}
+		enter_once = -1;
+		device.RenderRayTracing(man);
+		//Blt buffer to window buffer
+		DWORD * _tango = EP_GetImageBuffer();
+		int i, j, index;
+		for (i = 0; i < device.width; i++) {
+			for (j = 0; j < device.height; j++){
+				index = j *  device.width + i;
+				if (device.raytracing[index] != BLACK)
+				{
+					//::SetPixel(memHDC, i, j, device.tango[index]);
+					_tango[index] = device.raytracing[index];
+				}
+			}
+		}
+	}
+	else  {
+		enter_once = 1;
 		if (move_light > 0) {
 			device.RenderShade(man);
 		}
@@ -82,23 +112,6 @@ VOID onPaint(HWND hWnd)
 				}
 			}
 		}
-	}
-	else  {
-		device.RenderRayTracing(man);
-		//Blt buffer to window buffer
-		DWORD * _tango = EP_GetImageBuffer();
-		int i, j, index;
-		for (i = 0; i < device.width; i++) {
-			for (j = 0; j < device.height; j++){
-				index = j *  device.width + i;
-				if (device.raytracing[index] != BLACK)
-				{
-					//::SetPixel(memHDC, i, j, device.tango[index]);
-					_tango[index] = device.raytracing[index];
-				}
-			}
-		}
-
 	}
 
 	//BitBlt(hdc, 0, 0, nWidth, nHeight, memHdc, 0, 0, SRCCOPY);
@@ -137,6 +150,76 @@ VOID Initialize()
 	int i, j, k;
 	EFTYPE r = 10;
 	EFTYPE x_1, x_2, r_1, r_2, p_1 = PI / ((EFTYPE)c), p_2 = 2 * PI / ((EFTYPE)c);
+	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
+		.scale(10, 10, 10).move(0, 100, -300).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
+
+	for (int i = 0; i < 5; i++) {
+		for (int j = 0; j < 5; j++) {
+			cur_op = &man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
+				.scale(2, 2, 2).rotate(0, 0, 180).move(100 - 40 * j, -40, 100 - 40 * i).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t0);
+		}
+	}
+
+	c = 10;
+	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
+	count = 1;
+	for (k = 0; k < count; k++) {
+		//EFTYPE x = rand() % 300;
+		//EFTYPE z = rand() % 300;
+		//EFTYPE y = rand() % 100;
+		EFTYPE x = -20, y = 0, z = 0;
+		Group3D& gp = man.addGroup();
+		for (i = 0; i < c; i++) {
+			x_1 = r * cos(i * p_1);
+			r_1 = r * sin(i * p_1);
+			x_2 = r * cos((i + 1) * p_1);
+			r_2 = r * sin((i + 1) * p_1);
+			Object3D& obj = man.startGroup(gp.uniqueID).addReflectionObject(1000).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
+			for (j = 1; j < c; j++) {
+				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
+					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
+			}
+			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(2, 2, 2).move(x, y, z).rotate(0, 0, 0)
+				.setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 3);
+
+			//cur_op = &obj;
+		}
+		man.endGroup();
+	}
+
+	c = 10;
+	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
+	count = 1;
+	for (k = 0; k < count; k++) {
+		//EFTYPE x = rand() % 300;
+		//EFTYPE z = rand() % 300;
+		//EFTYPE y = rand() % 100;
+		EFTYPE x = 20, y = 0, z = 0;
+		Group3D& gp = man.addGroup();
+		for (i = 0; i < c; i++) {
+			x_1 = r * cos(i * p_1);
+			r_1 = r * sin(i * p_1);
+			x_2 = r * cos((i + 1) * p_1);
+			r_2 = r * sin((i + 1) * p_1);
+			Object3D& obj = man.startGroup(gp.uniqueID).addTransparentObject(1000).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
+			for (j = 1; j < c; j++) {
+				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
+					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
+			}
+			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(2, 2, 2).move(x, y, z).rotate(0, 0, 0)
+				.setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 3);
+
+			//cur_op = &obj;
+		}
+		man.endGroup();
+	}
+
+	return;
+
+	cur_op = &man.addObject(-1).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
+		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
+		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
+		.scale(5, 5, 5).move(-15, 0, 0).setColor(RED).setLineColor(BLUE);
 
 	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.scale(10, 10, 10).move(0, 100, -300).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
@@ -178,7 +261,7 @@ VOID Initialize()
 	man.addReflectionObject(1000).addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
 		.scale(10, 10, 10).rotate(90, 90, 0).move(200, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t1);
 
-	c = 30;
+	c = 10;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
 	count = 1;
 	for (k = 0; k < count; k++) {
@@ -197,13 +280,12 @@ VOID Initialize()
 					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
 			}
 			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(10, 10, 10).move(x, y, z).rotate(0, 0, 0)
-				.setColor(GREEN).setLineColor(RED).setTexture(tman, t10, 2);
+				.setColor(GREEN).setLineColor(RED).setTexture(tman, t10, 3);
 			cur_op = &obj;
 		}
 		man.endGroup();
 	}
 
-	return;
 	// generate teapot
 	Object3D& obj = man.addObject().renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
 	int normal = -1;
@@ -244,17 +326,6 @@ VOID Initialize()
 	//	.rotate(-90, -90, -90).move(-100, -20, 0).setColor(LIGHTGRAY).setLineColor(RED);
 
 
-	for (int i = 0; i < 15; i++) {
-		for (int j = 0; j < 15; j++) {
-			man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
-				.scale(4, 2, 2).rotate(0, 0, 180).move(300 - 80 * j, -40, 300 - 40 * i).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t0);
-		}
-	}
-
-	man.addObject(-1).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
-		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
-		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
-		.scale(5, 5, 5).move(-15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t11, 4);
 
 
 
@@ -622,6 +693,9 @@ VOID onKeyDown(WPARAM wParam)
 	case 'K':
 		device.render_light = -device.render_light;
 		break;
+	case 'V':
+		device.render_raytracing = -device.render_raytracing;
+		break;
 	case 'A':
 		obj->move(1, 0, 0);
 		break;
@@ -683,9 +757,6 @@ VOID onKeyDown(WPARAM wParam)
 				vobj = vobj->next[1];
 			} while (vobj && vobj != cur_op);
 		}
-		break;
-	case 'V':
-		obj->rotate(0, 0, -1);
 		break;
 	case 'B':
 		DEBUG_MODE = DEBUG_MODE >> 1;
