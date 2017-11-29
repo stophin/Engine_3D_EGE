@@ -144,15 +144,7 @@ VOID Initialize()
 	cur_op = &man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
 		.scale(10, 10, 10).rotate(-90, -90, -90).move(-50, -80, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t0);
 
-	cur_op = &man.addReflectionObject(1000).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
-		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
-		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
-		.scale(5, 5, 5).move(-15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t3);
-
-
-	return;
-
-	c = 30;
+	c = 10;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
 	count = 1;
 	for (k = 0; k < count; k++) {
@@ -178,8 +170,10 @@ VOID Initialize()
 		man.endGroup();
 	}
 
-	return;
-
+	cur_op = &man.addTransparentObject(0.01).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
+		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
+		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
+		.scale(2, 2, 2).move(20, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t3);
 
 	man.addReflectionObject(1000).addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
 		.scale(10, 10, 10).rotate(90, 90, 0).move(200, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t1);
@@ -188,7 +182,7 @@ VOID Initialize()
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
 	count = 1;
 	for (k = 0; k < count; k++) {
-		EFTYPE x = rand() % 300 - 150;
+		EFTYPE x = rand() % 300 - 300;
 		EFTYPE z = rand() % 300 - 150;
 		EFTYPE y = rand() % 100;
 		Group3D& gp = man.addGroup();

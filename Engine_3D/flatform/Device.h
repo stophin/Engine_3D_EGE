@@ -417,7 +417,6 @@ struct Device {
 				}
 				else {
 					obj = man.tras.next(obj);
-					render_state++;
 					if (!(obj && obj != man.tras.link)) {
 						break;
 					}
@@ -715,7 +714,6 @@ struct Device {
 				}
 				else {
 					obj = man.tras.next(obj);
-					render_state++;
 					if (!(obj && obj != man.tras.link)) {
 						//render transparent after all transparent objects were done
 						index = 0;
@@ -805,7 +803,7 @@ struct Device {
 						VObj * v, *v0, *v1, *vtemp;
 
 						do {
-							// when the rat is reflection or refraction
+							// when the ray is reflection or refraction
 							// then use all the verts instead 
 							// of the verts after frustrum culling
 							if (1 == ray.type || 2 == ray.type) {
@@ -822,14 +820,18 @@ struct Device {
 									//there must be three verts
 									if (v0 && v1) {
 										// back face culling
-										// when the rat is reflection or refraction
+										// when the ray is reflection or refraction
 										// then do not need back face culling
 										if (v->backface > 0 || 1 == ray.type || 2 == ray.type)
 										{
 											//NOTE: ray tracing is in camera coordinate
 											//get intersect point
 											trans = Vert3D::GetLineIntersectPointWithTriangle(v->v_c, v0->v_c, v1->v_c, ray.original, ray.direction, p);
-											if (!EP_ISZERO(trans)) {
+											//normal: trans is not zero
+											//reflection or refraction: trans is bigger than zero
+											if ((0 == ray.type && !EP_ISZERO(trans)) ||
+												(1 == ray.type && trans > 0) ||
+												(2 == ray.type && trans > 0)) {
 												Verts * verts = new Verts();
 												if (verts) {
 													verts->v.set(p);
@@ -923,7 +925,6 @@ struct Device {
 							}
 							else {
 								obj = man.tras.next(obj);
-								render_state++;
 								if (!(obj && obj != man.tras.link)) {
 									break;
 								}
@@ -982,7 +983,7 @@ struct Device {
 							//get n3 = T
 							EFTYPE cross = n2 ^ n3;
 							//sin(oL) <= nT / nL, that is nT > nL
-							EFTYPE nL = 0.5, nT = 0.8;
+							EFTYPE nL = 0.2, nT = 0.4;
 							EFTYPE nL_nT = nL / nT;
 							EFTYPE pN = nL_nT * cross - sqrt(1 - nL_nT * nL_nT * (1 - cross * cross));
 							n3 * pN;
@@ -1013,7 +1014,6 @@ struct Device {
 						verts = raytracing_verts_accumulated.next(verts);
 					} while (verts && verts != raytracing_verts_accumulated.link);
 				}
-				raytracing_verts.~MultiLinkList();
 				raytracing_verts_accumulated.~MultiLinkList();
 
 				*_raytracing = color;

@@ -220,7 +220,7 @@ struct Vert3D {
 		EFTYPE M, M_1;
 		//AB = C
 		//==>
-		//|xa - xb, xa - xc, xd||b|   |xa - xo|
+		//|xa - xb, xa - xc, xd||b|   |xa - xe|
 		//|ya - yb, ya - yc, yd||r| = |ya - ye|
 		//|za - zb, za - zc, zd||t|   |za - ze|
 		//==>
@@ -253,6 +253,7 @@ struct Vert3D {
 			return 0;
 		}
 
+		//beta > 0 && rama > 0 && beta + rama < 1
 		EFTYPE temp1 = e * i - h * f, temp2 = a * k - j * b,
 			temp3 = g * f - d * i, temp4 = j * c - a * l,
 			temp5 = d * h - e * g, temp6 = b * l - k * c;
