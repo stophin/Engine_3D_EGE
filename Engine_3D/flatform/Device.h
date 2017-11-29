@@ -787,6 +787,7 @@ struct Device {
 					n1.set(cam->lookat) * cam->znear;
 					n1 + n2;
 					n1.w = 1;
+					n1.normalize();
 					//set ray
 					ray.set(n0, n1);
 					//set ray type
@@ -795,7 +796,7 @@ struct Device {
 				index = y * width + x;
 				_raytracing = &raytracing[index];
 
-				count = 2;
+				count = 4;
 				do {
 					// for each triangle
 					Obj3D * obj = man.objs.link;
@@ -833,6 +834,7 @@ struct Device {
 											if ((0 == ray.type && !EP_ISZERO(trans)) ||
 												(1 == ray.type && trans > 0) ||
 												(2 == ray.type && trans > 0)) {
+											//if (!EP_ISZERO(trans)) {
 												Verts * verts = new Verts();
 												if (verts) {
 													verts->v.set(p);
@@ -937,8 +939,10 @@ struct Device {
 					Verts * nearest_vert = verts;
 					if (verts) {
 						do {
-
-							if (verts->trans > nearest_vert->trans) {
+							if ((0 == ray.type && verts->trans > nearest_vert->trans) ||
+								(1 == ray.type && verts->trans < nearest_vert->trans) ||
+								(2 == ray.type && verts->trans < nearest_vert->trans)) {
+							//if (verts->trans > nearest_vert->trans) {
 								nearest_vert = verts;
 							}
 
@@ -962,11 +966,12 @@ struct Device {
 							//get n3 = N
 							n3.set(nearest_vert->v_n);
 							//get n2 = I
-							n2.set(ray.direction).negative();
+							n2.set(ray.direction);// .negative();
 							//get n2 = R
 							EFTYPE cross = n2 ^ n3;
 							n3 * (cross * 2);
 							n2 - n3;
+							n2.normalize();
 							//set ray
 							ray.set(nearest_vert->v, n2);
 							//set ray type
@@ -980,7 +985,7 @@ struct Device {
 							//get n3 = N
 							n3.set(nearest_vert->v_n);
 							//get n2 = L
-							n2.set(ray.direction).negative();
+							n2.set(ray.direction);// .negative();
 							//get n3 = T
 							EFTYPE cross = n2 ^ n3;
 							//sin(oL) <= nT / nL, that is nT > nL
@@ -990,6 +995,7 @@ struct Device {
 							n3 * pN;
 							n2 * nL_nT;
 							n3 - n2;
+							n3.normalize();
 							//set ray
 							ray.set(nearest_vert->v, n3);
 							//set ray type
@@ -1007,7 +1013,7 @@ struct Device {
 				DWORD color = BLACK;
 				if (verts) {
 					do {
-						if (0 == verts->type) 
+						//if (0 == verts->type) 
 						{
 							color = Light3D::add(color, verts->color, 0.1);
 						}
