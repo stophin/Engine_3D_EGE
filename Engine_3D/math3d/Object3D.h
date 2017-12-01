@@ -184,6 +184,9 @@ public:
 	//v: vertex
 	//v_n: get the normal vector(camera coordinate)
 	DWORD getTextureColor(Vert3D& n0, Vert3D& n1, Vert3D& n2, Vert3D& n3, VObj * v, Vert3D* v_n = NULL) {
+		if (NULL == this->cam) {
+			return this->color;
+		}
 		Object3D * obj = this;
 		DWORD color;
 		DWORD * __image = &color;

@@ -802,6 +802,7 @@ struct Device {
 				index = y * width + x;
 				_raytracing = &raytracing[index];
 
+				Lgt3D * cur_lgt = man.lgts.link;
 				count = 4;
 				do {
 					// for each triangle
@@ -848,40 +849,49 @@ struct Device {
 													raytracing_verts.insertLink(verts);
 													__image = &verts->color;
 
-													n0.set(p);
-													n1.set(n0)* cam->M_1;
-													//get texture and normal vector at the same time
-													*__image = obj->getTextureColor(n0, n1, n2, n3, v, &verts->v_n);
-
-													//normal verts
-													if (0 == render_state) {
-														//calculate sumption of light factors
-														lgt = man.lgts.link;
-														f = 0;
-														if (lgt) {
-															do {
-																f += lgt->getFactor(v->n_r, n0);
-
-																if (render_light < 0) {
-																	break;
-																}
-
-																lgt = man.lgts.next(lgt);
-															} while (lgt && lgt != man.lgts.link);
-														}
-														*__image = Light3D::multi(*__image, f);
-														//set type normal
+													//shadow test set color to black or white
+													//then stop ray tracing
+													if (3 == ray.type) {
+														*__image = BLACK;
 														verts->type = 0;
+														break;
 													}
-													//reflection verts
-													else if (1 == render_state) {
-														//set type reflection
-														verts->type = 1;
-													}
-													//transparent verts
-													else if (2 == render_state) {
-														//set type transparent
-														verts->type = 2;
+													else {
+														n0.set(p);
+														n1.set(n0)* cam->M_1;
+														//get texture and normal vector at the same time
+														*__image = obj->getTextureColor(n0, n1, n2, n3, v, &verts->v_n);
+
+														//normal verts
+														if (0 == render_state) {
+															//calculate sumption of light factors
+															lgt = man.lgts.link;
+															f = 0;
+															if (lgt) {
+																do {
+																	f += lgt->getFactor(v->n_r, n0);
+
+																	if (render_light < 0) {
+																		break;
+																	}
+
+																	lgt = man.lgts.next(lgt);
+																} while (lgt && lgt != man.lgts.link);
+															}
+															*__image = Light3D::multi(*__image, f);
+															//set type normal
+															verts->type = 0;
+														}
+														//reflection verts
+														else if (1 == render_state) {
+															//set type reflection
+															verts->type = 1;
+														}
+														//transparent verts
+														else if (2 == render_state) {
+															//set type transparent
+															verts->type = 2;
+														}
 													}
 												}
 											}
@@ -957,8 +967,28 @@ struct Device {
 
 						//normal verts
 						if (0 == nearest_vert->type) {
-							//stop ray tracing
-							break;
+							//get shadow test ray
+							if (cur_lgt) {
+								n2.set(0, 0, 0, 1) * cur_lgt->M;
+								n2 - nearest_vert->v;
+								n2.normalize();
+								ray.set(nearest_vert->v, n2);
+								//set ray type
+								ray.type = 3;
+
+								//shadow test does not affect ray tracing times
+								count++;
+
+								cur_lgt = man.lgts.next(cur_lgt);
+								if (!(cur_lgt && cur_lgt == man.lgts.link)) {
+									//stop ray tracing after test all lights
+									break;
+								}
+							}
+							else {
+								//stop ray tracing
+								break;
+							}
 						}
 						//reflection verts
 						else if (1 == nearest_vert->type) {

@@ -126,6 +126,7 @@ public:
 	//0: normal
 	//1: reflection
 	//2: refraction
+	//3: shadow test ray
 	INT type;
 
 	//r(t) = o + t * d, t >= 0
