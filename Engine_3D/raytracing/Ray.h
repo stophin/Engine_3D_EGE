@@ -35,7 +35,7 @@ public:
 };
 
 typedef unsigned char UMAP;
-#define POOL_MAX	10
+#define POOL_MAX	50
 #define MAP_SHIFT	8
 #define MAP_MASK	0xFF
 #define GET_MAP_SIZE(x) (x / MAP_SHIFT + 1)
@@ -46,6 +46,10 @@ public:
 		pool = new Verts[size];
 		mapsize = GET_MAP_SIZE(size);
 		map = new UMAP[mapsize];
+		for (int i = 0; i < mapsize; i++) {
+			map[i] = MAP_MASK;
+		}
+		used = 0;
 	}
 	~VertsPool() {
 		if (pool) {
@@ -61,6 +65,7 @@ public:
 	UMAP * map;
 	INT size;
 	INT mapsize;
+	INT used;
 
 	Verts * get() {
 		int i, j, index;
@@ -69,6 +74,7 @@ public:
 				for (j = 0; j < MAP_SHIFT && index < this->size; j++, index++) {
 					if (this->map[i] & (0x01 << j)) {
 						this->map[i] &= ~(0x01 << j);
+						used++;
 						return &this->pool[index];
 					}
 				}
@@ -87,9 +93,12 @@ public:
 				i = index / MAP_SHIFT;
 				j = index - i * MAP_SHIFT;
 				this->map[i] |= (0x01 << j);
+				used--;
 				return;
 			}
 		}
+		o = NULL;
+		return;
 	}
 };
 

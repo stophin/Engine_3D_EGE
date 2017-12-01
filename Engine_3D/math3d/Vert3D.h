@@ -261,7 +261,7 @@ struct Vert3D {
 		M_1 = 1.0 / M;
 		tran = -(f * (temp2)+e * (temp4)+d * (temp6)) * M_1;
 		if (tran < 0 || tran > 1000) {
-			//return 0;
+			return 0;
 		}
 		rama = (i * (temp2)+h * (temp4)+g * (temp6)) * M_1;
 		if (rama < 0 || rama > 1) {

@@ -9,7 +9,6 @@
 
 #include "../common/MultiLinkList.h"
 #include "../math3d/Texture.h"
-#include "../raytracing/Ray.h"
 
 typedef class VObj VObj;
 class VObj {
@@ -178,7 +177,13 @@ public:
 		return texture[_u + _v * t_w];
 	}
 
-	DWORD getTextureColor(Vert3D& n0, Vert3D& n1, Vert3D& n2, Vert3D& n3, VObj * v, Verts * pverts = NULL) {
+	//n0: camera coordinate
+	//n1: word coordinate
+	//n2: temp vector
+	//n3: temp vector
+	//v: vertex
+	//v_n: get the normal vector(camera coordinate)
+	DWORD getTextureColor(Vert3D& n0, Vert3D& n1, Vert3D& n2, Vert3D& n3, VObj * v, Vert3D* v_n = NULL) {
 		Object3D * obj = this;
 		DWORD color;
 		DWORD * __image = &color;
@@ -186,8 +191,8 @@ public:
 			//set texture 
 			n2.set(n1)*obj->M_1;
 
-			if (pverts) {
-				pverts->v_n.set(v->n_r);
+			if (v_n) {
+				v_n->set(v->n_r);
 			}
 
 			//*__image = obj->getTexture(n2.y * obj->t_w, n2.z * obj->t_h);
@@ -230,8 +235,8 @@ public:
 			n3.set(n0);
 			n3 - n2;
 
-			if (pverts) {
-				pverts->v_n.set(n3);
+			if (v_n) {
+				v_n->set(n3);
 			}
 
 			//get n2 = I
@@ -261,8 +266,8 @@ public:
 			n3.set(n1) * obj->M_1;
 			n3 - n2;
 
-			if (pverts) {
-				pverts->v_n.set(n3);
+			if (v_n) {
+				v_n->set(n3)* obj->M * cam->M;
 			}
 
 			//get n2 = I
@@ -293,8 +298,8 @@ public:
 			n3.set(n1);
 			n3 - n2;
 
-			if (pverts) {
-				pverts->v_n.set(n3);
+			if (v_n) {
+				v_n->set(n3) *cam->M;
 			}
 
 			//get n2 = I
@@ -325,8 +330,8 @@ public:
 			n3.set(n1);
 			n3 - n2;
 
-			if (pverts) {
-				pverts->v_n.set(n3);
+			if (v_n) {
+				v_n->set(n3);
 			}
 
 			EFTYPE sxy = n2.set(0, 0, 1) ^ n3, syz = n2.set(1, 0, 0) ^ n3, sxz = n2.set(0, 1, 0) ^ n3;

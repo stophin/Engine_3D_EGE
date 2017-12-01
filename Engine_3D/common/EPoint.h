@@ -44,6 +44,9 @@ typedef bool	EBTYPE;
 #define EP_LTZERO(x)	(x < -EP_ZERO)
 #define EP_GTZERO(x)	(x > EP_ZERO)
 #define EP_ISZERO(x)	(x > -EP_ZERO && x < EP_ZERO)
+#define EP_LEZERO(x)	(EP_LTZERO(x) || EP_ISZERO(x))
+#define EP_GEZERO(x)	(EP_GTZERO(x) || EP_ISZERO(x))
+#define EP_NTZERO(x)	(!EP_ISZERO(x))
 
 //When judging IsIn
 //use these to determinate the type of argument

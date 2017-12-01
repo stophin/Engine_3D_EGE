@@ -5,6 +5,7 @@
 #define _DEVICE_H_
 
 #include "../math3d/Manager3D.h"
+#include "../raytracing/Ray.h"
 
 struct Device {
 	INT width;
@@ -737,6 +738,10 @@ struct Device {
 		}
 	}
 
+	
+	void ClearBeforeRayTracing() {
+		memset(raytracing, 0, width * height * sizeof(DWORD));
+	}
 
 
 	//ray tracing
@@ -745,7 +750,6 @@ struct Device {
 		if (NULL == cam) {
 			return;
 		}
-		memset(raytracing, 0, width * height * sizeof(DWORD));
 
 		Lgt3D * lgt;
 		EFTYPE f;
@@ -772,6 +776,8 @@ struct Device {
 					n0.set((x - cam->offset_w) / cam->scale_w, (y - cam->offset_h) / cam->scale_h, 0, 1);
 					//get direction vert
 					n1.set(cam->lookat).negative();
+					n1.normalize();
+					n1.negative();
 					//set ray
 					ray.set(n0, n1);
 					//set ray type
@@ -784,10 +790,11 @@ struct Device {
 					//get direction vert
 					n2.set((x - cam->offset_w) / cam->scale_w, (y - cam->offset_h) / cam->scale_h, 0, 1);
 					cam->anti_normalize(n2, cam->znear);
+					//n0.set(n2);
 					n1.set(cam->lookat) * cam->znear;
 					n1 + n2;
 					n1.w = 1;
-					n1.normalize();
+					n1.normalize().negative();
 					//set ray
 					ray.set(n0, n1);
 					//set ray type
@@ -805,10 +812,10 @@ struct Device {
 						VObj * v, *v0, *v1, *vtemp;
 
 						do {
-							// when the ray is reflection or refraction
+							// when the ray is reflection
 							// then use all the verts instead 
 							// of the verts after frustrum culling
-							if (1 == ray.type || 2 == ray.type) {
+							if (1 == ray.type) {
 								link = &obj->verts;
 							}
 							else {
@@ -822,21 +829,24 @@ struct Device {
 									//there must be three verts
 									if (v0 && v1) {
 										// back face culling
-										// when the ray is reflection or refraction
+										// when the ray is reflection
 										// then do not need back face culling
-										if (v->backface > 0 || 1 == ray.type || 2 == ray.type)
+										if (v->backface > 0 || 1 == ray.type)
 										{
 											//NOTE: ray tracing is in camera coordinate
 											//get intersect point
 											trans = Vert3D::GetLineIntersectPointWithTriangle(v->v_c, v0->v_c, v1->v_c, ray.original, ray.direction, p);
 											//normal: trans is not zero
 											//reflection or refraction: trans is bigger than zero
-											if ((0 == ray.type && !EP_ISZERO(trans)) ||
-												(1 == ray.type && trans > 0) ||
-												(2 == ray.type && trans > 0)) {
+											if ((0 == ray.type && EP_GTZERO(trans)) ||
+												(1 == ray.type && EP_GTZERO(trans)) ||
+												(2 == ray.type && EP_GTZERO(trans))) {
 											//if (!EP_ISZERO(trans)) {
 												Verts * verts = new Verts();
-												if (verts) {
+												if (!verts) {
+													verts = verts;
+												}
+												else {
 													verts->v.set(p);
 													verts->trans = trans;
 													raytracing_verts.insertLink(verts);
@@ -844,7 +854,7 @@ struct Device {
 
 													n0.set(p);
 													n1.set(n0)* cam->M_1;
-													*__image = obj->getTextureColor(n0, n1, n2, n3, v, verts);
+													*__image = obj->getTextureColor(n0, n1, n2, n3, v, &verts->v_n);
 
 													//normal verts
 													if (0 == render_state) {
@@ -877,6 +887,8 @@ struct Device {
 													else if (2 == render_state) {
 														//set type transparent
 														verts->type = 2;
+														//reset normal vector
+														//verts->v_n.set(v->n_r);
 													}
 												}
 											}
@@ -939,10 +951,10 @@ struct Device {
 					Verts * nearest_vert = verts;
 					if (verts) {
 						do {
-							if ((0 == ray.type && verts->trans > nearest_vert->trans) ||
+							if ((0 == ray.type && verts->trans < nearest_vert->trans) ||
 								(1 == ray.type && verts->trans < nearest_vert->trans) ||
 								(2 == ray.type && verts->trans < nearest_vert->trans)) {
-							//if (verts->trans > nearest_vert->trans) {
+								//if (verts->trans > nearest_vert->trans) {
 								nearest_vert = verts;
 							}
 
@@ -971,7 +983,7 @@ struct Device {
 							EFTYPE cross = n2 ^ n3;
 							n3 * (cross * 2);
 							n2 - n3;
-							n2.normalize();
+							n2.normalize();// .negative();
 							//set ray
 							ray.set(nearest_vert->v, n2);
 							//set ray type
@@ -985,17 +997,17 @@ struct Device {
 							//get n3 = N
 							n3.set(nearest_vert->v_n);
 							//get n2 = L
-							n2.set(ray.direction);// .negative();
+							n2.set(ray.direction).negative();
 							//get n3 = T
 							EFTYPE cross = n2 ^ n3;
 							//sin(oL) <= nT / nL, that is nT > nL
-							EFTYPE nL = 0.2, nT = 0.4;
+							EFTYPE nL = 0.1, nT = 0.5;
 							EFTYPE nL_nT = nL / nT;
-							EFTYPE pN = nL_nT * cross - sqrt(1 - nL_nT * nL_nT * (1 - cross * cross));
+							EFTYPE pN = nL_nT * cross - sqrt(abs(1 - nL_nT * nL_nT * (1 - cross * cross)));
 							n3 * pN;
 							n2 * nL_nT;
 							n3 - n2;
-							n3.normalize();
+							n3.normalize();// .negative();
 							//set ray
 							ray.set(nearest_vert->v, n3);
 							//set ray type
@@ -1007,13 +1019,14 @@ struct Device {
 					}
 
 				} while (--count > 0);
+				raytracing_verts.~MultiLinkList();
 
 				//accumulate all the ray traced verts' color
 				Verts * verts = raytracing_verts_accumulated.link;
 				DWORD color = BLACK;
 				if (verts) {
 					do {
-						//if (0 == verts->type) 
+						if (0 == verts->type) 
 						{
 							color = Light3D::add(color, verts->color, 0.1);
 						}
