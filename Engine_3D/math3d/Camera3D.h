@@ -43,7 +43,7 @@ public:
 	void initialize(int type) {
 		this->type = type;
 
-		if (type = 1) {
+		if (type == 1) {
 			//TODO
 			//use oblique
 			proj.mx.set(2 * znear / width, 0, -(rt.x + lb.x) / width, 0);
