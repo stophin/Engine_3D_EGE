@@ -776,8 +776,7 @@ struct Device {
 					n0.set((x - cam->offset_w) / cam->scale_w, (y - cam->offset_h) / cam->scale_h, 0, 1);
 					//get direction vert
 					n1.set(cam->lookat).negative();
-					n1.normalize();
-					n1.negative();
+					n1.normalize().negative();
 					//set ray
 					ray.set(n0, n1);
 					//set ray type
@@ -838,10 +837,7 @@ struct Device {
 											trans = Vert3D::GetLineIntersectPointWithTriangle(v->v_c, v0->v_c, v1->v_c, ray.original, ray.direction, p);
 											//normal: trans is not zero
 											//reflection or refraction: trans is bigger than zero
-											if ((0 == ray.type && EP_GTZERO(trans)) ||
-												(1 == ray.type && EP_GTZERO(trans)) ||
-												(2 == ray.type && EP_GTZERO(trans))) {
-											//if (!EP_ISZERO(trans)) {
+											if (EP_GTZERO(trans)) {
 												Verts * verts = new Verts();
 												if (!verts) {
 													verts = verts;
@@ -951,10 +947,7 @@ struct Device {
 					Verts * nearest_vert = verts;
 					if (verts) {
 						do {
-							if ((0 == ray.type && verts->trans < nearest_vert->trans) ||
-								(1 == ray.type && verts->trans < nearest_vert->trans) ||
-								(2 == ray.type && verts->trans < nearest_vert->trans)) {
-								//if (verts->trans > nearest_vert->trans) {
+							if (verts->trans < nearest_vert->trans) {
 								nearest_vert = verts;
 							}
 
@@ -978,7 +971,7 @@ struct Device {
 							//get n3 = N
 							n3.set(nearest_vert->v_n);
 							//get n2 = I
-							n2.set(ray.direction);// .negative();
+							n2.set(ray.direction);
 							//get n2 = R
 							EFTYPE cross = n2 ^ n3;
 							n3 * (cross * 2);
@@ -997,17 +990,18 @@ struct Device {
 							//get n3 = N
 							n3.set(nearest_vert->v_n);
 							//get n2 = L
+							//this formula used a negative I
 							n2.set(ray.direction).negative();
 							//get n3 = T
 							EFTYPE cross = n2 ^ n3;
 							//sin(oL) <= nT / nL, that is nT > nL
 							EFTYPE nL = 0.1, nT = 0.5;
 							EFTYPE nL_nT = nL / nT;
-							EFTYPE pN = nL_nT * cross - sqrt(abs(1 - nL_nT * nL_nT * (1 - cross * cross)));
+							EFTYPE pN = nL_nT * cross - sqrt(1 - nL_nT * nL_nT * (1 - cross * cross));
 							n3 * pN;
 							n2 * nL_nT;
 							n3 - n2;
-							n3.normalize();// .negative();
+							n3.normalize();
 							//set ray
 							ray.set(nearest_vert->v, n3);
 							//set ray type

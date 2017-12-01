@@ -242,35 +242,41 @@ struct Vert3D {
 		//     |za - zb, za - zc, za - ze| / |A|
 		//==>-(f(ak - jb) + e(jc - al) + d(bl - kc)) / M
 		EFTYPE a = va.x - vb.x, b = va.y - vb.y, c = va.z - vb.z;
-		EFTYPE d = va.x - vc.x, e = va.y - vc.y, f = va.z - vc.z;
-		EFTYPE g = vd.x, h = vd.y, i = vd.z;
-		EFTYPE j = va.x - vo.x, k = va.y - vo.y, l = va.z - vo.z;
 		//make sure M is not zero
-		if (EP_ISZERO(a) && EP_ISZERO(b) && EP_ISZERO(c) /*||
-			EP_ISZERO(d) || EP_ISZERO(e) || EP_ISZERO(f) ||
-			EP_ISZERO(g) || EP_ISZERO(h) || EP_ISZERO(i) ||
-			EP_ISZERO(j) || EP_ISZERO(k) || EP_ISZERO(l)*/) {
+		if (EP_ISZERO(a) && EP_ISZERO(b) && EP_ISZERO(c)) {
 			return 0;
 		}
-
-		//beta > 0 && rama > 0 && beta + rama < 1
-		EFTYPE temp1 = e * i - h * f, temp2 = a * k - j * b,
-			temp3 = g * f - d * i, temp4 = j * c - a * l,
-			temp5 = d * h - e * g, temp6 = b * l - k * c;
-		M = a * (temp1)+b * (temp3)+c * (temp5);
+		EFTYPE d = va.x - vc.x, e = va.y - vc.y, f = va.z - vc.z;
+		EFTYPE g = vd.x, h = vd.y, i = vd.z;
+		EFTYPE temp1 = e * i - h * f;
+		EFTYPE temp3 = g * f - d * i;
+		EFTYPE temp5 = d * h - e * g;
+		//make sure M is not zero
+		if (EP_ISZERO(temp1) && EP_ISZERO(temp3) && EP_ISZERO(temp5)) {
+			return 0;
+		}
+		M = a * (temp1)+ b * (temp3)+ c * (temp5);
 		M_1 = 1.0 / M;
-		tran = -(f * (temp2)+e * (temp4)+d * (temp6)) * M_1;
+
+		EFTYPE j = va.x - vo.x, k = va.y - vo.y, l = va.z - vo.z;
+		EFTYPE temp2 = a * k - j * b;
+		EFTYPE temp4 = j * c - a * l;
+		EFTYPE temp6 = b * l - k * c;
+		//transport forward
+		tran = -(f * (temp2)+ e * (temp4)+ d * (temp6)) * M_1;
 		if (tran < 0 || tran > 1000) {
 			return 0;
 		}
-		rama = (i * (temp2)+h * (temp4)+g * (temp6)) * M_1;
+		//beta > 0 && rama > 0 && beta + rama < 1
+		rama = (i * (temp2)+ h * (temp4)+ g * (temp6)) * M_1;
 		if (rama < 0 || rama > 1) {
 			return 0;
 		}
-		beta = (j * (temp1)+k * (temp3)+l * (temp5)) * M_1;
+		beta = (j * (temp1)+ k * (temp3)+ l * (temp5)) * M_1;
 		if (beta < 0 || beta > 1 - rama) {
 			return 0;
 		}
+		//set intersected point
 		p.set(vd);
 		p * tran;
 		p + vo;
