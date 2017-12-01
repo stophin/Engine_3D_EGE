@@ -158,12 +158,6 @@ VOID Initialize()
 	//////////////////////////
 
 	//////////////////////////
-	cur_op = &man.addObject(-1).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
-		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
-		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
-		.scale(10, 10, 10).move(-15, 0, -50).setColor(RED).setLineColor(BLUE);
-	//////////////////////////
-	//////////////////////////
 	Group3D& gp = man.addGroup();
 	for (int i = 0; i < 5; i++) {
 		for (int j = 0; j < 5; j++) {
@@ -228,6 +222,12 @@ VOID Initialize()
 		}
 		man.endGroup();
 	}
+	//////////////////////////
+	//////////////////////////
+	cur_op = &man.addObject(-1).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
+		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
+		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
+		.scale(10, 10, 10).move(-15, 0, -50).setColor(RED).setLineColor(BLUE);
 	//////////////////////////
 	return;
 

@@ -11,12 +11,12 @@ struct Device {
 	INT width;
 	INT height;
 
-	FLOAT *depth;//Depth test buffer
+	EFTYPE *depth;//Depth test buffer
 	DWORD *image;//Image buffer
 	DWORD *tango;//Target buffer
-	FLOAT *shade;//Shade buffer
+	EFTYPE *shade;//Shade buffer
 	DWORD *trans;//Transparent buffer
-	FLOAT *deptr;//Reflection depth buffer
+	EFTYPE *deptr;//Reflection depth buffer
 	DWORD *miror;//Reflection bufer
 	DWORD *raytracing;//Ray Tracing buffer
 
@@ -31,9 +31,9 @@ struct Device {
 	ege_colpoint cps[3];
 	Vert3D n, n_1, n_2, n0, n1, n2, n3, r;
 	DWORD * _tango, *_image, *_trans, *_mirror;
-	FLOAT * _depth;
+	EFTYPE * _depth;
 	DWORD * __image, *__tango, *__trans, *__mirror;
-	FLOAT *__depth, *__shade;
+	EFTYPE *__depth, *__shade;
 	DWORD ___image, ___last = 0;
 
 	Device() :
@@ -96,12 +96,12 @@ struct Device {
 		width = w;
 		height = h;
 
-		depth = new FLOAT[width * height];
+		depth = new EFTYPE[width * height];
 		image = new DWORD[width * height];
 		tango = new DWORD[width * height];
-		shade = new FLOAT[width * height];
+		shade = new EFTYPE[width * height];
 		trans = new DWORD[width * height];
-		deptr = new FLOAT[width * height];
+		deptr = new EFTYPE[width * height];
 		miror = new DWORD[width * height];
 		_image = image;
 		_tango = tango;
@@ -155,9 +155,9 @@ struct Device {
 								// need to change target device and depth array
 								DWORD * ___tango = _tango;
 								_tango = _mirror;
-								FLOAT * ___depth = _depth;
+								EFTYPE * ___depth = _depth;
 								_depth = deptr;
-								//memset(depth, 0, width * height * sizeof(FLOAT));
+								//memset(depth, 0, width * height * sizeof(EFTYPE));
 								//clear reflection depth and drawing
 								for (int i = v->ys; i <= v->ye && i < height; i++) {
 									for (int j = v->xs; j <= v->xe && j < width; j++) {
@@ -209,7 +209,7 @@ struct Device {
 											__depth = &_depth[index];
 
 											// get depth
-											//(-n.x * ((FLOAT)j - v.x) - n.y * ((FLOAT)i - v.y)) / n.z + v->z
+											//(-n.x * ((EFTYPE)j - v.x) - n.y * ((EFTYPE)i - v.y)) / n.z + v->z
 											n0.set((j - cam->offset_w) / cam->scale_w, (i - cam->offset_h) / cam->scale_h, 0, 1);
 											//z = Vert3D::getZ(v->n_d, v->x0, v->y0, v->z0, (EFTYPE)j, (EFTYPE)i);
 											z = Vert3D::getZ(v->n_1_z, v->x, v->y, v->z, n0.x, n0.y);
@@ -282,7 +282,7 @@ struct Device {
 		cam->M.set(cur_cam->M);
 		cam->M_1.set(cur_cam->M_1);
 
-		memset(shade, 0, width * height * sizeof(FLOAT));
+		memset(shade, 0, width * height * sizeof(EFTYPE));
 
 		Mat3D mm, mm_1;
 
@@ -359,7 +359,7 @@ struct Device {
 											if (*__image != BLACK) {
 												__shade = &shade[index];
 												// get shade
-												//(-n.x * ((FLOAT)j - v.x) - n.y * ((FLOAT)i - v.y)) / n.z + v->z
+												//(-n.x * ((EFTYPE)j - v.x) - n.y * ((EFTYPE)i - v.y)) / n.z + v->z
 												n0.set((j - cam->offset_w) / cam->scale_w, (i - cam->offset_h) / cam->scale_h, 0, 1);
 												//z = Vert3D::getZ(v->n_d, v->x0, v->y0, v->z0, (EFTYPE)j, (EFTYPE)i);
 												z = Vert3D::getZ(v->n_1_z, v->x, v->y, v->z, n0.x, n0.y);
@@ -433,7 +433,7 @@ struct Device {
 	}
 
 	void ClearBeforeRender() {
-		memset(depth, 0, width * height * sizeof(FLOAT));
+		memset(depth, 0, width * height * sizeof(EFTYPE));
 		memset(tango, 0, width * height * sizeof(DWORD));
 		memset(image, 0, width * height * sizeof(DWORD));
 		memset(trans, 0, width * height * sizeof(DWORD));
@@ -458,7 +458,7 @@ struct Device {
 			int res;
 			Camera3D* cam = NULL;
 			Lgt3D * lgt;
-			FLOAT zz;
+			EFTYPE zz;
 			EFTYPE f, t, transparent, _i, _j;
 			INT line_state = 0;
 			INT line_l = 0, line_r = 0;
@@ -546,7 +546,7 @@ struct Device {
 												__depth = &_depth[index];
 
 												// get depth
-												//(-n.x * ((FLOAT)j - v.x) - n.y * ((FLOAT)i - v.y)) / n.z + v->z
+												//(-n.x * ((EFTYPE)j - v.x) - n.y * ((EFTYPE)i - v.y)) / n.z + v->z
 												n0.set((j - cam->offset_w) / cam->scale_w, (i - cam->offset_h) / cam->scale_h, 0, 1);
 												//z = Vert3D::getZ(v->n_d, v->x0, v->y0, v->z0, (EFTYPE)j, (EFTYPE)i);
 												z = Vert3D::getZ(v->n_1_z, v->x, v->y, v->z, n0.x, n0.y);
@@ -850,6 +850,7 @@ struct Device {
 
 													n0.set(p);
 													n1.set(n0)* cam->M_1;
+													//get texture and normal vector at the same time
 													*__image = obj->getTextureColor(n0, n1, n2, n3, v, &verts->v_n);
 
 													//normal verts
@@ -876,15 +877,11 @@ struct Device {
 													else if (1 == render_state) {
 														//set type reflection
 														verts->type = 1;
-														//reset normal vector
-														//verts->v_n.set(v->n_r);
 													}
 													//transparent verts
 													else if (2 == render_state) {
 														//set type transparent
 														verts->type = 2;
-														//reset normal vector
-														//verts->v_n.set(v->n_r);
 													}
 												}
 											}

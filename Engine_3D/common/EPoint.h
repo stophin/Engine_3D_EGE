@@ -34,8 +34,8 @@
 #define GET_INT16_MIN(x) ((GET_INT16_NOW(x))==0)
 #define RST_INT16_MAX(x) SET_INT16_MAX(GET_INT16_MAX(x))
 
-typedef float		EPTYPE;
-typedef float	EFTYPE;
+typedef double	EPTYPE;
+typedef double	EFTYPE;
 typedef void	EPVOID;
 typedef bool	EBTYPE;
 

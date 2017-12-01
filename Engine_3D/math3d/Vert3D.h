@@ -91,7 +91,7 @@ struct Vert3D {
 	}
 
 	// module of cross product
-	FLOAT operator &(const Vert3D& v) const{
+	EFTYPE operator &(const Vert3D& v) const{
 		EFTYPE x = this->x, y = this->y, z = this->z, w = this->w;
 		//EFTYPE ra = sqrt(x * x + y * y + z * z);
 		//EFTYPE rb = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
@@ -104,7 +104,7 @@ struct Vert3D {
 	}
 
 	// dot product
-	FLOAT operator ^(const Vert3D& v) const{
+	EFTYPE operator ^(const Vert3D& v) const{
 		EFTYPE x = this->x, y = this->y, z = this->z, w = this->w;
 
 		return (x * v.x + y * v.y + z * v.z);
@@ -265,7 +265,7 @@ struct Vert3D {
 		//transport forward
 		tran = -(f * (temp2)+ e * (temp4)+ d * (temp6)) * M_1;
 		if (tran < 0 || tran > 1000) {
-			return 0;
+			//return 0;
 		}
 		//beta > 0 && rama > 0 && beta + rama < 1
 		rama = (i * (temp2)+ h * (temp4)+ g * (temp6)) * M_1;
