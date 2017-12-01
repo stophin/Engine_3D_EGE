@@ -856,8 +856,8 @@ struct Device {
 													//shadow test set color to black or white
 													//then stop ray tracing
 													if (3 == ray.type) {
-														*__image = BLACK;
-														verts->type = Light3D::multi(*__image, 0.5);
+														*__image = Light3D::multi(ray.color, ray.f / 5);
+														verts->type = 0;
 														break;
 													}
 													else {
@@ -979,11 +979,15 @@ struct Device {
 								ray.set(nearest_vert->v, n2);
 								//set ray type
 								ray.type = 3;
+								//this color
+								ray.color = nearest_vert->color;
+								//this factor
+								ray.f = cur_lgt->getFactor(nearest_vert->n_r, nearest_vert->v);
 								//test same direction
 								EFTYPE cross = n2 & nearest_vert->n_r;
 								if (cross < 0) {
 									//not same direction, this vertex is in shadow
-									nearest_vert->color = Light3D::multi(nearest_vert->color, 0.5);
+									nearest_vert->color = Light3D::multi(nearest_vert->color, ray.f / 5);
 								}
 
 								//shadow test does not affect ray tracing times

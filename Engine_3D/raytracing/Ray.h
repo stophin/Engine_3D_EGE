@@ -130,6 +130,9 @@ public:
 	//3: shadow test ray
 	INT type;
 
+	DWORD color;
+	EFTYPE f;
+
 	//r(t) = o + t * d, t >= 0
 	Vert3D& getPoint(float t) {
 		point.set(direction);
