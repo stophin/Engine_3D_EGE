@@ -230,7 +230,7 @@ public:
 			// reflection vector
 			// R = I -  N * ( dot(I , N)* 2 )
 			//get n3 = N
-			n2.set(0, 0, 0);
+			n2.set(0, 0, 0, 1);
 			n2 * obj->M * cam->M;
 			n3.set(n0);
 			n3 - n2;
@@ -261,7 +261,7 @@ public:
 			// reflection vector
 			// R = I -  N * ( dot(I , N)* 2 )
 			//get n3 = N
-			n2.set(0, 0, 0);
+			n2.set(0, 0, 0, 1);
 			//n2 * obj->M;
 			n3.set(n1) * obj->M_1;
 			n3 - n2;
@@ -293,7 +293,7 @@ public:
 			// reflection vector
 			// R = I -  N * ( dot(I , N)* 2 )
 			//get n3 = N
-			n2.set(0, 0, 0);
+			n2.set(0, 0, 0, 1);
 			n2 * obj->M;
 			n3.set(n1);
 			n3 - n2;
@@ -325,13 +325,13 @@ public:
 			// reflection vector
 			// R = I -  N * ( dot(I , N)* 2 )
 			//get n3 = N
-			n2.set(0, 0, 0);
+			n2.set(0, 0, 0, 1);
 			n2 * obj->M;
 			n3.set(n1);
 			n3 - n2;
 
 			if (v_n) {
-				v_n->set(n3);
+				v_n->set(n3) *cam->M;
 			}
 
 			EFTYPE sxy = n2.set(0, 0, 1) ^ n3, syz = n2.set(1, 0, 0) ^ n3, sxz = n2.set(0, 1, 0) ^ n3;

@@ -175,34 +175,6 @@ VOID Initialize()
 		//EFTYPE x = rand() % 300;
 		//EFTYPE z = rand() % 300;
 		//EFTYPE y = rand() % 100;
-		EFTYPE x = -20, y = 0, z = 0;
-		Group3D& gp = man.addGroup();
-		for (i = 0; i < c; i++) {
-			x_1 = r * cos(i * p_1);
-			r_1 = r * sin(i * p_1);
-			x_2 = r * cos((i + 1) * p_1);
-			r_2 = r * sin((i + 1) * p_1);
-			Object3D& obj = man.startGroup(gp.uniqueID).addTransparentObject(1000).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
-			for (j = 1; j < c; j++) {
-				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
-					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
-			}
-			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(2, 2, 2).move(x, y, z).rotate(0, 0, 0)
-				.setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 3);
-
-			cur_op = &obj;
-		}
-		man.endGroup();
-	}
-	//////////////////////////
-	//////////////////////////
-	c = 10;
-	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
-	count = 1;
-	for (k = 0; k < count; k++) {
-		//EFTYPE x = rand() % 300;
-		//EFTYPE z = rand() % 300;
-		//EFTYPE y = rand() % 100;
 		EFTYPE x = 20, y = 0, z = 10;
 		Group3D& gp = man.addGroup();
 		for (i = 0; i < c; i++) {
@@ -224,10 +196,38 @@ VOID Initialize()
 	}
 	//////////////////////////
 	//////////////////////////
+	c = 10;
+	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
+	count = 1;
+	for (k = 0; k < count; k++) {
+		//EFTYPE x = rand() % 300;
+		//EFTYPE z = rand() % 300;
+		//EFTYPE y = rand() % 100;
+		EFTYPE x = -20, y = 0, z = 0;
+		Group3D& gp = man.addGroup();
+		for (i = 0; i < c; i++) {
+			x_1 = r * cos(i * p_1);
+			r_1 = r * sin(i * p_1);
+			x_2 = r * cos((i + 1) * p_1);
+			r_2 = r * sin((i + 1) * p_1);
+			Object3D& obj = man.startGroup(gp.uniqueID).addTransparentObject(1000).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
+			for (j = 1; j < c; j++) {
+				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
+					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
+			}
+			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(2, 2, 2).move(x, y, z).rotate(0, 0, 0)
+				.setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 3);
+
+			cur_op = &obj;
+		}
+		man.endGroup();
+	}
+	//////////////////////////
+	//////////////////////////
 	cur_op = &man.addObject(-1).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
 		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
-		.scale(10, 10, 10).move(-15, 0, -50).setColor(RED).setLineColor(BLUE);
+		.scale(10, 10, 10).move(-15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t11, 4);
 	//////////////////////////
 	return;
 
@@ -763,6 +763,21 @@ VOID onKeyDown(WPARAM wParam)
 				vobj = vobj->next[1];
 			} while (vobj && vobj != cur_op);
 		}
+		break;
+	case '0':
+		cur_op->texture_type = 0;
+		break;
+	case '1':
+		cur_op->texture_type = 1;
+		break;
+	case '2':
+		cur_op->texture_type = 2;
+		break;
+	case '3':
+		cur_op->texture_type = 3;
+		break;
+	case '4':
+		cur_op->texture_type = 4;
 		break;
 	case 'B':
 		DEBUG_MODE = DEBUG_MODE >> 1;
