@@ -18,6 +18,7 @@ public:
 	DWORD color;
 	Vert3D v;
 	Vert3D v_n;
+	Vert3D n_r;
 
 	//ray tracing type
 	//0: normal(stop rendering)

@@ -215,7 +215,7 @@ struct Vert3D {
 		return -1;
 	}
 
-	static EFTYPE GetLineIntersectPointWithTriangle(const Vert3D& va, const Vert3D& vb, const Vert3D& vc, const Vert3D& vo, const Vert3D& vd, Vert3D& p) {
+	static EFTYPE GetLineIntersectPointWithTriangle(const Vert3D& va, const Vert3D& vb, const Vert3D& vc, const Vert3D& vo, const Vert3D& vd, EFTYPE max, Vert3D& p) {
 		EFTYPE beta, rama, tran;
 		EFTYPE M, M_1;
 		//AB = C
@@ -264,8 +264,8 @@ struct Vert3D {
 		EFTYPE temp6 = b * l - k * c;
 		//transport forward
 		tran = -(f * (temp2)+ e * (temp4)+ d * (temp6)) * M_1;
-		if (tran < 0 || tran > 1000) {
-			//return 0;
+		if (tran < 0 || tran > max) {
+			return 0;
 		}
 		//beta > 0 && rama > 0 && beta + rama < 1
 		rama = (i * (temp2)+ h * (temp4)+ g * (temp6)) * M_1;

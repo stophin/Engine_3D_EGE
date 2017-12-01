@@ -766,7 +766,7 @@ struct Device {
 		MultiLinkList<Verts> raytracing_verts_accumulated(1);
 		MultiLinkList<VObj> * link = NULL;
 		//reflection times
-		INT count;
+		INT count, shadow_count;
 		//for each pixel in width * height's screen
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
@@ -803,6 +803,7 @@ struct Device {
 				_raytracing = &raytracing[index];
 
 				Lgt3D * cur_lgt = man.lgts.link;
+				shadow_count = 0;
 				count = 4;
 				do {
 					// for each triangle
@@ -825,6 +826,7 @@ struct Device {
 							// more than 3 verts
 							if (v && link->linkcount >= 3) {
 								v0 = NULL; v1 = NULL;
+								EFTYPE trans_last = 1000;
 								do {
 									//there must be three verts
 									if (v0 && v1) {
@@ -835,7 +837,7 @@ struct Device {
 										{
 											//NOTE: ray tracing is in camera coordinate
 											//get intersect point
-											trans = Vert3D::GetLineIntersectPointWithTriangle(v->v_c, v0->v_c, v1->v_c, ray.original, ray.direction, p);
+											trans = Vert3D::GetLineIntersectPointWithTriangle(v->v_c, v0->v_c, v1->v_c, ray.original, ray.direction, trans_last, p);
 											//normal: trans is not zero
 											//reflection or refraction: trans is bigger than zero
 											if (EP_GTZERO(trans)) {
@@ -844,8 +846,10 @@ struct Device {
 													verts = verts;
 												}
 												else {
+													//trans_last = trans;
 													verts->v.set(p);
 													verts->trans = trans;
+													verts->n_r.set(v->n_r);
 													raytracing_verts.insertLink(verts);
 													__image = &verts->color;
 
@@ -853,7 +857,7 @@ struct Device {
 													//then stop ray tracing
 													if (3 == ray.type) {
 														*__image = BLACK;
-														verts->type = 0;
+														verts->type = Light3D::multi(*__image, 0.5);
 														break;
 													}
 													else {
@@ -968,22 +972,26 @@ struct Device {
 						//normal verts
 						if (0 == nearest_vert->type) {
 							//get shadow test ray
-							if (cur_lgt) {
-								n2.set(0, 0, 0, 1) * cur_lgt->M;
+							if (cur_lgt && (shadow_count == 0 || cur_lgt != man.lgts.link)) {
+								n2.set(0, 0, 0, 1) * cur_lgt->M * cam->M;
 								n2 - nearest_vert->v;
 								n2.normalize();
 								ray.set(nearest_vert->v, n2);
 								//set ray type
 								ray.type = 3;
+								//test same direction
+								EFTYPE cross = n2 & nearest_vert->n_r;
+								if (cross < 0) {
+									//not same direction, this vertex is in shadow
+									nearest_vert->color = Light3D::multi(nearest_vert->color, 0.5);
+								}
 
 								//shadow test does not affect ray tracing times
 								count++;
 
+								//get next shadow test light
+								shadow_count++;
 								cur_lgt = man.lgts.next(cur_lgt);
-								if (!(cur_lgt && cur_lgt == man.lgts.link)) {
-									//stop ray tracing after test all lights
-									break;
-								}
 							}
 							else {
 								//stop ray tracing
