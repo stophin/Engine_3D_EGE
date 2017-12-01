@@ -42,7 +42,10 @@ public:
 	INT type;
 	void initialize(int type) {
 		this->type = type;
-		if (type == 1) {
+
+		if (type = 1) {
+			//TODO
+			//use oblique
 			proj.mx.set(2 * znear / width, 0, -(rt.x + lb.x) / width, 0);
 			proj.my.set(0, 2 * znear / height, -(rt.y + lb.y) / height, 0);
 			proj.mz.set(0, 0, zfar / (zfar - znear), -zfar * znear / (zfar - znear));
@@ -50,7 +53,7 @@ public:
 
 			proj_1.mx.set(1 / (2 * znear / width), 0, -(rt.x + lb.x) / width, 0);
 			proj_1.my.set(0, 1 / (2 * znear / height), -(rt.y + lb.y) / height, 0);
-			proj_1.mz.set(0, 0, 1 / (zfar / (zfar - znear)), (- zfar * znear / (zfar - znear)) / (zfar / (zfar - znear)));
+			proj_1.mz.set(0, 0, 1 / (zfar / (zfar - znear)), (-zfar * znear / (zfar - znear)) / (zfar / (zfar - znear)));
 			proj_1.mw.set(0, 0, 0, 1);
 		}
 		else if (type == 2) {
