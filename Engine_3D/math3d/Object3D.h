@@ -107,7 +107,7 @@ public:
 	Object3D() : 
 		_M(&M, &M_1, 1), texture(NULL),
 		cam(NULL), indice(3), verts(0), verts_r(1), verts_f(2), transparent(0), reflection(0), v0(NULL), v1(NULL), render_aabb(0),
-		texture_type(0), vertex_type(0){
+		texture_type(0), vertex_type(0), backfaceculling(0){
 		center.init();
 		center_r.init();
 		center_w.init();
@@ -141,6 +141,15 @@ public:
 
 		return *this;
 	}
+
+	//backface culling when shadow testing in ray casting
+	INT backfaceculling;
+	Object3D& setBackfaceCulling(INT bfc) {
+		this->backfaceculling = bfc;
+
+		return *this;
+	}
+
 
 	Object3D&   setTexture(TextureManage& tman, INT uID, INT t = 0) {
 		Texture * ptexture = tman.textures.getLink(uID);

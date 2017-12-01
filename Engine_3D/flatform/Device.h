@@ -831,9 +831,9 @@ struct Device {
 									//there must be three verts
 									if (v0 && v1) {
 										// back face culling
-										// when the ray is reflection
+										// when the ray is shadow testing
 										// then do not need back face culling
-										if (v->backface > 0 || 1 == ray.type)
+										if (v->backface > 0 || (3 == ray.type && obj->backfaceculling == 0))
 										{
 											//NOTE: ray tracing is in camera coordinate
 											//get intersect point

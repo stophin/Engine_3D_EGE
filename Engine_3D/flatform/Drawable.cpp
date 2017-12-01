@@ -128,7 +128,7 @@ VOID Initialize()
 	man.addShadowCamera();
 	man.addReflectionCamera();
 
-	//man.addLight(9, -51, -60);
+	man.addLight(9, -51, 300);
 	man.addLight(5, 100, 300);
 	//man.addLight(-1000, 100, 100);
 
@@ -171,7 +171,7 @@ VOID Initialize()
 	cur_op = &man.addObject(-1).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
 		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
-		.scale(10, 10, 10).move(15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t11, 4);
+		.scale(10, 10, 10).move(15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t11, 4).setBackfaceCulling(1);
 	//////////////////////////
 
 	//////////////////////////
@@ -195,7 +195,7 @@ VOID Initialize()
 					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
 			}
 			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(2, 2, 2).move(x, y, z).rotate(0, 0, 0)
-				.setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 3);
+				.setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 0);
 
 			cur_op = &obj;
 		}
@@ -230,6 +230,7 @@ VOID Initialize()
 		man.endGroup();
 	}
 	//////////////////////////
+	return;
 	//////////////////////////
 	// generate teapot
 	Object3D& obj = man.addTransparentObject(0.05).renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
@@ -248,7 +249,6 @@ VOID Initialize()
 	obj.move(50, -30, 20).rotate(-90, 30, 0).setTexture(tman, t9, 3).setUV(0, -300);// .setTexture(tman, t7, 1);
 	cur_op = &obj;
 	//////////////////////////
-	return;
 
 	//////////////////////////
 	cur_op = &man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
