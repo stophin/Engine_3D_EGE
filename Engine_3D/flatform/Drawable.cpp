@@ -176,7 +176,7 @@ VOID Initialize()
 
 	//////////////////////////
 	// generate teapot
-	Object3D& obj = man.addTransparentObject(1000).renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
+	Object3D& obj = man.addReflectionObject(1000).renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
 	int normal = -1;
 	int vertex_count = 0;
 	int triangle_count = 0;

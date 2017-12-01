@@ -846,7 +846,7 @@ struct Device {
 													verts = verts;
 												}
 												else {
-													//trans_last = trans;
+													trans_last = trans;
 													verts->v.set(p);
 													verts->trans = trans;
 													verts->n_r.set(v->n_r);
