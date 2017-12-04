@@ -8,169 +8,20 @@
 #include "Object3D.h"
 #include "Light3D.h"
 
-typedef class Cam3D Cam3D;
-class Cam3D : public Camera3D {
-public:
-	Cam3D() :
-		Camera3D(50, 50, 50, 1000, 90, 90), type(0) {
-		initialize();
-	}
-	Cam3D(EFTYPE width, EFTYPE height, EFTYPE znear, EFTYPE zfar, EFTYPE angle_width, EFTYPE angle_height) :
-		Camera3D(width, height, znear, zfar, angle_width, angle_height), type(0) {
-		initialize();
-	}
-	void initialize() {
-		for (INT i = 0; i < 1; i++)
-		{
-			this->prev[i] = NULL;
-			this->next[i] = NULL;
-		}
-	}
-	// camera type
-	// 0 : normal camera
-	// 1 : shadow camera
-	// 2 : reflection camera
-	int type;
-
-#define MAX_CAM3D_LINK	1
-	INT uniqueID;
-	Cam3D * prev[MAX_CAM3D_LINK];
-	Cam3D * next[MAX_CAM3D_LINK];
-	void operator delete(void * _ptr){
-		if (_ptr == NULL)
-		{
-			return;
-		}
-		for (INT i = 0; i < MAX_CAM3D_LINK; i++)
-		{
-			if (((Cam3D*)_ptr)->prev[i] != NULL || ((Cam3D*)_ptr)->next[i] != NULL)
-			{
-				return;
-			}
-		}
-		delete(_ptr);
-	}
-};
-
-typedef class Obj3D Obj3D;
-class Obj3D : public Object3D {
-public:
-	Obj3D() : Object3D() {
-		initialize();
-	}
-	void initialize() {
-		for (INT i = 0; i < 2; i++)
-		{
-			this->prev[i] = NULL;
-			this->next[i] = NULL;
-		}
-	}
-
-#define MAX_OBJ3D_LINK	2
-	INT uniqueID;
-	Obj3D * prev[MAX_OBJ3D_LINK];
-	Obj3D * next[MAX_OBJ3D_LINK];
-	void operator delete(void * _ptr){
-		if (_ptr == NULL)
-		{
-			return;
-		}
-		for (INT i = 0; i < MAX_OBJ3D_LINK; i++)
-		{
-			if (((Obj3D*)_ptr)->prev[i] != NULL || ((Obj3D*)_ptr)->next[i] != NULL)
-			{
-				return;
-			}
-		}
-		delete(_ptr);
-	}
-};
-
-typedef class Group3D Group3D;
-class Group3D {
-public:
-	Group3D(): objs(1) {
-		initialize();
-	}
-
-	~Group3D() {
-		objs.~MultiLinkList();
-	}
-
-	MultiLinkList<Obj3D> objs;
-
-	void initialize() {
-		for (INT i = 0; i < 1; i++)
-		{
-			this->prev[i] = NULL;
-			this->next[i] = NULL;
-		}
-	}
-
-#define MAX_GROUP3D_LINK	1
-	INT uniqueID;
-	Group3D * prev[MAX_GROUP3D_LINK];
-	Group3D * next[MAX_GROUP3D_LINK];
-	void operator delete(void * _ptr){
-		if (_ptr == NULL)
-		{
-			return;
-		}
-		for (INT i = 0; i < MAX_GROUP3D_LINK; i++)
-		{
-			if (((Group3D*)_ptr)->prev[i] != NULL || ((Group3D*)_ptr)->next[i] != NULL)
-			{
-				return;
-			}
-		}
-		delete(_ptr);
-	}
-};
-
-typedef class Lgt3D Lgt3D;
-class Lgt3D : public Light3D {
-public:
-	Lgt3D() : Light3D() {
-		initialize();
-	}
-	void initialize() {
-		for (INT i = 0; i < 1; i++)
-		{
-			this->prev[i] = NULL;
-			this->next[i] = NULL;
-		}
-	}
-
-#define MAX_LGT3D_LINK	1
-	INT uniqueID;
-	Lgt3D * prev[MAX_LGT3D_LINK];
-	Lgt3D * next[MAX_LGT3D_LINK];
-	void operator delete(void * _ptr){
-		if (_ptr == NULL)
-		{
-			return;
-		}
-		for (INT i = 0; i < MAX_LGT3D_LINK; i++)
-		{
-			if (((Lgt3D*)_ptr)->prev[i] != NULL || ((Lgt3D*)_ptr)->next[i] != NULL)
-			{
-				return;
-			}
-		}
-		delete(_ptr);
-	}
-};
-
+#include "../scene/OctTree.h"
 
 typedef class Manager3D Manager3D;
 class Manager3D {
 public:
-	Manager3D() : cams(0), objs(0), lgts(0), tras(0), refl(0), grps(0),
+	Manager3D() : cams(0), objs(0), lgts(0), tras(0), refl(0), grps(0), octs(1),
 		group(NULL){
 
 	}
 	~Manager3D() {
 		this->cams.~MultiLinkList();
+		//NOTE: octs links contains parts of objs and tras and refl, 
+		//so we muse deconstruct it first
+		this->octs.~MultiLinkList();
 		this->objs.~MultiLinkList();
 		this->tras.~MultiLinkList();
 		this->refl.~MultiLinkList();
@@ -183,6 +34,11 @@ public:
 	MultiLinkList<Obj3D> refl;
 	MultiLinkList<Lgt3D> lgts;
 	MultiLinkList<Group3D> grps;
+	//oct-tree
+	MultiLinkList<Obj3D> octs;
+
+	Rect3D rect;
+	OctTree octTree;
 
 	void setCameraRange(EFTYPE o_w, EFTYPE o_h, EFTYPE s_w, EFTYPE s_h) {
 		Cam3D * cam = this->cams.link;
@@ -267,6 +123,8 @@ public:
 		}
 
 		((Object3D *)obj)->anti = anti;
+		//TODO
+		((Object3D *)obj)->render_aabb = 1;
 
 		return *((Object3D *)obj);
 	}

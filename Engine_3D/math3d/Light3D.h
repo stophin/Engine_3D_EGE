@@ -105,4 +105,40 @@ public:
 	}
 
 };
+
+
+typedef class Lgt3D Lgt3D;
+class Lgt3D : public Light3D {
+public:
+	Lgt3D() : Light3D() {
+		initialize();
+	}
+	void initialize() {
+		for (INT i = 0; i < 1; i++)
+		{
+			this->prev[i] = NULL;
+			this->next[i] = NULL;
+		}
+	}
+
+#define MAX_LGT3D_LINK	1
+	INT uniqueID;
+	Lgt3D * prev[MAX_LGT3D_LINK];
+	Lgt3D * next[MAX_LGT3D_LINK];
+	void operator delete(void * _ptr){
+		if (_ptr == NULL)
+		{
+			return;
+		}
+		for (INT i = 0; i < MAX_LGT3D_LINK; i++)
+		{
+			if (((Lgt3D*)_ptr)->prev[i] != NULL || ((Lgt3D*)_ptr)->next[i] != NULL)
+			{
+				return;
+			}
+		}
+		delete(_ptr);
+	}
+};
+
 #endif

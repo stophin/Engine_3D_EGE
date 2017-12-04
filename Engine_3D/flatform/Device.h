@@ -6,6 +6,7 @@
 
 #include "../math3d/Manager3D.h"
 #include "../raytracing/Ray.h"
+#include "../scene/OctTree.h"
 
 struct Device {
 	INT width;
@@ -701,9 +702,15 @@ struct Device {
 				if (render_state == 0) {
 					obj = man.objs.next(obj);
 					if (!(obj && obj != man.objs.link)) {
-						obj = man.tras.link;
-						//do not render reflection points
-						render_state = 2;
+						//obj = man.tras.link;
+						////do not render reflection points
+						//render_state = 2;
+						obj = man.refl.link;
+						render_state = 1;
+						if (!obj) {
+							obj = man.tras.link;
+							render_state = 2;
+						}
 					}
 				}
 				else if (render_state == 1) {
@@ -765,6 +772,7 @@ struct Device {
 		MultiLinkList<Verts> raytracing_verts(0);
 		MultiLinkList<Verts> raytracing_verts_accumulated(1);
 		MultiLinkList<VObj> * link = NULL;
+		MultiLinkList<Obj3D> * olink;
 		//reflection times
 		INT count, shadow_count;
 		//for each pixel in width * height's screen
@@ -807,7 +815,16 @@ struct Device {
 				count = 4;
 				do {
 					// for each triangle
-					Obj3D * obj = man.objs.link;
+					if (0 == ray.type || NULL == ray.obj) {
+						olink = &man.objs;
+					}
+					else {
+						man.octs.clearLink();
+						man.octTree.Collision((Obj3D*)ray.obj, &man.octs);
+						olink = &man.octs;
+					}
+
+					Obj3D * obj = olink->link;
 					if (obj) {
 						int render_state = 0;
 						VObj * v, *v0, *v1, *vtemp;
@@ -850,6 +867,7 @@ struct Device {
 													verts->v.set(p);
 													verts->trans = trans;
 													verts->n_r.set(v->n_r);
+													verts->obj = obj;
 													raytracing_verts.insertLink(verts);
 													__image = &verts->color;
 
@@ -923,31 +941,39 @@ struct Device {
 
 							//first do objects till end
 							//then do reflection and then transparent object
-							if (render_state == 0) {
-								obj = man.objs.next(obj);
-								if (!(obj && obj != man.objs.link)) {
-									obj = man.refl.link;
-									//next render reflection points
-									render_state = 1;
-									if (!obj) {
-										//or render reflection points
+							if (0 == ray.type) {
+								if (render_state == 0) {
+									obj = man.objs.next(obj);
+									if (!(obj && obj != man.objs.link)) {
+										obj = man.refl.link;
+										//next render reflection points
+										render_state = 1;
+										if (!obj) {
+											//or render reflection points
+											obj = man.tras.link;
+											render_state = 2;
+										}
+									}
+								}
+								else if (render_state == 1) {
+									obj = man.refl.next(obj);
+									if (!(obj && obj != man.refl.link)) {
 										obj = man.tras.link;
+										//next render transparent points
 										render_state = 2;
+									}
+
+								}
+								else {
+									obj = man.tras.next(obj);
+									if (!(obj && obj != man.tras.link)) {
+										break;
 									}
 								}
 							}
-							else if (render_state == 1) {
-								obj = man.refl.next(obj);
-								if (!(obj && obj != man.refl.link)) {
-									obj = man.tras.link;
-									//next render transparent points
-									render_state = 2;
-								}
-
-							}
 							else {
-								obj = man.tras.next(obj);
-								if (!(obj && obj != man.tras.link)) {
+								obj = olink->next(obj);
+								if (!(obj && obj != olink->link)) {
 									break;
 								}
 							}
@@ -977,6 +1003,8 @@ struct Device {
 								n2 - nearest_vert->v;
 								n2.normalize();
 								ray.set(nearest_vert->v, n2);
+								//set object
+								ray.obj = nearest_vert->obj;
 								//set ray type
 								ray.type = 3;
 								//this color
@@ -1018,6 +1046,8 @@ struct Device {
 							n2.normalize();// .negative();
 							//set ray
 							ray.set(nearest_vert->v, n2);
+							//set object
+							ray.obj = nearest_vert->obj;
 							//set ray type
 							ray.type = 1;
 						}
@@ -1043,6 +1073,8 @@ struct Device {
 							n3.normalize();
 							//set ray
 							ray.set(nearest_vert->v, n3);
+							//set object
+							ray.obj = nearest_vert->obj;
 							//set ray type
 							ray.type = 2;
 						}

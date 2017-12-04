@@ -149,4 +149,50 @@ public:
 	}
 };
 
+
+typedef class Cam3D Cam3D;
+class Cam3D : public Camera3D {
+public:
+	Cam3D() :
+		Camera3D(50, 50, 50, 1000, 90, 90), type(0) {
+		initialize();
+	}
+	Cam3D(EFTYPE width, EFTYPE height, EFTYPE znear, EFTYPE zfar, EFTYPE angle_width, EFTYPE angle_height) :
+		Camera3D(width, height, znear, zfar, angle_width, angle_height), type(0) {
+		initialize();
+	}
+	void initialize() {
+		for (INT i = 0; i < 1; i++)
+		{
+			this->prev[i] = NULL;
+			this->next[i] = NULL;
+		}
+	}
+	// camera type
+	// 0 : normal camera
+	// 1 : shadow camera
+	// 2 : reflection camera
+	int type;
+
+#define MAX_CAM3D_LINK	1
+	INT uniqueID;
+	Cam3D * prev[MAX_CAM3D_LINK];
+	Cam3D * next[MAX_CAM3D_LINK];
+	void operator delete(void * _ptr){
+		if (_ptr == NULL)
+		{
+			return;
+		}
+		for (INT i = 0; i < MAX_CAM3D_LINK; i++)
+		{
+			if (((Cam3D*)_ptr)->prev[i] != NULL || ((Cam3D*)_ptr)->next[i] != NULL)
+			{
+				return;
+			}
+		}
+		delete(_ptr);
+	}
+};
+
+
 #endif

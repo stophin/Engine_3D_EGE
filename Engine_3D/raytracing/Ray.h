@@ -19,6 +19,7 @@ public:
 	Vert3D v;
 	Vert3D v_n;
 	Vert3D n_r;
+	void * obj;
 
 	//ray tracing type
 	//0: normal(stop rendering)
@@ -129,6 +130,8 @@ public:
 	//2: refraction
 	//3: shadow test ray
 	INT type;
+
+	void * obj;
 
 	DWORD color;
 	EFTYPE f;

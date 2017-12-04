@@ -114,6 +114,7 @@ public:
 
 		aabb[0].set(-EP_MAX, -EP_MAX, -EP_MAX, 1);
 		aabb[6].set(EP_MAX, EP_MAX, EP_MAX, 1);
+		octTree = NULL;
 	}
 	~Object3D() {
 		this->indice.~MultiLinkList();
@@ -121,6 +122,8 @@ public:
 		this->verts_r.~MultiLinkList();
 		this->verts_f.~MultiLinkList();
 	}
+
+	void * octTree;
 
 	DWORD *texture;
 	INT t_w;
@@ -609,7 +612,15 @@ public:
 	VObj *v0, *v1;
 
 	INT render_aabb;
-	Vert3D aabb[8];
+	union {
+		Vert3D aabb[8];
+		struct {
+			Vert3D rightBottomFront;
+			Vert3D _aabb[5];
+			Vert3D leftTopBack;
+			Vert3D __aabb;
+		};
+	};
 
 	Object3D& renderAABB() {
 		this->render_aabb = 1;
@@ -835,6 +846,82 @@ public:
 		this->render_normalize();
 
 		return *this;
+	}
+};
+
+
+typedef class Obj3D Obj3D;
+class Obj3D : public Object3D {
+public:
+	Obj3D() : Object3D() {
+		initialize();
+	}
+	void initialize() {
+		for (INT i = 0; i < 2; i++)
+		{
+			this->prev[i] = NULL;
+			this->next[i] = NULL;
+		}
+	}
+
+#define MAX_OBJ3D_LINK	13
+	INT uniqueID;
+	Obj3D * prev[MAX_OBJ3D_LINK];
+	Obj3D * next[MAX_OBJ3D_LINK];
+	void operator delete(void * _ptr){
+		if (_ptr == NULL)
+		{
+			return;
+		}
+		for (INT i = 0; i < MAX_OBJ3D_LINK; i++)
+		{
+			if (((Obj3D*)_ptr)->prev[i] != NULL || ((Obj3D*)_ptr)->next[i] != NULL)
+			{
+				return;
+			}
+		}
+		delete(_ptr);
+	}
+};
+
+typedef class Group3D Group3D;
+class Group3D {
+public:
+	Group3D() : objs(1) {
+		initialize();
+	}
+
+	~Group3D() {
+		objs.~MultiLinkList();
+	}
+
+	MultiLinkList<Obj3D> objs;
+
+	void initialize() {
+		for (INT i = 0; i < 1; i++)
+		{
+			this->prev[i] = NULL;
+			this->next[i] = NULL;
+		}
+	}
+
+#define MAX_GROUP3D_LINK	1
+	INT uniqueID;
+	Group3D * prev[MAX_GROUP3D_LINK];
+	Group3D * next[MAX_GROUP3D_LINK];
+	void operator delete(void * _ptr){
+		if (_ptr == NULL)
+		{
+			return;
+		}
+		for (INT i = 0; i < MAX_GROUP3D_LINK; i++)
+		{
+			if (((Group3D*)_ptr)->prev[i] != NULL || ((Group3D*)_ptr)->next[i] != NULL)
+			{
+				return;
+			}
+		}
+		delete(_ptr);
 	}
 };
 
