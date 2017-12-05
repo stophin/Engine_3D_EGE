@@ -44,6 +44,8 @@ struct Vert3D {
 		this->y = y;
 		this->z = z;
 
+		this->w = 1;
+
 		return *this;
 	}
 

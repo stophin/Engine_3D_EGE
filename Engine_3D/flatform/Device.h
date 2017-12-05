@@ -816,17 +816,20 @@ struct Device {
 				do {
 					// when the ray is reflection or refraction
 					// use the objects around instead of all the objects
-					if (ray.obj && (1 == ray.type || 2 == ray.type )) {
+					if (1 == ray.type || 2 == ray.type) {
 						man.octs.clearLink();
 						man.octTree.Collision((Obj3D*)ray.obj, &man.octs);
 						olink = &man.octs;
 					}
 					else {
-						man.octs.clearLink();
-						n0.set(ray.original) *cam->M_1;
-						n1.set(ray.direction) *cam->M_1;
-						man.octTree.Collision(n0, n1, &man.octs);
-						olink = &man.octs;
+						if (0) {
+							man.octs.clearLink();
+							man.octTree.Collision(ray.original, ray.direction, (Cam3D*)cam, &man.octs);
+							olink = &man.octs;
+						}
+						else {
+							olink = &man.objs;
+						}
 					}
 
 					Obj3D * obj = olink->link;
@@ -1110,6 +1113,73 @@ struct Device {
 
 				*_raytracing = color;
 			}
+		}
+	}
+
+
+	void drawAABB(Manager3D& man, OctTree * oct) {
+		if (NULL == oct) {
+			return;
+		}
+		Camera3D * cam = man.cams.link;
+		if (NULL == cam) {
+			return;
+		}
+		if (oct->hasChild) {
+			for (int i = 0; i < MAX_QUARDANTS; i++) {
+				if (oct->children[i]) {
+					drawAABB(man, oct->children[i]);
+				}
+			}
+		}
+		if (render_raytracing < 0) {
+			oct->v[0].set(oct->bounds.x, oct->bounds.y, oct->bounds.z);
+			oct->v[1].set(oct->bounds.x, oct->bounds.y + oct->bounds.height, oct->bounds.z);
+			oct->v[2].set(oct->bounds.x + oct->bounds.width, oct->bounds.y + oct->bounds.height, oct->bounds.z);
+			oct->v[3].set(oct->bounds.x + oct->bounds.width, oct->bounds.y, oct->bounds.z);
+			oct->v[4].set(oct->bounds.x, oct->bounds.y, oct->bounds.z + oct->bounds.depth);
+			oct->v[5].set(oct->bounds.x, oct->bounds.y + oct->bounds.height, oct->bounds.z + oct->bounds.depth);
+			oct->v[6].set(oct->bounds.x + oct->bounds.width, oct->bounds.y + oct->bounds.height, oct->bounds.z + oct->bounds.depth);
+			oct->v[7].set(oct->bounds.x + oct->bounds.width, oct->bounds.y, oct->bounds.z + oct->bounds.depth);
+			//to camera coordinate
+			for (int i = 0; i < 8; i++) {
+				oct->v[i] * cam->M;
+			}
+		}
+		static INT indice[6][4] = {
+			{ 0, 1, 2, 3},
+			{ 3, 2, 6, 7},
+			{ 0, 3, 7, 4},
+			{ 0, 1, 5, 4},
+			{ 4, 5, 6, 7},
+			{ 5, 6, 2, 1}
+		};
+		INT intersect = 0;
+		DWORD * tango = EP_GetImageBuffer();
+		for (int i = 0; i < 6; i++) {
+			oct->v0.set(oct->v[indice[i][0]]);
+			oct->v1.set(oct->v[indice[i][1]]);
+			oct->v2.set(oct->v[indice[i][2]]);
+			oct->n.set(oct->v[indice[i][3]]);
+
+			cam->project(oct->v0);
+			cam->project(oct->v1);
+			cam->project(oct->v2);
+			cam->project(oct->n);
+
+			oct->v0.x = oct->v0.x * cam->scale_w + cam->offset_w;
+			oct->v0.y = oct->v0.y * cam->scale_h + cam->offset_h;
+			oct->v1.x = oct->v1.x * cam->scale_w + cam->offset_w;
+			oct->v1.y = oct->v1.y * cam->scale_h + cam->offset_h;
+			oct->v2.x = oct->v2.x * cam->scale_w + cam->offset_w;
+			oct->v2.y = oct->v2.y * cam->scale_h + cam->offset_h;
+			oct->n.x = oct->n.x * cam->scale_w + cam->offset_w;
+			oct->n.y = oct->n.y * cam->scale_h + cam->offset_h;
+
+			this->Draw_Line(tango, this->width, this->height, oct->v0.x, oct->v0.y, oct->v1.x, oct->v1.y, RED);
+			this->Draw_Line(tango, this->width, this->height, oct->v1.x, oct->v1.y, oct->v2.x, oct->v2.y, RED);
+			this->Draw_Line(tango, this->width, this->height, oct->v2.x, oct->v2.y, oct->n.x, oct->n.y, RED);
+			this->Draw_Line(tango, this->width, this->height, oct->n.x, oct->n.y, oct->v0.x, oct->v0.y, RED);
 		}
 	}
 

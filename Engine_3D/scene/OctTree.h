@@ -147,12 +147,12 @@ public:
 		EFTYPE yMidPoint = this->bounds.y + this->bounds.height / 2;
 		EFTYPE zMidPoint = this->bounds.z + this->bounds.depth / 2;
 
-		EFTYPE topQuad = (rect.y >= this->bounds.y && rect.y + rect.height <= yMidPoint);
-		EFTYPE bottomQuad = (rect.y >= yMidPoint && rect.y + rect.height <= this->bounds.y + this->bounds.height);
-		EFTYPE frontQuad = (rect.z >= this->bounds.z && rect.z + rect.depth <= zMidPoint);
-		EFTYPE backQuad = (rect.z >= zMidPoint && rect.z + rect.depth <= this->bounds.z + this->bounds.depth);
+		EFTYPE topQuad = (rect.y > this->bounds.y && rect.y + rect.height < yMidPoint);
+		EFTYPE bottomQuad = (rect.y > yMidPoint && rect.y + rect.height < this->bounds.y + this->bounds.height);
+		EFTYPE frontQuad = (rect.z > this->bounds.z && rect.z + rect.depth < zMidPoint);
+		EFTYPE backQuad = (rect.z > zMidPoint && rect.z + rect.depth < this->bounds.z + this->bounds.depth);
 
-		if (rect.x >= this->bounds.x && rect.x + rect.width <= xMidPoint) {//leftQuad
+		if (rect.x > this->bounds.x && rect.x + rect.width < xMidPoint) {//leftQuad
 			if (topQuad) {
 				if (frontQuad) {
 					index = 1;//leftTopFront
@@ -170,7 +170,7 @@ public:
 				}
 			}
 		}
-		else if (rect.x >= xMidPoint && rect.x + rect.width <= this->bounds.x + this->bounds.width) {//rightQuad
+		else if (rect.x > xMidPoint && rect.x + rect.width < this->bounds.x + this->bounds.width) {//rightQuad
 			if (topQuad) {
 				if (frontQuad) {
 					index = 0;//rightTopFront
@@ -218,8 +218,8 @@ public:
 				do {
 					_next = this->objects.next(_obj);
 
-					rect.set(obj->leftTopBack.x, obj->leftTopBack.y, obj->leftTopBack.z,
-						obj->rightBottomFront.x - obj->leftTopBack.x, obj->rightBottomFront.y - obj->leftTopBack.y, obj->rightBottomFront.z - obj->leftTopBack.z);
+					rect.set(_obj->leftTopBack.x, _obj->leftTopBack.y, _obj->leftTopBack.z,
+						_obj->rightBottomFront.x - _obj->leftTopBack.x, _obj->rightBottomFront.y - _obj->leftTopBack.y, _obj->rightBottomFront.z - _obj->leftTopBack.z);
 					INT index = this->GetIndex(rect);
 					if (index != -1) {
 						this->objects.removeLink(_obj);
@@ -266,14 +266,17 @@ public:
 	Vert3D v[8];
 	Vert3D v0, v1, v2;
 	Vert3D n0, n1, n, p;
-	void Collision(Vert3D& vo, Vert3D& vd, MultiLinkList<Obj3D> * link) {
+	void Collision(Vert3D& vo, Vert3D& vd, Camera3D * cam, MultiLinkList<Obj3D> * link) {
 		if (NULL == link) {
+			return;
+		}
+		if (NULL == cam) {
 			return;
 		}
 		if (this->hasChild) {
 			for (int i = 0; i < MAX_QUARDANTS; i++) {
 				if (this->children[i]) {
-					this->children[i]->Collision(vo, vd, link);
+					this->children[i]->Collision(vo, vd, cam, link);
 				}
 			}
 		}
@@ -288,6 +291,10 @@ public:
 		v[5].set(this->bounds.x, this->bounds.y + this->bounds.height, this->bounds.z + this->bounds.depth);
 		v[6].set(this->bounds.x + this->bounds.width, this->bounds.y + this->bounds.height, this->bounds.z + this->bounds.depth);
 		v[7].set(this->bounds.x + this->bounds.width, this->bounds.y, this->bounds.z + this->bounds.depth);
+		//to camera coordinate
+		for (int i = 0; i < 8; i++) {
+			v[i] * cam->M;
+		}
 		//012 023 326 367 034 437 045 051 475 576 152 256
 		static INT indice[12][3] = {
 			{ 0, 1, 2 },
@@ -312,6 +319,7 @@ public:
 			n0.set(v1) - v0;
 			n1.set(v2) - v0;
 			n = n0 * n1;
+			//back face culling
 			EFTYPE cross = vd  & n;
 			if (cross < 0) {
 				continue;

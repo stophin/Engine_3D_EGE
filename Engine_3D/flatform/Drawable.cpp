@@ -57,6 +57,7 @@ VOID onPaint(HWND hWnd)
 	// Place draw code here
 	setcolor(BLACK);
 	cleardevice();
+	device.drawAABB(man, &man.octTree);
 	//Render in device buffer
 	if (device.render_raytracing > 0) {
 		if (enter_once < 0) {
@@ -160,7 +161,7 @@ VOID Initialize()
 	//////////////////////////
 	c = 10;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
-	count = 5;
+	count = 1;
 	for (k = 0; k < count; k++) {
 		EFTYPE x = rand() % 300;
 		EFTYPE z = rand() % 300;
@@ -177,18 +178,13 @@ VOID Initialize()
 					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
 			}
 			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(2, 2, 2).move(x, y, z).rotate(0, 0, 0)
-				.setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 3);
+				.setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 1);
 
 			cur_op = &obj;
 		}
 		man.endGroup();
 	}
 	//////////////////////////
-
-	//do this after all done
-	man.createOctTree();
-	return;
-
 
 	//////////////////////////
 	Group3D& gp = man.addGroup();
