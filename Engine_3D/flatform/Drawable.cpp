@@ -174,7 +174,6 @@ VOID Initialize()
 		.scale(10, 10, 10).move(15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t11, 4).setBackfaceCulling(1);
 	//////////////////////////
 
-#if 0
 	//////////////////////////
 	c = 10;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
@@ -231,6 +230,7 @@ VOID Initialize()
 		man.endGroup();
 	}
 	//////////////////////////
+#if 0
 	//////////////////////////
 	// generate teapot
 	Object3D& obj = man.addTransparentObject(0.05).renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);

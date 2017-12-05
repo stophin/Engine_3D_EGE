@@ -814,14 +814,15 @@ struct Device {
 				shadow_count = 0;
 				count = 4;
 				do {
-					// for each triangle
-					if (0 == ray.type || NULL == ray.obj) {
-						olink = &man.objs;
-					}
-					else {
+					// when the ray is reflection or refraction
+					// use the objects around instead of all the objects
+					if (0 && ray.obj && (1 == ray.type || 2 == ray.type )) {
 						man.octs.clearLink();
 						man.octTree.Collision((Obj3D*)ray.obj, &man.octs);
 						olink = &man.octs;
+					}
+					else {
+						olink = &man.objs;
 					}
 
 					Obj3D * obj = olink->link;
@@ -829,6 +830,7 @@ struct Device {
 						int render_state = 0;
 						VObj * v, *v0, *v1, *vtemp;
 
+						// for each triangle
 						do {
 							// when the ray is reflection
 							// then use all the verts instead 
