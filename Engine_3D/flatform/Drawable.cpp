@@ -173,7 +173,48 @@ VOID Initialize()
 		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
 		.scale(10, 10, 10).move(15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t11, 4).setBackfaceCulling(1);
 	//////////////////////////
+	//////////////////////////
+	// generate teapot
+	{
+		Object3D& obj = man.addTransparentObject(5).renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
+		int normal = -1;
+		int vertex_count = 0;
+		int triangle_count = 0;
+		for (int i = 0; i <= g_teapotPositionNum - 3; i += 3) {
+			vertex_count++;
+			obj.addIndice(g_teapotPositions[i], g_teapotPositions[i + 1], g_teapotPositions[i + 2]);
+			//,g_teapotNormals[i], g_teapotNormals[i + 1], g_teapotNormals[i + 2]);
+		}
+		for (int i = 0; i <= g_teapotIndicesNum - 3; i += 3) {
+			triangle_count++;
+			obj.setIndice(g_teapotIndices[i], g_teapotIndices[i + 1], g_teapotIndices[i + 2]);
+		}
+		obj.move(50, -30, 20).rotate(-90, 30, 0).setTexture(tman, t9, 1).setUV(0, -300);// .setTexture(tman, t7, 1);
+		cur_op = &obj;
+	}
+	//////////////////////////
 
+	//////////////////////////
+	// generate teapot
+	{
+		Object3D& obj = man.addReflectionObject(0.05).renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
+		int normal = -1;
+		int vertex_count = 0;
+		int triangle_count = 0;
+		for (int i = 0; i <= g_teapotPositionNum - 3; i += 3) {
+			vertex_count++;
+			obj.addIndice(g_teapotPositions[i], g_teapotPositions[i + 1], g_teapotPositions[i + 2]);
+			//,g_teapotNormals[i], g_teapotNormals[i + 1], g_teapotNormals[i + 2]);
+		}
+		for (int i = 0; i <= g_teapotIndicesNum - 3; i += 3) {
+			triangle_count++;
+			obj.setIndice(g_teapotIndices[i], g_teapotIndices[i + 1], g_teapotIndices[i + 2]);
+		}
+		obj.move(-50, -30, 20).rotate(-90, 30, 0).setTexture(tman, t9, 1).setUV(0, -300);// .setTexture(tman, t7, 1);
+		cur_op = &obj;
+	}
+	//////////////////////////
+#if 0
 	//////////////////////////
 	c = 10;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
@@ -230,25 +271,6 @@ VOID Initialize()
 		man.endGroup();
 	}
 	//////////////////////////
-#if 0
-	//////////////////////////
-	// generate teapot
-	Object3D& obj = man.addTransparentObject(0.05).renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
-	int normal = -1;
-	int vertex_count = 0;
-	int triangle_count = 0;
-	for (int i = 0; i <= g_teapotPositionNum - 3; i += 3) {
-		vertex_count++;
-		obj.addIndice(g_teapotPositions[i], g_teapotPositions[i + 1], g_teapotPositions[i + 2]);
-		//,g_teapotNormals[i], g_teapotNormals[i + 1], g_teapotNormals[i + 2]);
-	}
-	for (int i = 0; i <= g_teapotIndicesNum - 3; i += 3) {
-		triangle_count++;
-		obj.setIndice(g_teapotIndices[i], g_teapotIndices[i + 1], g_teapotIndices[i + 2]);
-	}
-	obj.move(50, -30, 20).rotate(-90, 30, 0).setTexture(tman, t9, 1).setUV(0, -300);// .setTexture(tman, t7, 1);
-	cur_op = &obj;
-	//////////////////////////
 	//////////////////////////
 	cur_op = &man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
 		.scale(10, 10, 10).rotate(-90, -90, -90).move(-50, -80, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t0);
@@ -294,90 +316,8 @@ VOID Initialize()
 	}
 	//////////////////////////
 #endif
-	//get scnene aabb
-	Obj3D* _obj = man.objs.link;
-	INT render_state = 0;
-	man.rect.set(EP_MAX, EP_MAX, EP_MAX, 0, 0, 0);
-	if (_obj) {
-		do {
-			man.octTree.v0.set(_obj->leftTopBack) * _obj->M;
-			man.octTree.v1.set(_obj->rightBottomFront) * _obj->M;
-			if (man.rect.x > man.octTree.v0.x) man.rect.x = man.octTree.v0.x;
-			if (man.rect.y > man.octTree.v0.y) man.rect.y = man.octTree.v0.y;
-			if (man.rect.z > man.octTree.v0.z) man.rect.z = man.octTree.v0.z;
-			if (man.rect.width < man.octTree.v1.x) man.rect.width = man.octTree.v1.x;
-			if (man.rect.height < man.octTree.v1.y) man.rect.height = man.octTree.v1.y;
-			if (man.rect.depth < man.octTree.v1.z) man.rect.depth = man.octTree.v1.z;
-
-			//first do objects till end
-			//then do reflection and then transparent object
-			if (render_state == 0) {
-				_obj = man.objs.next(_obj);
-				if (!(_obj && _obj != man.objs.link)) {
-					_obj = man.refl.link;
-					render_state = 1;
-					if (!_obj) {
-						//or render reflection points
-						_obj = man.tras.link;
-						render_state = 2;
-					}
-				}
-			}
-			else if (render_state == 1) {
-				_obj = man.refl.next(_obj);
-				if (!(_obj && _obj != man.refl.link)) {
-					_obj = man.tras.link;
-					render_state = 2;
-				}
-			}
-			else {
-				_obj = man.tras.next(_obj);
-				if (!(_obj && _obj != man.tras.link)) {
-					break;
-				}
-			}
-		} while (_obj);
-	}
-	man.rect.width = man.rect.width - man.rect.x;
-	man.rect.height = man.rect.height - man.rect.y;
-	man.rect.depth = man.rect.depth - man.rect.z;
-	//create oct-tree
-	man.octTree.bounds.set(man.rect);
-	_obj = man.objs.link;
-	render_state = 0;
-	if (_obj) {
-		do {
-			man.octTree.Insert(_obj);
-
-			//first do objects till end
-			//then do reflection and then transparent object
-			if (render_state == 0) {
-				_obj = man.objs.next(_obj);
-				if (!(_obj && _obj != man.objs.link)) {
-					_obj = man.refl.link;
-					render_state = 1;
-					if (!_obj) {
-						//or render reflection points
-						_obj = man.tras.link;
-						render_state = 2;
-					}
-				}
-			}
-			else if (render_state == 1) {
-				_obj = man.refl.next(_obj);
-				if (!(_obj && _obj != man.refl.link)) {
-					_obj = man.tras.link;
-					render_state = 2;
-				}
-			}
-			else {
-				_obj = man.tras.next(_obj);
-				if (!(_obj && _obj != man.tras.link)) {
-					break;
-				}
-			}
-		} while (_obj);
-	}
+	//do this after all done
+	man.createOctTree();
 }
 
 EFTYPE scale = 10.0;

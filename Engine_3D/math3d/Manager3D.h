@@ -39,6 +39,92 @@ public:
 
 	Rect3D rect;
 	OctTree octTree;
+	void createOctTree() {
+		//get scnene aabb
+		Obj3D* _obj = this->objs.link;
+		INT render_state = 0;
+		this->rect.set(EP_MAX, EP_MAX, EP_MAX, 0, 0, 0);
+		if (_obj) {
+			do {
+				this->octTree.v0.set(_obj->leftTopBack) * _obj->M;
+				this->octTree.v1.set(_obj->rightBottomFront) * _obj->M;
+				if (this->rect.x > this->octTree.v0.x) this->rect.x = this->octTree.v0.x;
+				if (this->rect.y > this->octTree.v0.y) this->rect.y = this->octTree.v0.y;
+				if (this->rect.z > this->octTree.v0.z) this->rect.z = this->octTree.v0.z;
+				if (this->rect.width < this->octTree.v1.x) this->rect.width = this->octTree.v1.x;
+				if (this->rect.height < this->octTree.v1.y) this->rect.height = this->octTree.v1.y;
+				if (this->rect.depth < this->octTree.v1.z) this->rect.depth = this->octTree.v1.z;
+
+				//first do objects till end
+				//then do reflection and then transparent object
+				if (render_state == 0) {
+					_obj = this->objs.next(_obj);
+					if (!(_obj && _obj != this->objs.link)) {
+						_obj = this->refl.link;
+						render_state = 1;
+						if (!_obj) {
+							//or render reflection points
+							_obj = this->tras.link;
+							render_state = 2;
+						}
+					}
+				}
+				else if (render_state == 1) {
+					_obj = this->refl.next(_obj);
+					if (!(_obj && _obj != this->refl.link)) {
+						_obj = this->tras.link;
+						render_state = 2;
+					}
+				}
+				else {
+					_obj = this->tras.next(_obj);
+					if (!(_obj && _obj != this->tras.link)) {
+						break;
+					}
+				}
+			} while (_obj);
+		}
+		this->rect.width = this->rect.width - this->rect.x;
+		this->rect.height = this->rect.height - this->rect.y;
+		this->rect.depth = this->rect.depth - this->rect.z;
+		//create oct-tree
+		this->octTree.bounds.set(this->rect);
+		_obj = this->objs.link;
+		render_state = 0;
+		if (_obj) {
+			do {
+				this->octTree.Insert(_obj);
+
+				//first do objects till end
+				//then do reflection and then transparent object
+				if (render_state == 0) {
+					_obj = this->objs.next(_obj);
+					if (!(_obj && _obj != this->objs.link)) {
+						_obj = this->refl.link;
+						render_state = 1;
+						if (!_obj) {
+							//or render reflection points
+							_obj = this->tras.link;
+							render_state = 2;
+						}
+					}
+				}
+				else if (render_state == 1) {
+					_obj = this->refl.next(_obj);
+					if (!(_obj && _obj != this->refl.link)) {
+						_obj = this->tras.link;
+						render_state = 2;
+					}
+				}
+				else {
+					_obj = this->tras.next(_obj);
+					if (!(_obj && _obj != this->tras.link)) {
+						break;
+					}
+				}
+			} while (_obj);
+		}
+	}
 
 	void setCameraRange(EFTYPE o_w, EFTYPE o_h, EFTYPE s_w, EFTYPE s_h) {
 		Cam3D * cam = this->cams.link;

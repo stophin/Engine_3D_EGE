@@ -6,7 +6,6 @@
 
 #include "../math3d/Object3D.h"
 
-typedef class Obj3D Obj3D;
 class Rect3D {
 public:
 	Rect3D(EFTYPE x, EFTYPE y, EFTYPE z, EFTYPE w, EFTYPE h, EFTYPE d) :
