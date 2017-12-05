@@ -191,17 +191,14 @@ public:
 		return index;
 	}
 
-	Vert3D v0, v1;
 	Rect3D rect;
 	void Insert(Obj3D * obj) {
 		if (NULL == obj) {
 			return;
 		}
 		if (this->hasChild) {
-			Obj3D * vobj = obj;
-			v0.set(vobj->aabb[6]) * vobj->M;//leftTopBack
-			v1.set(vobj->aabb[0]) * vobj->M;//rightBottomFront
-			rect.set(v0.x, v0.y, v0.z, abs(v1.x - v0.x), abs(v1.y - v0.y), abs(v1.z - v0.z));
+			rect.set(obj->leftTopBack.x, obj->leftTopBack.y, obj->leftTopBack.z, 
+				obj->rightBottomFront.x - obj->leftTopBack.x, obj->rightBottomFront.y - obj->leftTopBack.y, obj->rightBottomFront.z - obj->leftTopBack.z);
 			INT index = this->GetIndex(rect);
 			if (index != -1) {
 				this->children[index]->Insert(obj);
@@ -221,10 +218,8 @@ public:
 				do {
 					_next = this->objects.next(_obj);
 
-					Obj3D * vobj = obj;
-					v0.set(vobj->aabb[6]) * vobj->M;//leftTopBack
-					v1.set(vobj->aabb[0]) * vobj->M;//rightBottomFront
-					rect.set(v0.x, v0.y, v0.z, abs(v1.x - v0.x), abs(v1.y - v0.y), abs(v1.z - v0.z));
+					rect.set(obj->leftTopBack.x, obj->leftTopBack.y, obj->leftTopBack.z,
+						obj->rightBottomFront.x - obj->leftTopBack.x, obj->rightBottomFront.y - obj->leftTopBack.y, obj->rightBottomFront.z - obj->leftTopBack.z);
 					INT index = this->GetIndex(rect);
 					if (index != -1) {
 						this->objects.removeLink(_obj);
@@ -245,10 +240,8 @@ public:
 			return;
 		}
 		if (this->hasChild) {
-			Obj3D * vobj = obj;
-			v0.set(vobj->aabb[6]) * vobj->M;//leftTopBack
-			v1.set(vobj->aabb[0]) * vobj->M;//rightBottomFront
-			rect.set(v0.x, v0.y, v0.z, abs(v1.x - v0.x), abs(v1.y - v0.y), abs(v1.z - v0.z));
+			rect.set(obj->leftTopBack.x, obj->leftTopBack.y, obj->leftTopBack.z,
+				obj->rightBottomFront.x - obj->leftTopBack.x, obj->rightBottomFront.y - obj->leftTopBack.y, obj->rightBottomFront.z - obj->leftTopBack.z);
 			INT index = this->GetIndex(rect);
 			if (index != -1) {
 				this->children[index]->Collision(obj, link);
@@ -267,6 +260,78 @@ public:
 
 				_obj = this->objects.next(_obj);
 			} while (_obj && _obj != this->objects.link);
+		}
+	}
+
+	Vert3D v[8];
+	Vert3D v0, v1, v2;
+	Vert3D n0, n1, n, p;
+	void Collision(Vert3D& vo, Vert3D& vd, MultiLinkList<Obj3D> * link) {
+		if (NULL == link) {
+			return;
+		}
+		if (this->hasChild) {
+			for (int i = 0; i < MAX_QUARDANTS; i++) {
+				if (this->children[i]) {
+					this->children[i]->Collision(vo, vd, link);
+				}
+			}
+		}
+		if (NULL == this->objects.link) {
+			return;
+		}
+		v[0].set(this->bounds.x, this->bounds.y, this->bounds.z);
+		v[1].set(this->bounds.x, this->bounds.y + this->bounds.height, this->bounds.z);
+		v[2].set(this->bounds.x + this->bounds.width, this->bounds.y + this->bounds.height, this->bounds.z);
+		v[3].set(this->bounds.x + this->bounds.width, this->bounds.y, this->bounds.z);
+		v[4].set(this->bounds.x, this->bounds.y, this->bounds.z + this->bounds.depth);
+		v[5].set(this->bounds.x, this->bounds.y + this->bounds.height, this->bounds.z + this->bounds.depth);
+		v[6].set(this->bounds.x + this->bounds.width, this->bounds.y + this->bounds.height, this->bounds.z + this->bounds.depth);
+		v[7].set(this->bounds.x + this->bounds.width, this->bounds.y, this->bounds.z + this->bounds.depth);
+		//012 023 326 367 034 437 045 051 475 576 152 256
+		static INT indice[12][3] = {
+			{ 0, 1, 2 },
+			{ 0, 2, 3 },
+			{ 3, 2, 6 },
+			{ 3, 6, 7 },
+			{ 0, 3, 4 },
+			{ 4, 3, 7 },
+			{ 0, 4, 5 },
+			{ 0, 5, 1 },
+			{ 4, 7, 5 },
+			{ 5, 7, 6 },
+			{ 1, 5, 2 },
+			{ 2, 5, 6 }
+		};
+		INT intersect = 0;
+		for (int i = 0; i < 12; i++) {
+			v0.set(v[indice[i][0]]);
+			v1.set(v[indice[i][1]]);
+			v2.set(v[indice[i][2]]);
+
+			n0.set(v1) - v0;
+			n1.set(v2) - v0;
+			n = n0 * n1;
+			EFTYPE cross = vd  & n;
+			if (cross < 0) {
+				continue;
+			}
+			EFTYPE trans = Vert3D::GetLineIntersectPointWithTriangle(v0, v1, v2, vo, vd, 10000, p);
+			if (EP_GTZERO(trans)) {
+				intersect = 1;
+				break;
+			}
+		}
+		if (intersect) {
+			Obj3D * _obj = this->objects.link;
+			if (_obj) {
+				do {
+
+					link->insertLink(_obj);
+
+					_obj = this->objects.next(_obj);
+				} while (_obj && _obj != this->objects.link);
+			}
 		}
 	}
 

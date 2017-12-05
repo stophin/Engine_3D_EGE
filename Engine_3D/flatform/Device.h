@@ -596,7 +596,7 @@ struct Device {
 														r.set(n0);
 														t = r.negative() & v->n_r;
 														if (t < 0) t = -t;
-														transparent = obj->transparent;
+														transparent = 1.0 / obj->transparent;
 														if (transparent < 0) transparent = -transparent;
 
 														_i = (i - obj->center_r.y) * (transparent / t) + obj->center_r.y;
@@ -822,7 +822,11 @@ struct Device {
 						olink = &man.octs;
 					}
 					else {
-						olink = &man.objs;
+						man.octs.clearLink();
+						n0.set(ray.original) *cam->M_1;
+						n1.set(ray.direction) *cam->M_1;
+						man.octTree.Collision(n0, n1, &man.octs);
+						olink = &man.octs;
 					}
 
 					Obj3D * obj = olink->link;
@@ -999,6 +1003,7 @@ struct Device {
 
 						//normal verts
 						if (0 == nearest_vert->type) {
+							break;
 							//get shadow test ray
 							if (cur_lgt && (shadow_count == 0 || cur_lgt != man.lgts.link)) {
 								n2.set(0, 0, 0, 1) * cur_lgt->M * cam->M;

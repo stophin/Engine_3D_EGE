@@ -46,14 +46,14 @@ public:
 		this->rect.set(EP_MAX, EP_MAX, EP_MAX, 0, 0, 0);
 		if (_obj) {
 			do {
-				this->octTree.v0.set(_obj->leftTopBack) * _obj->M;
-				this->octTree.v1.set(_obj->rightBottomFront) * _obj->M;
-				if (this->rect.x > this->octTree.v0.x) this->rect.x = this->octTree.v0.x;
-				if (this->rect.y > this->octTree.v0.y) this->rect.y = this->octTree.v0.y;
-				if (this->rect.z > this->octTree.v0.z) this->rect.z = this->octTree.v0.z;
-				if (this->rect.width < this->octTree.v1.x) this->rect.width = this->octTree.v1.x;
-				if (this->rect.height < this->octTree.v1.y) this->rect.height = this->octTree.v1.y;
-				if (this->rect.depth < this->octTree.v1.z) this->rect.depth = this->octTree.v1.z;
+				Vert3D &v0 = _obj->leftTopBack;
+				Vert3D &v1 = _obj->rightBottomFront;
+				if (this->rect.x > v0.x) this->rect.x = v0.x;
+				if (this->rect.y > v0.y) this->rect.y = v0.y;
+				if (this->rect.z > v0.z) this->rect.z = v0.z;
+				if (this->rect.width < v1.x) this->rect.width = v1.x;
+				if (this->rect.height < v1.y) this->rect.height = v1.y;
+				if (this->rect.depth < v1.z) this->rect.depth = v1.z;
 
 				//first do objects till end
 				//then do reflection and then transparent object

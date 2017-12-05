@@ -105,7 +105,7 @@ typedef class Object3D Object3D;
 class Object3D {
 public:
 	Object3D() : 
-		_M(&M, &M_1, 1), texture(NULL),
+		_M(&M, &M_1, 1), texture(NULL), anti(1),
 		cam(NULL), indice(3), verts(0), verts_r(1), verts_f(2), transparent(0), reflection(0), v0(NULL), v1(NULL), render_aabb(0),
 		texture_type(0), vertex_type(0), backfaceculling(0){
 		center.init();
@@ -612,8 +612,9 @@ public:
 	VObj *v0, *v1;
 
 	INT render_aabb;
+	Vert3D aabb[8];
 	union {
-		Vert3D aabb[8];
+		Vert3D aabb_w[8];
 		struct {
 			Vert3D rightBottomFront;
 			Vert3D _aabb[5];
@@ -621,11 +622,23 @@ public:
 			Vert3D __aabb;
 		};
 	};
+	Vert3D aabb_r[8];
 
 	Object3D& renderAABB() {
 		this->render_aabb = 1;
 
 		return *this;
+	}
+
+	void refreshAABB() {
+		if (this->render_aabb) {
+			for (int i = 0; i < 8; i++) {
+				//world coordinate
+				this->aabb_w[i].set(this->aabb[i]) * M;
+				//camera coordinate
+				this->aabb_r[i].set(this->aabb_w[i]) * cam->M;
+			}
+		}
 	}
 
 	void render_normalize() {
@@ -638,6 +651,7 @@ public:
 			CM.setI() * M * this->cam->M;
 
 			if (this->render_aabb > 0) {
+				//initialize aabb
 				this->render_aabb = -this->render_aabb;
 				//8 quadrants
 				this->aabb[1].set(this->aabb[0].x, this->aabb[6].y, this->aabb[0].z, 1);
@@ -647,11 +661,12 @@ public:
 				this->aabb[5].set(this->aabb[0].x, this->aabb[6].y, this->aabb[6].z, 1);
 				this->aabb[7].set(this->aabb[6].x, this->aabb[0].y, this->aabb[6].z, 1);
 			}
+			this->refreshAABB();
 			if (this->render_aabb) {
 				int i;
 				for (i = 0; i < 8; i++) {
 					// object coordinate -> world coordinate -> camera coordinate
-					v->v_r.set(this->aabb[i]) * CM;
+					v->v_r.set(this->aabb_r[i]);
 					v->v_r.w = EP_MAX;
 					// cut in camera coordinate
 					if (!this->cam->normalize(v->v_r)) {
