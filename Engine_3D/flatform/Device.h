@@ -816,7 +816,7 @@ struct Device {
 				do {
 					// when the ray is reflection or refraction
 					// use the objects around instead of all the objects
-					if (0 && ray.obj && (1 == ray.type || 2 == ray.type )) {
+					if (ray.obj && (1 == ray.type || 2 == ray.type )) {
 						man.octs.clearLink();
 						man.octTree.Collision((Obj3D*)ray.obj, &man.octs);
 						olink = &man.octs;
@@ -941,9 +941,10 @@ struct Device {
 								} while (v && v != link->link);
 							}
 
-							//first do objects till end
-							//then do reflection and then transparent object
-							if (0 == ray.type) {
+							// use the objects around or all the objects?
+							if (&man.objs == olink) {
+								//first do objects till end
+								//then do reflection and then transparent object
 								if (render_state == 0) {
 									obj = man.objs.next(obj);
 									if (!(obj && obj != man.objs.link)) {

@@ -218,6 +218,8 @@ struct Vert3D {
 	static EFTYPE GetLineIntersectPointWithTriangle(const Vert3D& va, const Vert3D& vb, const Vert3D& vc, const Vert3D& vo, const Vert3D& vd, EFTYPE max, Vert3D& p) {
 		EFTYPE beta, rama, tran;
 		EFTYPE M, M_1;
+		//vo + t * vd = va + beta * (vb - va) + rama * (vc - va)
+		//intersect point is in triangle va-vb-vc when beta > 0 and rama > 0 and beta + rama < 1
 		//AB = C
 		//==>
 		//|xa - xb, xa - xc, xd||b|   |xa - xe|
