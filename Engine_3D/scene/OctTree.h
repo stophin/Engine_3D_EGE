@@ -217,7 +217,6 @@ public:
 		if (this->objects.linkcount > this->maxObjects && this->level < this->maxLevels) {
 			this->Split();
 			Obj3D * _obj = this->objects.link, *_next;
-			Object3D * vobj;
 			if (_obj) {
 				do {
 					_next = this->objects.next(_obj);
@@ -288,26 +287,6 @@ public:
 				this->Insert(obj);
 			}
 		}
-	}
-
-	//for multi-link list
-#define MAX_OCTTREE_LINK	1
-	INT uniqueID;
-	OctTree * prev[MAX_OCTTREE_LINK];
-	OctTree * next[MAX_OCTTREE_LINK];
-	void operator delete(void * _ptr){
-		if (_ptr == NULL)
-		{
-			return;
-		}
-		for (INT i = 0; i < MAX_OCTTREE_LINK; i++)
-		{
-			if (((OctTree*)_ptr)->prev[i] != NULL || ((OctTree*)_ptr)->next[i] != NULL)
-			{
-				return;
-			}
-		}
-		delete(_ptr);
 	}
 };
 

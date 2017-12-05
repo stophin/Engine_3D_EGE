@@ -857,8 +857,7 @@ struct Device {
 											//NOTE: ray tracing is in camera coordinate
 											//get intersect point
 											trans = Vert3D::GetLineIntersectPointWithTriangle(v->v_c, v0->v_c, v1->v_c, ray.original, ray.direction, trans_last, p);
-											//normal: trans is not zero
-											//reflection or refraction: trans is bigger than zero
+											//trans is greate than zero, and litte than last trans
 											if (EP_GTZERO(trans)) {
 												Verts * verts = new Verts();
 												if (!verts) {
