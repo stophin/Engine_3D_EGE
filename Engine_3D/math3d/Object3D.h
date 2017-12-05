@@ -661,8 +661,8 @@ public:
 				this->aabb[5].set(this->aabb[0].x, this->aabb[6].y, this->aabb[6].z, 1);
 				this->aabb[7].set(this->aabb[6].x, this->aabb[0].y, this->aabb[6].z, 1);
 			}
-			this->refreshAABB();
 			if (this->render_aabb) {
+				this->refreshAABB();
 				int i;
 				for (i = 0; i < 8; i++) {
 					// object coordinate -> world coordinate -> camera coordinate
