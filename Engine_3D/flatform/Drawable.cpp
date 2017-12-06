@@ -57,7 +57,7 @@ VOID onPaint(HWND hWnd)
 	// Place draw code here
 	setcolor(BLACK);
 	cleardevice();
-	device.drawAABB(man, &man.octTree);
+	//device.drawAABB(man, &man.octTree);
 	//Render in device buffer
 	if (device.render_raytracing > 0) {
 		if (enter_once < 0) {

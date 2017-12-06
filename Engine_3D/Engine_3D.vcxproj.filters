@@ -81,12 +81,6 @@
     <ClInclude Include="math3d\Matrix3D.h">
       <Filter>头文件\math3d</Filter>
     </ClInclude>
-    <ClInclude Include="flatform\Device.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="math3d\Texture.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="teapot.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -95,6 +89,12 @@
     </ClInclude>
     <ClInclude Include="scene\OctTree.h">
       <Filter>头文件\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="math3d\Texture.h">
+      <Filter>头文件\math3d</Filter>
+    </ClInclude>
+    <ClInclude Include="flatform\Device.h">
+      <Filter>头文件\platform</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

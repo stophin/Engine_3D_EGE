@@ -266,35 +266,15 @@ public:
 	Vert3D v[8];
 	Vert3D v0, v1, v2;
 	Vert3D n0, n1, n, p;
-	void Collision(Vert3D& vo, Vert3D& vd, Camera3D * cam, MultiLinkList<Obj3D> * link) {
-		if (NULL == link) {
-			return;
-		}
+	INT Collision(Vert3D& vo, Vert3D& vd, Camera3D *  cam, Obj3D * obj) {
 		if (NULL == cam) {
-			return;
+			return 0;
 		}
-		if (this->hasChild) {
-			for (int i = 0; i < MAX_QUARDANTS; i++) {
-				if (this->children[i]) {
-					this->children[i]->Collision(vo, vd, cam, link);
-				}
-			}
+		if (NULL == obj) {
+			return 0;
 		}
-		if (NULL == this->objects.link) {
-			return;
-		}
-		v[0].set(this->bounds.x, this->bounds.y, this->bounds.z);
-		v[1].set(this->bounds.x, this->bounds.y + this->bounds.height, this->bounds.z);
-		v[2].set(this->bounds.x + this->bounds.width, this->bounds.y + this->bounds.height, this->bounds.z);
-		v[3].set(this->bounds.x + this->bounds.width, this->bounds.y, this->bounds.z);
-		v[4].set(this->bounds.x, this->bounds.y, this->bounds.z + this->bounds.depth);
-		v[5].set(this->bounds.x, this->bounds.y + this->bounds.height, this->bounds.z + this->bounds.depth);
-		v[6].set(this->bounds.x + this->bounds.width, this->bounds.y + this->bounds.height, this->bounds.z + this->bounds.depth);
-		v[7].set(this->bounds.x + this->bounds.width, this->bounds.y, this->bounds.z + this->bounds.depth);
-		//to camera coordinate
-		for (int i = 0; i < 8; i++) {
-			v[i] * cam->M;
-		}
+		Obj3D * _obj = obj;
+
 		//012 023 326 367 034 437 045 051 475 576 152 256
 		static INT indice[12][3] = {
 			{ 0, 1, 2 },
@@ -312,13 +292,13 @@ public:
 		};
 		INT intersect = 0;
 		for (int i = 0; i < 12; i++) {
-			v0.set(v[indice[i][0]]);
-			v1.set(v[indice[i][1]]);
-			v2.set(v[indice[i][2]]);
+			v0.set(_obj->aabb_r[indice[i][0]]);
+			v1.set(_obj->aabb_r[indice[i][1]]);
+			v2.set(_obj->aabb_r[indice[i][2]]);
 
 			n0.set(v1) - v0;
 			n1.set(v2) - v0;
-			n = n0 * n1;
+			n.set(n0) * n1;
 			//back face culling
 			EFTYPE cross = vd  & n;
 			if (cross < 0) {
@@ -331,16 +311,9 @@ public:
 			}
 		}
 		if (intersect) {
-			Obj3D * _obj = this->objects.link;
-			if (_obj) {
-				do {
-
-					link->insertLink(_obj);
-
-					_obj = this->objects.next(_obj);
-				} while (_obj && _obj != this->objects.link);
-			}
+			return 1;
 		}
+		return 0;
 	}
 
 	void change(Obj3D * obj) {
@@ -362,6 +335,4 @@ public:
 		}
 	}
 };
-
-
 #endif

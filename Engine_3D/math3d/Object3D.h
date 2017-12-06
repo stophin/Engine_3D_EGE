@@ -112,8 +112,8 @@ public:
 		center_r.init();
 		center_w.init();
 
-		aabb[0].set(-EP_MAX, -EP_MAX, -EP_MAX, 1);
-		aabb[6].set(EP_MAX, EP_MAX, EP_MAX, 1);
+		rightBottomFront_O.set(-EP_MAX, -EP_MAX, -EP_MAX, 1);
+		leftTopBack_O.set(EP_MAX, EP_MAX, EP_MAX, 1);
 		octTree = NULL;
 	}
 	~Object3D() {
@@ -538,14 +538,14 @@ public:
 
 		if (this->render_aabb) {
 			//max
-			if (this->aabb[0].x < v->v.x) this->aabb[0].x = v->v.x;
-			if (this->aabb[0].y < v->v.y) this->aabb[0].y = v->v.y;
-			if (this->aabb[0].z < v->v.z) this->aabb[0].z = v->v.z;
+			if (this->rightBottomFront_O.x < v->v.x) this->rightBottomFront_O.x = v->v.x;
+			if (this->rightBottomFront_O.y < v->v.y) this->rightBottomFront_O.y = v->v.y;
+			if (this->rightBottomFront_O.z < v->v.z) this->rightBottomFront_O.z = v->v.z;
 
 			//min
-			if (this->aabb[6].x > v->v.x) this->aabb[6].x = v->v.x;
-			if (this->aabb[6].y > v->v.y) this->aabb[6].y = v->v.y;
-			if (this->aabb[6].z > v->v.z) this->aabb[6].z = v->v.z;
+			if (this->leftTopBack_O.x > v->v.x) this->leftTopBack_O.x = v->v.x;
+			if (this->leftTopBack_O.y > v->v.y) this->leftTopBack_O.y = v->v.y;
+			if (this->leftTopBack_O.z > v->v.z) this->leftTopBack_O.z = v->v.z;
 		}
 
 		this->verts.insertLink(v);
@@ -612,17 +612,36 @@ public:
 	VObj *v0, *v1;
 
 	INT render_aabb;
-	Vert3D aabb[8];
+	union {
+		Vert3D aabb[8];
+		struct {
+			Vert3D _aabb_o[2];
+			Vert3D rightBottomFront_O;
+			Vert3D __aabb_o;
+			Vert3D leftTopBack_O;
+			Vert3D ___aabb_o[3];
+		};
+	};
 	union {
 		Vert3D aabb_w[8];
 		struct {
+			Vert3D _aabb[2];
 			Vert3D rightBottomFront;
-			Vert3D _aabb[5];
-			Vert3D leftTopBack;
 			Vert3D __aabb;
+			Vert3D leftTopBack;
+			Vert3D ___aabb[3];
 		};
 	};
-	Vert3D aabb_r[8];
+	union {
+		Vert3D aabb_r[8];
+		struct {
+			Vert3D _aabb_r[2];
+			Vert3D rightBottomFront_R;
+			Vert3D __aabb_r;
+			Vert3D leftTopBack_R;
+			Vert3D ___aabb_r[3];
+		};
+	};
 
 	Object3D& renderAABB() {
 		this->render_aabb = 1;
@@ -630,11 +649,18 @@ public:
 		return *this;
 	}
 
-	void refreshAABB() {
+	void refreshAABBW() {
 		if (this->render_aabb) {
 			for (int i = 0; i < 8; i++) {
 				//world coordinate
 				this->aabb_w[i].set(this->aabb[i]) * M;
+			}
+		}
+	}
+
+	void refreshAABBC() {
+		if (this->render_aabb) {
+			for (int i = 0; i < 8; i++) {
 				//camera coordinate
 				this->aabb_r[i].set(this->aabb_w[i]) * cam->M;
 			}
@@ -654,15 +680,16 @@ public:
 				//initialize aabb
 				this->render_aabb = -this->render_aabb;
 				//8 quadrants
-				this->aabb[1].set(this->aabb[0].x, this->aabb[6].y, this->aabb[0].z, 1);
-				this->aabb[2].set(this->aabb[6].x, this->aabb[6].y, this->aabb[0].z, 1);
-				this->aabb[3].set(this->aabb[6].x, this->aabb[6].y, this->aabb[0].z, 1);
-				this->aabb[4].set(this->aabb[0].x, this->aabb[0].y, this->aabb[6].z, 1);
-				this->aabb[5].set(this->aabb[0].x, this->aabb[6].y, this->aabb[6].z, 1);
-				this->aabb[7].set(this->aabb[6].x, this->aabb[0].y, this->aabb[6].z, 1);
+				this->aabb[0].set(this->leftTopBack_O.x, this->leftTopBack_O.y, this->rightBottomFront_O.z);
+				this->aabb[1].set(this->leftTopBack_O.x, this->rightBottomFront_O.y, this->rightBottomFront_O.z);
+				this->aabb[3].set(this->rightBottomFront_O.x, this->leftTopBack_O.y, this->rightBottomFront_O.z);
+				this->aabb[5].set(this->leftTopBack_O.x, this->rightBottomFront_O.y, this->leftTopBack_O.z);
+				this->aabb[6].set(this->rightBottomFront_O.x, this->rightBottomFront_O.y, this->leftTopBack_O.z);
+				this->aabb[7].set(this->rightBottomFront_O.x, this->leftTopBack_O.y, this->leftTopBack_O.z);
 			}
 			if (this->render_aabb) {
-				this->refreshAABB();
+				this->refreshAABBW();
+				this->refreshAABBC();
 				int i;
 				for (i = 0; i < 8; i++) {
 					// object coordinate -> world coordinate -> camera coordinate

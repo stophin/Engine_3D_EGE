@@ -273,11 +273,11 @@ struct Vert3D {
 		}
 		//beta > 0 && rama > 0 && beta + rama < 1
 		rama = (i * (temp2)+ h * (temp4)+ g * (temp6)) * M_1;
-		if (rama < 0 || rama > 1) {
+		if (rama <= 0 || rama >= 1) {
 			return 0;
 		}
 		beta = (j * (temp1)+ k * (temp3)+ l * (temp5)) * M_1;
-		if (beta < 0 || beta > 1 - rama) {
+		if (beta <= 0 || beta >= 1 - rama) {
 			return 0;
 		}
 		//set intersected point

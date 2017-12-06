@@ -817,19 +817,15 @@ struct Device {
 					// when the ray is reflection or refraction
 					// use the objects around instead of all the objects
 					if (1 == ray.type || 2 == ray.type) {
+						if (!ray.obj) {
+							ray.obj = ray.obj;
+						}
 						man.octs.clearLink();
 						man.octTree.Collision((Obj3D*)ray.obj, &man.octs);
 						olink = &man.octs;
 					}
 					else {
-						if (0) {
-							man.octs.clearLink();
-							man.octTree.Collision(ray.original, ray.direction, (Cam3D*)cam, &man.octs);
-							olink = &man.octs;
-						}
-						else {
-							olink = &man.objs;
-						}
+						olink = &man.objs;
 					}
 
 					Obj3D * obj = olink->link;
@@ -839,112 +835,120 @@ struct Device {
 
 						// for each triangle
 						do {
-							// when the ray is reflection
-							// then use all the verts instead 
-							// of the verts after frustrum culling
-							if (1 == ray.type) {
-								link = &obj->verts;
+							//object aabb intersection
+							INT intersection = 1;
+							if (&man.objs == olink) {
+								intersection = man.octTree.Collision(ray.original, ray.direction, cam, obj);
 							}
-							else {
-								link = &obj->verts_r;
-							}
-							v = link->link;
-							// more than 3 verts
-							if (v && link->linkcount >= 3) {
-								v0 = NULL; v1 = NULL;
-								EFTYPE trans_last = 1000;
-								do {
-									//there must be three verts
-									if (v0 && v1) {
-										// back face culling
-										// when the ray is shadow testing
-										// then do not need back face culling
-										if (v->backface > 0 || (3 == ray.type && obj->backfaceculling == 0))
-										{
-											//NOTE: ray tracing is in camera coordinate
-											//get intersect point
-											trans = Vert3D::GetLineIntersectPointWithTriangle(v->v_c, v0->v_c, v1->v_c, ray.original, ray.direction, trans_last, p);
-											//trans is greate than zero, and litte than last trans
-											if (EP_GTZERO(trans)) {
-												Verts * verts = new Verts();
-												if (!verts) {
-													verts = verts;
-												}
-												else {
-													trans_last = trans;
-													verts->v.set(p);
-													verts->trans = trans;
-													verts->n_r.set(v->n_r);
-													verts->obj = obj;
-													raytracing_verts.insertLink(verts);
-													__image = &verts->color;
+							if (intersection) {
 
-													//shadow test set color to black or white
-													//then stop ray tracing
-													if (3 == ray.type) {
-														*__image = Light3D::multi(ray.color, ray.f / 5);
-														verts->type = 0;
-														break;
+								// when the ray is reflection
+								// then use all the verts instead 
+								// of the verts after frustrum culling
+								if (1 == ray.type) {
+									link = &obj->verts;
+								}
+								else {
+									link = &obj->verts_r;
+								}
+								v = link->link;
+								// more than 3 verts
+								if (v && link->linkcount >= 3) {
+									v0 = NULL; v1 = NULL;
+									EFTYPE trans_last = 1000;
+									do {
+										//there must be three verts
+										if (v0 && v1) {
+											// back face culling
+											// when the ray is shadow testing
+											// then do not need back face culling
+											if (v->backface > 0 || (3 == ray.type && obj->backfaceculling == 0))
+											{
+												//NOTE: ray tracing is in camera coordinate
+												//get intersect point
+												trans = Vert3D::GetLineIntersectPointWithTriangle(v->v_c, v0->v_c, v1->v_c, ray.original, ray.direction, trans_last, p);
+												//trans is greate than zero, and litte than last trans
+												if (EP_GTZERO(trans)) {
+													Verts * verts = new Verts();
+													if (!verts) {
+														verts = verts;
 													}
 													else {
-														n0.set(p);
-														n1.set(n0)* cam->M_1;
-														//get texture and normal vector at the same time
-														*__image = obj->getTextureColor(n0, n1, n2, n3, v, &verts->v_n);
+														trans_last = trans;
+														verts->v.set(p);
+														verts->trans = trans;
+														verts->n_r.set(v->n_r);
+														verts->obj = obj;
+														raytracing_verts.insertLink(verts);
+														__image = &verts->color;
 
-														//normal verts
-														if (0 == render_state) {
-															//calculate sumption of light factors
-															lgt = man.lgts.link;
-															f = 0;
-															if (lgt) {
-																do {
-																	f += lgt->getFactor(v->n_r, n0);
-
-																	if (render_light < 0) {
-																		break;
-																	}
-
-																	lgt = man.lgts.next(lgt);
-																} while (lgt && lgt != man.lgts.link);
-															}
-															*__image = Light3D::multi(*__image, f);
-															//set type normal
+														//shadow test set color to black or white
+														//then stop ray tracing
+														if (3 == ray.type) {
+															*__image = Light3D::multi(ray.color, ray.f / 5);
 															verts->type = 0;
+															break;
 														}
-														//reflection verts
-														else if (1 == render_state) {
-															//set type reflection
-															verts->type = 1;
-														}
-														//transparent verts
-														else if (2 == render_state) {
-															//set type transparent
-															verts->type = 2;
+														else {
+															n0.set(p);
+															n1.set(n0)* cam->M_1;
+															//get texture and normal vector at the same time
+															*__image = obj->getTextureColor(n0, n1, n2, n3, v, &verts->v_n);
+
+															//normal verts
+															if (0 == render_state) {
+																//calculate sumption of light factors
+																lgt = man.lgts.link;
+																f = 0;
+																if (lgt) {
+																	do {
+																		f += lgt->getFactor(v->n_r, n0);
+
+																		if (render_light < 0) {
+																			break;
+																		}
+
+																		lgt = man.lgts.next(lgt);
+																	} while (lgt && lgt != man.lgts.link);
+																}
+																*__image = Light3D::multi(*__image, f);
+																//set type normal
+																verts->type = 0;
+															}
+															//reflection verts
+															else if (1 == render_state) {
+																//set type reflection
+																verts->type = 1;
+															}
+															//transparent verts
+															else if (2 == render_state) {
+																//set type transparent
+																verts->type = 2;
+															}
 														}
 													}
 												}
 											}
-										}
 
-										if (obj->vertex_type == 1) {
-											v0 = NULL;
-											v1 = NULL;
+											if (obj->vertex_type == 1) {
+												v0 = NULL;
+												v1 = NULL;
+											}
+											else {
+												v0 = v1;
+												v1 = v;
+											}
 										}
-										else {
-											v0 = v1;
+										else if (v0 == NULL) {
+											v0 = v;
+										}
+										else if (v1 == NULL) {
 											v1 = v;
 										}
-									}
-									else if (v0 == NULL) {
-										v0 = v;
-									}
-									else if (v1 == NULL) {
-										v1 = v;
-									}
 
-									v = link->next(v);
-								} while (v && v != link->link);
+										v = link->next(v);
+									} while (v && v != link->link);
+								}
 							}
 
 							// use the objects around or all the objects?
@@ -1006,7 +1010,6 @@ struct Device {
 
 						//normal verts
 						if (0 == nearest_vert->type) {
-							break;
 							//get shadow test ray
 							if (cur_lgt && (shadow_count == 0 || cur_lgt != man.lgts.link)) {
 								n2.set(0, 0, 0, 1) * cur_lgt->M * cam->M;
@@ -1133,6 +1136,7 @@ struct Device {
 			}
 		}
 		if (render_raytracing < 0) {
+			//oct tree use verts in world coordinate
 			oct->v[0].set(oct->bounds.x, oct->bounds.y, oct->bounds.z);
 			oct->v[1].set(oct->bounds.x, oct->bounds.y + oct->bounds.height, oct->bounds.z);
 			oct->v[2].set(oct->bounds.x + oct->bounds.width, oct->bounds.y + oct->bounds.height, oct->bounds.z);
