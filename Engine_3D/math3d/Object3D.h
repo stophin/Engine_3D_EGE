@@ -667,7 +667,12 @@ public:
 		}
 	}
 
-	void render_normalize() {
+	//mode:
+	//0: normal
+	//1: object changed only
+	//2: camera changed only
+	//3: object and camera changed
+	void render_normalize(int mode = 0) {
 		if (this->cam == NULL) {
 			return;
 		}
@@ -688,8 +693,16 @@ public:
 				this->aabb[7].set(this->rightBottomFront_O.x, this->leftTopBack_O.y, this->leftTopBack_O.z);
 			}
 			if (this->render_aabb) {
-				this->refreshAABBW();
-				this->refreshAABBC();
+				if (mode == 1) {
+					this->refreshAABBW();
+				}
+				else if (mode == 2) {
+					this->refreshAABBC();
+				}
+				else if (mode == 3) {
+					this->refreshAABBW();
+					this->refreshAABBC();
+				}
 				int i;
 				for (i = 0; i < 8; i++) {
 					// object coordinate -> world coordinate -> camera coordinate
@@ -868,7 +881,7 @@ public:
 	Object3D& move(EFTYPE dx, EFTYPE dy, EFTYPE dz) {
 		this->_M.move(dx, dy, dz);
 
-		this->render_normalize();
+		this->render_normalize(1);
 
 		return *this;
 	}
@@ -876,7 +889,7 @@ public:
 	Object3D& scale(EFTYPE sx, EFTYPE sy, EFTYPE sz) {
 		this->_M.scale(sx, sy, sz);
 
-		this->render_normalize();
+		this->render_normalize(1);
 
 		return *this;
 	}
@@ -885,7 +898,7 @@ public:
 
 		this->_M.rotate(ax, ay, az);
 
-		this->render_normalize();
+		this->render_normalize(1);
 
 		return *this;
 	}

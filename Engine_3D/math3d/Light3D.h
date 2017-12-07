@@ -28,7 +28,7 @@ public:
 
 	Camera3D * cam;
 
-	void render_normalize() {
+	void render_normalize(int mode = 0) {
 		if (this->cam == NULL) {
 			return;
 		}

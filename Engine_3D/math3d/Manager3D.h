@@ -300,7 +300,7 @@ public:
 				else {
 					obj->cam = this->cams.link;
 				}
-				obj->render_normalize();
+				obj->render_normalize(2);
 
 				obj = this->objs.next(obj);
 			} while (obj && obj != this->objs.link);
@@ -314,7 +314,7 @@ public:
 				else {
 					obj->cam = this->cams.link;
 				}
-				obj->render_normalize();
+				obj->render_normalize(2);
 
 				obj = this->tras.next(obj);
 			} while (obj && obj != this->tras.link);
@@ -328,7 +328,7 @@ public:
 				else {
 					obj->cam = this->cams.link;
 				}
-				obj->render_normalize();
+				obj->render_normalize(2);
 
 				obj = this->refl.next(obj);
 			} while (obj && obj != this->refl.link);
@@ -342,7 +342,7 @@ public:
 				else {
 					lgt->cam = this->cams.link;
 				}
-				lgt->render_normalize();
+				lgt->render_normalize(2);
 
 				lgt = this->lgts.next(lgt);
 			} while (lgt && lgt != this->lgts.link);
