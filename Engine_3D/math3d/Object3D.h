@@ -77,6 +77,7 @@ public:
 	Mat3D R_r;
 
 	EFTYPE backface;
+	INT cut;
 
 	Vert3D aabb[2];
 
@@ -778,7 +779,8 @@ public:
 				v->zz = v->v_c.z;
 				v->v_r.set(v->v_c);
 				// camera coordinate -> view region
-				if (!this->cam->normalize(v->v_r)) {
+				v->cut = !this->cam->normalize(v->v_r);
+				if (v->cut) {
 
 					if (1){
 

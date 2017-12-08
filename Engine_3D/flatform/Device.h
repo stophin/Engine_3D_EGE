@@ -860,9 +860,9 @@ struct Device {
 										//there must be three verts
 										if (v0 && v1) {
 											// back face culling
-											// when the ray is shadow testing
+											// when the ray is reflection or shadow testing
 											// then do not need back face culling
-											if (v->backface > 0 || (3 == ray.type && obj->backfaceculling == 0))
+											if (v->backface > 0 || 1 == ray.type || (3 == ray.type && obj->backfaceculling == 0))
 											{
 												//NOTE: ray tracing is in camera coordinate
 												//get intersect point
@@ -895,33 +895,36 @@ struct Device {
 															//get texture and normal vector at the same time
 															*__image = obj->getTextureColor(n0, n1, n2, n3, v, &verts->v_n);
 
+															//calculate sumption of light factors
+															lgt = man.lgts.link;
+															f = 0;
+															if (lgt) {
+																do {
+																	f += lgt->getFactor(v->n_r, n0);
+
+																	if (render_light < 0) {
+																		break;
+																	}
+
+																	lgt = man.lgts.next(lgt);
+																} while (lgt && lgt != man.lgts.link);
+															}
+
 															//normal verts
 															if (0 == render_state) {
-																//calculate sumption of light factors
-																lgt = man.lgts.link;
-																f = 0;
-																if (lgt) {
-																	do {
-																		f += lgt->getFactor(v->n_r, n0);
-
-																		if (render_light < 0) {
-																			break;
-																		}
-
-																		lgt = man.lgts.next(lgt);
-																	} while (lgt && lgt != man.lgts.link);
-																}
 																*__image = Light3D::multi(*__image, f);
 																//set type normal
 																verts->type = 0;
 															}
 															//reflection verts
 															else if (1 == render_state) {
+																*__image = Light3D::add(*__image, BLACK, f);
 																//set type reflection
 																verts->type = 1;
 															}
 															//transparent verts
 															else if (2 == render_state) {
+																*__image = Light3D::add(*__image, BLACK, f);
 																//set type transparent
 																verts->type = 2;
 															}
@@ -1104,7 +1107,7 @@ struct Device {
 				DWORD color = BLACK;
 				if (verts) {
 					do {
-						if (0 == verts->type) 
+						//if (0 == verts->type) 
 						{
 							color = Light3D::add(color, verts->color, 0.1);
 						}

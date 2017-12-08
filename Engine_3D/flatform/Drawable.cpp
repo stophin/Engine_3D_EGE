@@ -130,7 +130,7 @@ VOID Initialize()
 	man.addReflectionCamera();
 
 	man.addLight(9, 100, 300);
-	man.addLight(5, 100, 300);
+	//man.addLight(5, 100, 300);
 	//man.addLight(-1000, 100, 100);
 
 	//load resource
@@ -157,7 +157,12 @@ VOID Initialize()
 	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.scale(10, 10, 10).move(0, 100, -200).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
 	//////////////////////////
+#if 0
 
+	//////////////////////////
+	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
+		.scale(10, 10, 10).move(0, 100, -200).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
+	//////////////////////////
 
 	//////////////////////////
 	Group3D& gp = man.addGroup();
@@ -169,11 +174,30 @@ VOID Initialize()
 	}
 	man.endGroup();
 	//////////////////////////
-
+	//////////////////////////
+	// generate teapot
+	{
+		Object3D& obj = man.addTransparentObject(5).renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
+		int normal = -1;
+		int vertex_count = 0;
+		int triangle_count = 0;
+		for (int i = 0; i <= g_teapotPositionNum - 3; i += 3) {
+			vertex_count++;
+			obj.addIndice(g_teapotPositions[i], g_teapotPositions[i + 1], g_teapotPositions[i + 2]);
+			//,g_teapotNormals[i], g_teapotNormals[i + 1], g_teapotNormals[i + 2]);
+		}
+		for (int i = 0; i <= g_teapotIndicesNum - 3; i += 3) {
+			triangle_count++;
+			obj.setIndice(g_teapotIndices[i], g_teapotIndices[i + 1], g_teapotIndices[i + 2]);
+		}
+		obj.move(50, -30, 20).rotate(-90, 30, 0).setTexture(tman, t9, 1).setUV(0, -300);// .setTexture(tman, t7, 1);
+		cur_op = &obj;
+	}
+	//////////////////////////
 	//////////////////////////
 	c = 10;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
-	count = 30;
+	count = 1;
 	for (k = 0; k < count; k++) {
 		EFTYPE x = rand() % 300;
 		EFTYPE z = rand() % 300;
@@ -184,7 +208,7 @@ VOID Initialize()
 			r_1 = r * sin(i * p_1);
 			x_2 = r * cos((i + 1) * p_1);
 			r_2 = r * sin((i + 1) * p_1);
-			Object3D& obj = man.startGroup(gp.uniqueID).addReflectionObject(1).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
+			Object3D& obj = man.startGroup(gp.uniqueID).addTransparentObject(1).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
 			for (j = 1; j < c; j++) {
 				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
 					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
@@ -201,10 +225,8 @@ VOID Initialize()
 	cur_op = &man.addObject(-1).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
 		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
-		.scale(30, 30, 30).move(15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t11, 4).setBackfaceCulling(1);
+		.scale(5, 5, 5).move(15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t11, 4).setBackfaceCulling(1);
 	//////////////////////////
-
-#if 0
 	//////////////////////////
 	c = 10;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
@@ -261,26 +283,7 @@ VOID Initialize()
 		man.endGroup();
 	}
 	//////////////////////////
-	//////////////////////////
-	// generate teapot
-	{
-		Object3D& obj = man.addTransparentObject(5).renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
-		int normal = -1;
-		int vertex_count = 0;
-		int triangle_count = 0;
-		for (int i = 0; i <= g_teapotPositionNum - 3; i += 3) {
-			vertex_count++;
-			obj.addIndice(g_teapotPositions[i], g_teapotPositions[i + 1], g_teapotPositions[i + 2]);
-			//,g_teapotNormals[i], g_teapotNormals[i + 1], g_teapotNormals[i + 2]);
-		}
-		for (int i = 0; i <= g_teapotIndicesNum - 3; i += 3) {
-			triangle_count++;
-			obj.setIndice(g_teapotIndices[i], g_teapotIndices[i + 1], g_teapotIndices[i + 2]);
-		}
-		obj.move(50, -30, 20).rotate(-90, 30, 0).setTexture(tman, t9, 1).setUV(0, -300);// .setTexture(tman, t7, 1);
-		cur_op = &obj;
-	}
-	//////////////////////////
+
 
 	//////////////////////////
 	// generate teapot
@@ -301,6 +304,12 @@ VOID Initialize()
 		obj.move(-50, -30, 20).rotate(-90, 30, 0).setTexture(tman, t9, 1).setUV(0, -300);// .setTexture(tman, t7, 1);
 		cur_op = &obj;
 	}
+	//////////////////////////
+	//////////////////////////
+	cur_op = &man.addObject(-1).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
+		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
+		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
+		.scale(30, 30, 30).move(15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t11, 4).setBackfaceCulling(1);
 	//////////////////////////
 	//////////////////////////
 	cur_op = &man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
