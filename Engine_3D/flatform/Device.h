@@ -753,6 +753,7 @@ struct Device {
 	struct RenderParameters{
 		Manager3D * man;
 		Device * device;
+		HANDLE hMutex;
 		INT sx;
 		INT sy;
 		INT ex;
@@ -765,7 +766,13 @@ struct Device {
 		p.ex = ex;
 		p.ey = ey;
 	}
+	void RenderRayTracing_SingleThread(Manager3D& man) {
+		RenderRayTracingSub(man, 0, 0, width, height, 0, NULL, this);
+	}
+
 	void RenderRayTracing(Manager3D& man) {
+		//创建互斥体  
+		HANDLE hMutex = CreateMutex(NULL, FALSE, TEXT("Mutex"));
 		//创建线程  
 		INT thread_count = 4;
 		HANDLE thread_pool[128];
@@ -779,6 +786,7 @@ struct Device {
 				param[index].man = &man;
 				param[index].device = this;
 				param[index].id = index;
+				param[index].hMutex = hMutex;
 				SetRect(param[index], dx * i, dy * j, dx * i + dx, dy * j + dy);
 				thread_pool[i * thread_count + j] = CreateThread(NULL, 0, RenderThreadProc, &param[index], 0, NULL);
 			}
@@ -800,14 +808,17 @@ struct Device {
 	}
 	static DWORD WINAPI RenderThreadProc(LPVOID lpThreadParameter) {
 		RenderParameters * pthread = (RenderParameters*)lpThreadParameter;
-		//创建互斥体  
-		HANDLE hMutex = CreateMutex(NULL, FALSE, TEXT("MyMutex1"));
 		if (NULL == pthread) {
 			return 0;
 		}
-		RenderRayTracingSub(*pthread->man, pthread->sx, pthread->sy, pthread->ex, pthread->ey, pthread->id, hMutex, pthread->device);
+		RenderRayTracingSub(*pthread->man, pthread->sx, pthread->sy, pthread->ex, pthread->ey, pthread->id, pthread->hMutex, pthread->device);
 		return 0;
 	}
+
+//使用同一个pool因此要保证操作的原子性
+#define RAYTRACING_MUTEX(x) \
+	if (hMutex) {WaitForSingleObject(hMutex, 1000);} ##x\
+	if (hMutex) { ReleaseMutex(hMutex); }
 	
 	//ray tracing
 	static void RenderRayTracingSub(Manager3D & man, INT sx, INT sy, INT ex, INT ey, INT id, HANDLE hMutex, Device* device = NULL) {
@@ -823,10 +834,9 @@ struct Device {
 
 		Lgt3D * lgt;
 		EFTYPE f;
-		Vert3D n0, n1, n2, n3;
+		Vert3D n0, n1, n2, n3, p;
 		EFTYPE z;
 		Ray ray;
-		Vert3D p;
 		INT index;
 		EFTYPE _i, _j;
 		INT _index;
@@ -934,11 +944,7 @@ struct Device {
 												trans = Vert3D::GetLineIntersectPointWithTriangle(v->v_c, v0->v_c, v1->v_c, ray.original, ray.direction, trans_last, p);
 												//trans is greate than zero, and litte than last trans
 												if (EP_GTZERO(trans)) {
-													if (hMutex) {
-														//使用同一个pool因此要保证new的原子性
-														WaitForSingleObject(hMutex, 100);
-													}
-													Verts * verts = new Verts();
+													RAYTRACING_MUTEX(Verts * verts = new Verts(););
 													if (!verts) {
 														verts = verts;
 													}
@@ -987,15 +993,15 @@ struct Device {
 															}
 															//reflection verts
 															else if (1 == render_state) {
-																*__image = Light3D::add(*__image, BLACK, f);
-																//*__image = Light3D::multi(BLACK, f);
+																//*__image = Light3D::add(*__image, BLACK, f);
+																*__image = Light3D::multi(BLACK, f);
 																//set type reflection
 																verts->type = 1;
 															}
 															//transparent verts
 															else if (2 == render_state) {
-																*__image = Light3D::add(*__image, BLACK, f);
-																//*__image = Light3D::multi(WHITE, f);
+																//*__image = Light3D::add(*__image, BLACK, f);
+																*__image = Light3D::multi(BLACK, f);
 																//set type transparent
 																verts->type = 2;
 															}
@@ -1080,7 +1086,7 @@ struct Device {
 					}
 					if (nearest_vert) {
 						raytracing_verts_accumulated.insertLink(nearest_vert);
-						raytracing_verts.~MultiLinkList();
+						RAYTRACING_MUTEX(raytracing_verts.~MultiLinkList(););
 
 						//normal verts
 						if (0 == nearest_vert->type) {
@@ -1171,7 +1177,7 @@ struct Device {
 					}
 
 				} while (--count > 0);
-				raytracing_verts.~MultiLinkList();
+				RAYTRACING_MUTEX(raytracing_verts.~MultiLinkList(););
 
 				//accumulate all the ray traced verts' color
 				Verts * verts = raytracing_verts_accumulated.link;
@@ -1186,7 +1192,7 @@ struct Device {
 						verts = raytracing_verts_accumulated.next(verts);
 					} while (verts && verts != raytracing_verts_accumulated.link);
 				}
-				raytracing_verts_accumulated.~MultiLinkList();
+				RAYTRACING_MUTEX(raytracing_verts_accumulated.~MultiLinkList(););
 
 				*_raytracing = color;
 			}

@@ -78,6 +78,7 @@ VOID onPaint(HWND hWnd)
 		}
 		enter_once = -1;
 		device.ClearBeforeRayTracing();
+		//device.RenderRayTracing_SingleThread(man);
 		device.RenderRayTracing(man);
 		//Blt buffer to window buffer
 		DWORD * _tango = EP_GetImageBuffer();
@@ -173,6 +174,7 @@ VOID Initialize()
 	}
 	man.endGroup();
 	//////////////////////////
+
 	//////////////////////////
 	c = 10;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
@@ -284,7 +286,6 @@ VOID Initialize()
 	//////////////////////////
 
 #if 0
-
 	//////////////////////////
 	// generate teapot
 	{

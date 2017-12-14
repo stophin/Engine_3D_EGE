@@ -262,7 +262,6 @@ public:
 			} while (_obj && _obj != this->objects.link);
 		}
 	}
-
 	INT Collision(Vert3D& vo, Vert3D& vd, Camera3D *  cam, Obj3D * obj) {
 		if (NULL == cam) {
 			return 0;
@@ -288,7 +287,6 @@ public:
 			{ 2, 5, 6 }
 		};
 		INT intersect = 0;
-		Vert3D v[8];
 		Vert3D v0, v1, v2;
 		Vert3D n0, n1, n, p;
 		for (int i = 0; i < 12; i++) {
@@ -315,6 +313,7 @@ public:
 		}
 		return 0;
 	}
+
 
 	void change(Obj3D * obj) {
 		if (NULL == obj) {
