@@ -174,7 +174,6 @@ VOID Initialize()
 	}
 	man.endGroup();
 	//////////////////////////
-
 	//////////////////////////
 	c = 10;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
@@ -285,7 +284,6 @@ VOID Initialize()
 	}
 	//////////////////////////
 
-#if 0
 	//////////////////////////
 	// generate teapot
 	{
@@ -324,11 +322,11 @@ VOID Initialize()
 		.scale(2, 2, 2).move(20, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t3);
 	//////////////////////////
 
+
 	//////////////////////////
 	man.addReflectionObject(0.05).addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
 		.scale(10, 10, 10).rotate(90, 90, 0).move(200, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t1);
 	//////////////////////////
-
 	//////////////////////////
 	//sphere world map
 	c = 10;
@@ -356,6 +354,7 @@ VOID Initialize()
 		man.endGroup();
 	}
 	//////////////////////////
+#if 0
 #endif
 	//do this after all done
 	man.createOctTree();

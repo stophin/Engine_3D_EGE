@@ -227,6 +227,8 @@ public:
 			this->group->objs.insertLink(obj);
 		}
 		((Object3D *)obj)->anti = 1;
+		//TODO
+		((Object3D *)obj)->render_aabb = 1;
 
 		return *((Object3D *)obj);
 
@@ -245,6 +247,8 @@ public:
 			this->group->objs.insertLink(obj);
 		}
 		((Object3D *)obj)->anti = 1;
+		//TODO
+		((Object3D *)obj)->render_aabb = 1;
 
 		return *((Object3D *)obj);
 
