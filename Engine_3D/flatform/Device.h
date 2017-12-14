@@ -782,7 +782,7 @@ struct Device {
 	void RenderRayTracing(Manager3D& man) {
 		if (0 == thread_ready) {
 			//线程数 thread_count * thread_count
-			thread_count = 8;
+			thread_count = 5;
 			//创建互斥体  
 			hMutex = CreateMutex(NULL, FALSE, TEXT("Mutex"));
 			//创建线程  
@@ -1056,15 +1056,15 @@ struct Device {
 															}
 															//reflection verts
 															else if (1 == render_state) {
-																//*__image = Light3D::add(*__image, BLACK, f);
-																*__image = Light3D::multi(BLACK, f);
+																*__image = Light3D::add(*__image, BLACK, f);
+																//*__image = Light3D::multi(BLACK, f);
 																//set type reflection
 																verts->type = 1;
 															}
 															//transparent verts
 															else if (2 == render_state) {
-																//*__image = Light3D::add(*__image, BLACK, f);
-																*__image = Light3D::multi(BLACK, f);
+																*__image = Light3D::add(*__image, BLACK, f);
+																//*__image = Light3D::multi(BLACK, f);
 																//set type transparent
 																verts->type = 2;
 															}

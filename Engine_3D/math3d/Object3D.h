@@ -455,6 +455,12 @@ public:
 
 		return *this;
 	}
+	Object3D&  setColor(BYTE * c) {
+		DWORD color = EGERGBA(c[0], c[1], c[2], 1);
+		this->color = color;
+
+		return *this;
+	}
 
 	Object3D& setVertexType(int type) {
 		this->vertex_type = type;

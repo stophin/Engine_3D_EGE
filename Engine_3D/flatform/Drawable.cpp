@@ -120,11 +120,15 @@ VOID onPaint(HWND hWnd)
 	//BitBlt(hdc, 0, 0, nWidth, nHeight, memHdc, 0, 0, SRCCOPY);
 }
 
+#include "../reader/3DS.h"
+
+extern t3DModel g_3DModel[10];
 #include "../teapot.h"
 
 Object3D * cur_op = NULL;
 VOID Initialize()
 {
+
 	man.addCamera(50, 50, 50, 1000, 90, 90).move(0, 0, -200);
 	man.addCamera(30, 30, 60, 600, 30, 30).move(0, 0, -100);
 	man.addShadowCamera();
@@ -153,10 +157,109 @@ VOID Initialize()
 	int i, j, k;
 	EFTYPE r = 10;
 	EFTYPE x_1, x_2, r_1, r_2, p_1 = PI / ((EFTYPE)c), p_2 = 2 * PI / ((EFTYPE)c);
+	//3ds file loader
+	CLoad3DS loader;
+	INT loadIndex;
+
 
 	//////////////////////////
 	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.scale(10, 10, 10).move(0, 100, -200).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
+	//////////////////////////
+
+
+	//////////////////////////
+	loadIndex = 0;
+	loader.Init("Redocn_2012081411324334.3ds", loadIndex);
+	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
+		t3DObject & object = g_3DModel[0].pObject.at(i);
+		cur_op = &man.addObject(10).setVertexType(1);
+		for (int j = 0; j < object.numOfVerts; j++) {
+			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
+		}
+		for (int j = 0; j < object.numOfFaces; j++) {
+			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
+		}
+		cur_op->move(0, 0, 0).scale(0.1, 0.1, 0.1).rotate(-90, 180, 0).setColor(RED);
+		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
+			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
+		}
+	}
+	//////////////////////////
+#if 0
+	//////////////////////////
+	loadIndex = 0;
+	loader.Init("025.3ds", loadIndex);
+	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
+		t3DObject & object = g_3DModel[0].pObject.at(i);
+		cur_op = &man.addObject(10).setVertexType(1);
+		for (int j = 0; j < object.numOfVerts; j++) {
+			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
+		}
+		for (int j = 0; j < object.numOfFaces; j++) {
+			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
+		}
+		cur_op->move(0, 0, 0).scale(10, 10, 10).rotate(-90, 0, 0).setColor(RED);
+		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
+			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
+		}
+	}
+	//////////////////////////
+
+	//////////////////////////
+	loadIndex = 0;
+	loader.Init("porshe-BOXTER.3ds", loadIndex);
+	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
+		t3DObject & object = g_3DModel[0].pObject.at(i);
+		cur_op = &man.addObject(10).setVertexType(1);
+		for (int j = 0; j < object.numOfVerts; j++) {
+			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
+		}
+		for (int j = 0; j < object.numOfFaces; j++) {
+			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
+		}
+		cur_op->move(0, 0, 0).scale(10, 10, 10).rotate(-90, 0, 0).setColor(RED);
+		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
+			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
+		}
+	}
+	//////////////////////////
+	//////////////////////////
+	loadIndex = 0;
+	loader.Init("Redocn_2013121708420722.3ds", loadIndex);
+	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
+		t3DObject & object = g_3DModel[0].pObject.at(i);
+		cur_op = &man.addTransparentObject(10).setVertexType(1);
+		for (int j = 0; j < object.numOfVerts; j++) {
+			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
+		}
+		for (int j = 0; j < object.numOfFaces; j++) {
+			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
+		}
+		cur_op->move(0, 0, 0).scale(0.1, 0.1, 0.1).rotate(-90, 0, 0).setColor(RED);
+		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
+			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
+		}
+	}
+	//////////////////////////
+
+	//////////////////////////
+	loadIndex = 1;
+	loader.Init("Redocn_2013121212394251.3ds", loadIndex);
+	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
+		t3DObject & object = g_3DModel[loadIndex].pObject.at(i);
+		cur_op = &man.addObject(10).setVertexType(1);
+		for (int j = 0; j < object.numOfVerts; j++) {
+			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
+		}
+		for (int j = 0; j < object.numOfFaces; j++) {
+			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
+		}
+		cur_op->move(0, 0, 0).rotate(-90, 0, 0).setColor(RED);
+		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
+			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
+		}
+	}
 	//////////////////////////
 
 	//////////////////////////
@@ -217,7 +320,7 @@ VOID Initialize()
 			triangle_count++;
 			obj.setIndice(g_teapotIndices[i], g_teapotIndices[i + 1], g_teapotIndices[i + 2]);
 		}
-		obj.move(50, -30, 20).rotate(-90, 30, 0).setTexture(tman, t9, 1).setUV(0, -300);// .setTexture(tman, t7, 1);
+		obj.move(50, -30, 20).rotate(-90, 30, 0).setTexture(tman, t9, 3).setUV(0, -300);// .setTexture(tman, t7, 1);
 		cur_op = &obj;
 	}
 	//////////////////////////
@@ -300,7 +403,7 @@ VOID Initialize()
 			triangle_count++;
 			obj.setIndice(g_teapotIndices[i], g_teapotIndices[i + 1], g_teapotIndices[i + 2]);
 		}
-		obj.move(-50, -30, 20).rotate(-90, 30, 0).setTexture(tman, t9, 1).setUV(0, -300);// .setTexture(tman, t7, 1);
+		obj.move(-50, -30, 20).rotate(-90, 30, 0).setTexture(tman, t9, 3).setUV(0, -300);// .setTexture(tman, t7, 1);
 		cur_op = &obj;
 	}
 	//////////////////////////
@@ -354,7 +457,6 @@ VOID Initialize()
 		man.endGroup();
 	}
 	//////////////////////////
-#if 0
 #endif
 	//do this after all done
 	man.createOctTree();

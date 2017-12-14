@@ -34,6 +34,9 @@
     <Filter Include="头文件\scene">
       <UniqueIdentifier>{6f188afc-2467-4537-a434-80869ac8c91d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\reader">
+      <UniqueIdentifier>{982d84d9-c3d3-457b-af94-fadd4fb865f5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -96,6 +99,9 @@
     <ClInclude Include="flatform\Device.h">
       <Filter>头文件\platform</Filter>
     </ClInclude>
+    <ClInclude Include="reader\3DS.h">
+      <Filter>头文件\reader</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -118,6 +124,9 @@
     </ClCompile>
     <ClCompile Include="raytracing\Ray.cpp">
       <Filter>头文件\raytracing</Filter>
+    </ClCompile>
+    <ClCompile Include="reader\3DS.cpp">
+      <Filter>头文件\reader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
