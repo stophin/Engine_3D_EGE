@@ -782,7 +782,7 @@ struct Device {
 	void RenderRayTracing(Manager3D& man) {
 		if (0 == thread_ready) {
 			//线程数 thread_count * thread_count
-			thread_count = 4;
+			thread_count = 8;
 			//创建互斥体  
 			hMutex = CreateMutex(NULL, FALSE, TEXT("Mutex"));
 			//创建线程  
@@ -798,8 +798,8 @@ struct Device {
 					param[index].hMutex = hMutex;
 					SetRect(param[index], dx * i, dy * j, dx * i + dx, dy * j + dy);
 
-					thread_pool[i * thread_count + j] = CreateThread(NULL, 0, RenderThreadProc, &param[index], 0, NULL);
-					param[index].hThread = thread_pool[i * thread_count + j];
+					thread_pool[index] = CreateThread(NULL, 0, RenderThreadProc, &param[index], 0, NULL);
+					param[index].hThread = thread_pool[index];
 					thread_status[index] = 1;
 				}
 			}
@@ -812,7 +812,7 @@ struct Device {
 					param[index].man = &man;
 					param[index].device = this;
 
-					ResumeThread(thread_pool[i * thread_count + j]);
+					ResumeThread(thread_pool[index]);
 					thread_status[index] = 1;
 				}
 			}
@@ -845,7 +845,7 @@ struct Device {
 				//将这些参数设置为NULL以结束线程
 				param[index].man = NULL;
 
-				ResumeThread(thread_pool[i * thread_count + j]);
+				ResumeThread(thread_pool[index]);
 			}
 		}
 		//等待线程退出  
