@@ -47,7 +47,8 @@ struct Device {
 		trans(NULL),
 		deptr(NULL),
 		miror(NULL),
-		raytracing(NULL){
+		raytracing(NULL),
+		thread_ready(0){
 
 	}
 	Device(INT w, INT h){
@@ -90,6 +91,7 @@ struct Device {
 			delete[] raytracing;
 			raytracing = NULL;
 		}
+		EndAllThread();
 	}
 
 	void Resize(INT w, INT h)  {
@@ -749,11 +751,15 @@ struct Device {
 	void ClearBeforeRayTracing() {
 		memset(raytracing, 0, width * height * sizeof(DWORD));
 	}
+	void RenderRayTracing_SingleThread(Manager3D& man) {
+		RenderRayTracingSub(man, 0, 0, width, height, 0, NULL, this);
+	}
 
 	struct RenderParameters{
 		Manager3D * man;
 		Device * device;
 		HANDLE hMutex;
+		HANDLE hThread;
 		INT sx;
 		INT sy;
 		INT ex;
@@ -766,32 +772,82 @@ struct Device {
 		p.ex = ex;
 		p.ey = ey;
 	}
-	void RenderRayTracing_SingleThread(Manager3D& man) {
-		RenderRayTracingSub(man, 0, 0, width, height, 0, NULL, this);
-	}
+	INT thread_count;
+	HANDLE thread_pool[128];
+	HANDLE hMutex;
+	RenderParameters param[128];
+	INT thread_ready;
+	INT thread_status[128];
 
 	void RenderRayTracing(Manager3D& man) {
-		//创建互斥体  
-		HANDLE hMutex = CreateMutex(NULL, FALSE, TEXT("Mutex"));
-		//创建线程  
-		INT thread_count = 4;
-		HANDLE thread_pool[128];
-		INT dx = width / thread_count;
-		INT dy = height / thread_count;
-		RenderParameters param[128];
+		if (0 == thread_ready) {
+			//线程数 thread_count * thread_count
+			thread_count = 4;
+			//创建互斥体  
+			hMutex = CreateMutex(NULL, FALSE, TEXT("Mutex"));
+			//创建线程  
+			INT dx = width / thread_count;
+			INT dy = height / thread_count;
+			for (int i = 0; i < thread_count; i++) {
+				for (int j = 0; j < thread_count; j++) {
+					INT index = i * thread_count + j;
+
+					param[index].man = &man;
+					param[index].device = this;
+					param[index].id = index;
+					param[index].hMutex = hMutex;
+					SetRect(param[index], dx * i, dy * j, dx * i + dx, dy * j + dy);
+
+					thread_pool[i * thread_count + j] = CreateThread(NULL, 0, RenderThreadProc, &param[index], 0, NULL);
+					param[index].hThread = thread_pool[i * thread_count + j];
+					thread_status[index] = 1;
+				}
+			}
+			thread_ready = 1;
+		}
+		else {
+			for (int i = 0; i < thread_count; i++) {
+				for (int j = 0; j < thread_count; j++) {
+					INT index = i * thread_count + j;
+					param[index].man = &man;
+					param[index].device = this;
+
+					ResumeThread(thread_pool[i * thread_count + j]);
+					thread_status[index] = 1;
+				}
+			}
+		}
+		//等待线程退出
+		INT thread_all_done;
+		while (1) {
+			thread_all_done = 1;
+			for (int i = 0; i < thread_count; i++) {
+				for (int j = 0; j < thread_count; j++) {
+					INT index = i * thread_count + j;
+					if (1 == thread_status[index]) {
+						thread_all_done = 0;
+						break;
+					}
+				}
+				if (0 == thread_all_done) {
+					break;
+				}
+			}
+			if (thread_all_done) {
+				break;
+			}
+		}
+	}
+	void EndAllThread() {
 		for (int i = 0; i < thread_count; i++) {
 			for (int j = 0; j < thread_count; j++) {
 				INT index = i * thread_count + j;
+				//将这些参数设置为NULL以结束线程
+				param[index].man = NULL;
 
-				param[index].man = &man;
-				param[index].device = this;
-				param[index].id = index;
-				param[index].hMutex = hMutex;
-				SetRect(param[index], dx * i, dy * j, dx * i + dx, dy * j + dy);
-				thread_pool[i * thread_count + j] = CreateThread(NULL, 0, RenderThreadProc, &param[index], 0, NULL);
+				ResumeThread(thread_pool[i * thread_count + j]);
 			}
 		}
-
 		//等待线程退出  
 		for (int i = 0; i < thread_count; i++) {
 			for (int j = 0; j < thread_count; j++) {
@@ -811,7 +867,14 @@ struct Device {
 		if (NULL == pthread) {
 			return 0;
 		}
-		RenderRayTracingSub(*pthread->man, pthread->sx, pthread->sy, pthread->ex, pthread->ey, pthread->id, pthread->hMutex, pthread->device);
+		while (1) {
+			if (NULL == pthread->man) {
+				break;
+			}
+			RenderRayTracingSub(*pthread->man, pthread->sx, pthread->sy, pthread->ex, pthread->ey, pthread->id, pthread->hMutex, pthread->device);
+			pthread->device->thread_status[pthread->id] = 0;
+			SuspendThread(pthread->hThread);
+		}
 		return 0;
 	}
 
