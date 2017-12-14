@@ -750,9 +750,76 @@ struct Device {
 		memset(raytracing, 0, width * height * sizeof(DWORD));
 	}
 
+	struct RenderParameters{
+		Manager3D * man;
+		Device * device;
+		INT sx;
+		INT sy;
+		INT ex;
+		INT ey;
+		INT id;
+	};
+	void SetRect(RenderParameters& p, INT sx, INT sy, INT ex, INT ey) {
+		p.sx = sx;
+		p.sy = sy;
+		p.ex = ex;
+		p.ey = ey;
+	}
+	void RenderRayTracing(Manager3D& man) {
+		//创建线程  
+		INT thread_count = 3;
+		HANDLE thread_pool[128];
+		INT dx = width / thread_count;
+		INT dy = height / thread_count;
+		RenderParameters param[128];
+		for (int i = 0; i < thread_count; i++) {
+			for (int j = 0; j < thread_count; j++) {
+				INT index = i * thread_count + j;
 
+				param[index].man = &man;
+				param[index].device = this;
+				param[index].id = index;
+				SetRect(param[index], dx * i, dy * j, dx * i + dx, dy * j + dy);
+				thread_pool[i * thread_count + j] = CreateThread(NULL, 0, RenderThreadProc, &param[index], 0, NULL);
+			}
+		}
+
+		//等待线程退出  
+		for (int i = 0; i < thread_count; i++) {
+			for (int j = 0; j < thread_count; j++) {
+				WaitForSingleObject(thread_pool[i * thread_count + j], INFINITE);
+			}
+		}
+
+		//关闭句柄，释放资源  
+		for (int i = 0; i < thread_count; i++) {
+			for (int j = 0; j < thread_count; j++) {
+				CloseHandle(thread_pool[i * thread_count + j]);
+			}
+		}
+	}
+	static DWORD WINAPI RenderThreadProc(LPVOID lpThreadParameter) {
+		RenderParameters * pthread = (RenderParameters*)lpThreadParameter;
+		//创建互斥体  
+		HANDLE hMutex = CreateMutex(NULL, FALSE, TEXT("MyMutex1"));
+		if (NULL == pthread) {
+			return 0;
+		}
+		//if (pthread->id == 0 || pthread->id == 1) 
+		{
+			RenderRayTracingSub(*pthread->man, pthread->sx, pthread->sy, pthread->ex, pthread->ey, pthread->id, hMutex, pthread->device);
+		}
+		return 0;
+	}
+	
 	//ray tracing
-	void RenderRayTracing(Manager3D & man) {
+	static void RenderRayTracingSub(Manager3D & man, INT sx, INT sy, INT ex, INT ey, INT id, HANDLE hMutex, Device* device = NULL) {
+		if (NULL == device) {
+			//device = this;
+			return;
+		}
+		if (ex < sx) return;
+		if (ey < sy) return;
 		Camera3D * cam = man.cams.link;
 		if (NULL == cam) {
 			return;
@@ -760,7 +827,7 @@ struct Device {
 
 		Lgt3D * lgt;
 		EFTYPE f;
-		Vert3D n0, n1, n2;
+		Vert3D n0, n1, n2, n3;
 		EFTYPE z;
 		Ray ray;
 		Vert3D p;
@@ -773,11 +840,12 @@ struct Device {
 		MultiLinkList<Verts> raytracing_verts_accumulated(1);
 		MultiLinkList<VObj> * link = NULL;
 		MultiLinkList<Obj3D> * olink;
+		DWORD * __image;
 		//reflection times
 		INT count, shadow_count;
 		//for each pixel in width * height's screen
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
+		for (int y = sy; y < ey; y++) {
+			for (int x = sx; x < ex; x++) {
 				//Orthographic
 				if (cam->type == 1) {
 					//get original vert from this pixel
@@ -807,8 +875,8 @@ struct Device {
 					//set ray type
 					ray.type = 0;
 				}
-				index = y * width + x;
-				_raytracing = &raytracing[index];
+				index = y * device->width + x;
+				_raytracing = &device->raytracing[index];
 
 				Lgt3D * cur_lgt = man.lgts.link;
 				shadow_count = 0;
@@ -816,7 +884,7 @@ struct Device {
 				do {
 					// when the ray is reflection or refraction
 					// use the objects around instead of all the objects
-					if (1 == ray.type || 2 == ray.type) {
+					if (0 && 1 == ray.type || 2 == ray.type) {
 						if (!ray.obj) {
 							ray.obj = ray.obj;
 						}
@@ -869,6 +937,8 @@ struct Device {
 												trans = Vert3D::GetLineIntersectPointWithTriangle(v->v_c, v0->v_c, v1->v_c, ray.original, ray.direction, trans_last, p);
 												//trans is greate than zero, and litte than last trans
 												if (EP_GTZERO(trans)) {
+													//使用同一个pool因此要保证new的原子性
+													WaitForSingleObject(hMutex, 100);
 													Verts * verts = new Verts();
 													if (!verts) {
 														verts = verts;
@@ -902,7 +972,7 @@ struct Device {
 																do {
 																	f += lgt->getFactor(v->n_r, n0);
 
-																	if (render_light < 0) {
+																	if (device->render_light < 0) {
 																		break;
 																	}
 
@@ -919,12 +989,14 @@ struct Device {
 															//reflection verts
 															else if (1 == render_state) {
 																*__image = Light3D::add(*__image, BLACK, f);
+																//*__image = Light3D::multi(BLACK, f);
 																//set type reflection
 																verts->type = 1;
 															}
 															//transparent verts
 															else if (2 == render_state) {
 																*__image = Light3D::add(*__image, BLACK, f);
+																//*__image = Light3D::multi(WHITE, f);
 																//set type transparent
 																verts->type = 2;
 															}
@@ -1138,19 +1210,22 @@ struct Device {
 				}
 			}
 		}
+		Vert3D v[8];
+		Vert3D v0, v1, v2;
+		Vert3D n0, n1, n, p;
 		if (render_raytracing < 0) {
 			//oct tree use verts in world coordinate
-			oct->v[0].set(oct->bounds.x, oct->bounds.y, oct->bounds.z);
-			oct->v[1].set(oct->bounds.x, oct->bounds.y + oct->bounds.height, oct->bounds.z);
-			oct->v[2].set(oct->bounds.x + oct->bounds.width, oct->bounds.y + oct->bounds.height, oct->bounds.z);
-			oct->v[3].set(oct->bounds.x + oct->bounds.width, oct->bounds.y, oct->bounds.z);
-			oct->v[4].set(oct->bounds.x, oct->bounds.y, oct->bounds.z + oct->bounds.depth);
-			oct->v[5].set(oct->bounds.x, oct->bounds.y + oct->bounds.height, oct->bounds.z + oct->bounds.depth);
-			oct->v[6].set(oct->bounds.x + oct->bounds.width, oct->bounds.y + oct->bounds.height, oct->bounds.z + oct->bounds.depth);
-			oct->v[7].set(oct->bounds.x + oct->bounds.width, oct->bounds.y, oct->bounds.z + oct->bounds.depth);
+			v[0].set(oct->bounds.x, oct->bounds.y, oct->bounds.z);
+			v[1].set(oct->bounds.x, oct->bounds.y + oct->bounds.height, oct->bounds.z);
+			v[2].set(oct->bounds.x + oct->bounds.width, oct->bounds.y + oct->bounds.height, oct->bounds.z);
+			v[3].set(oct->bounds.x + oct->bounds.width, oct->bounds.y, oct->bounds.z);
+			v[4].set(oct->bounds.x, oct->bounds.y, oct->bounds.z + oct->bounds.depth);
+			v[5].set(oct->bounds.x, oct->bounds.y + oct->bounds.height, oct->bounds.z + oct->bounds.depth);
+			v[6].set(oct->bounds.x + oct->bounds.width, oct->bounds.y + oct->bounds.height, oct->bounds.z + oct->bounds.depth);
+			v[7].set(oct->bounds.x + oct->bounds.width, oct->bounds.y, oct->bounds.z + oct->bounds.depth);
 			//to camera coordinate
 			for (int i = 0; i < 8; i++) {
-				oct->v[i] * cam->M;
+				v[i] * cam->M;
 			}
 		}
 		static INT indice[6][4] = {
@@ -1163,30 +1238,31 @@ struct Device {
 		};
 		INT intersect = 0;
 		DWORD * tango = EP_GetImageBuffer();
+
 		for (int i = 0; i < 6; i++) {
-			oct->v0.set(oct->v[indice[i][0]]);
-			oct->v1.set(oct->v[indice[i][1]]);
-			oct->v2.set(oct->v[indice[i][2]]);
-			oct->n.set(oct->v[indice[i][3]]);
+			v0.set(v[indice[i][0]]);
+			v1.set(v[indice[i][1]]);
+			v2.set(v[indice[i][2]]);
+			n.set(v[indice[i][3]]);
 
-			cam->project(oct->v0);
-			cam->project(oct->v1);
-			cam->project(oct->v2);
-			cam->project(oct->n);
+			cam->project(v0);
+			cam->project(v1);
+			cam->project(v2);
+			cam->project(n);
 
-			oct->v0.x = oct->v0.x * cam->scale_w + cam->offset_w;
-			oct->v0.y = oct->v0.y * cam->scale_h + cam->offset_h;
-			oct->v1.x = oct->v1.x * cam->scale_w + cam->offset_w;
-			oct->v1.y = oct->v1.y * cam->scale_h + cam->offset_h;
-			oct->v2.x = oct->v2.x * cam->scale_w + cam->offset_w;
-			oct->v2.y = oct->v2.y * cam->scale_h + cam->offset_h;
-			oct->n.x = oct->n.x * cam->scale_w + cam->offset_w;
-			oct->n.y = oct->n.y * cam->scale_h + cam->offset_h;
+			v0.x = v0.x * cam->scale_w + cam->offset_w;
+			v0.y = v0.y * cam->scale_h + cam->offset_h;
+			v1.x = v1.x * cam->scale_w + cam->offset_w;
+			v1.y = v1.y * cam->scale_h + cam->offset_h;
+			v2.x = v2.x * cam->scale_w + cam->offset_w;
+			v2.y = v2.y * cam->scale_h + cam->offset_h;
+			n.x = n.x * cam->scale_w + cam->offset_w;
+			n.y = n.y * cam->scale_h + cam->offset_h;
 
-			this->Draw_Line(tango, this->width, this->height, oct->v0.x, oct->v0.y, oct->v1.x, oct->v1.y, RED);
-			this->Draw_Line(tango, this->width, this->height, oct->v1.x, oct->v1.y, oct->v2.x, oct->v2.y, RED);
-			this->Draw_Line(tango, this->width, this->height, oct->v2.x, oct->v2.y, oct->n.x, oct->n.y, RED);
-			this->Draw_Line(tango, this->width, this->height, oct->n.x, oct->n.y, oct->v0.x, oct->v0.y, RED);
+			this->Draw_Line(tango, this->width, this->height, v0.x, v0.y, v1.x, v1.y, RED);
+			this->Draw_Line(tango, this->width, this->height, v1.x, v1.y, v2.x, v2.y, RED);
+			this->Draw_Line(tango, this->width, this->height, v2.x, v2.y, n.x, n.y, RED);
+			this->Draw_Line(tango, this->width, this->height, n.x, n.y, v0.x, v0.y, RED);
 		}
 	}
 

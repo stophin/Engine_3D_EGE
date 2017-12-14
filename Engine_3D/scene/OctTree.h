@@ -263,9 +263,6 @@ public:
 		}
 	}
 
-	Vert3D v[8];
-	Vert3D v0, v1, v2;
-	Vert3D n0, n1, n, p;
 	INT Collision(Vert3D& vo, Vert3D& vd, Camera3D *  cam, Obj3D * obj) {
 		if (NULL == cam) {
 			return 0;
@@ -291,6 +288,9 @@ public:
 			{ 2, 5, 6 }
 		};
 		INT intersect = 0;
+		Vert3D v[8];
+		Vert3D v0, v1, v2;
+		Vert3D n0, n1, n, p;
 		for (int i = 0; i < 12; i++) {
 			v0.set(_obj->aabb_r[indice[i][0]]);
 			v1.set(_obj->aabb_r[indice[i][1]]);

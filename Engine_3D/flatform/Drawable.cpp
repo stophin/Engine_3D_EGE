@@ -157,7 +157,6 @@ VOID Initialize()
 	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.scale(10, 10, 10).move(0, 100, -200).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
 	//////////////////////////
-#if 0
 
 	//////////////////////////
 	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
@@ -173,6 +172,34 @@ VOID Initialize()
 		}
 	}
 	man.endGroup();
+	//////////////////////////
+#if 0
+	//////////////////////////
+	c = 10;
+	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
+	count = 10;
+	for (k = 0; k < count; k++) {
+		EFTYPE x = rand() % 100;
+		EFTYPE z = rand() % 100;
+		EFTYPE y = rand() % 100;
+		Group3D& gp = man.addGroup();
+		for (i = 0; i < c; i++) {
+			x_1 = r * cos(i * p_1);
+			r_1 = r * sin(i * p_1);
+			x_2 = r * cos((i + 1) * p_1);
+			r_2 = r * sin((i + 1) * p_1);
+			Object3D& obj = man.startGroup(gp.uniqueID).addReflectionObject(1).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
+			for (j = 1; j < c; j++) {
+				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
+					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
+			}
+			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(2, 2, 2).move(x, y, z).rotate(0, 0, 0)
+				.setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 3);
+
+			cur_op = &obj;
+		}
+		man.endGroup();
+	}
 	//////////////////////////
 	//////////////////////////
 	// generate teapot
@@ -192,33 +219,6 @@ VOID Initialize()
 		}
 		obj.move(50, -30, 20).rotate(-90, 30, 0).setTexture(tman, t9, 1).setUV(0, -300);// .setTexture(tman, t7, 1);
 		cur_op = &obj;
-	}
-	//////////////////////////
-	//////////////////////////
-	c = 10;
-	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
-	count = 1;
-	for (k = 0; k < count; k++) {
-		EFTYPE x = rand() % 300;
-		EFTYPE z = rand() % 300;
-		EFTYPE y = rand() % 100;
-		Group3D& gp = man.addGroup();
-		for (i = 0; i < c; i++) {
-			x_1 = r * cos(i * p_1);
-			r_1 = r * sin(i * p_1);
-			x_2 = r * cos((i + 1) * p_1);
-			r_2 = r * sin((i + 1) * p_1);
-			Object3D& obj = man.startGroup(gp.uniqueID).addTransparentObject(1).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
-			for (j = 1; j < c; j++) {
-				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
-					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
-			}
-			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(2, 2, 2).move(x, y, z).rotate(0, 0, 0)
-				.setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 1);
-
-			cur_op = &obj;
-		}
-		man.endGroup();
 	}
 	//////////////////////////
 	//////////////////////////

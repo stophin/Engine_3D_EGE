@@ -37,14 +37,15 @@ public:
 };
 
 typedef unsigned char UMAP;
-#define POOL_MAX	50
+#define POOL_MAX	10240
 #define MAP_SHIFT	8
 #define MAP_MASK	0xFF
 #define GET_MAP_SIZE(x) (x / MAP_SHIFT + 1)
 class VertsPool {
 public:
 	VertsPool() :
-		size(POOL_MAX){
+		size(POOL_MAX),
+		mutex(0){
 		pool = new Verts[size];
 		mapsize = GET_MAP_SIZE(size);
 		map = new UMAP[mapsize];
@@ -63,6 +64,7 @@ public:
 			map = NULL;
 		}
 	}
+	INT mutex;
 	Verts * pool;
 	UMAP * map;
 	INT size;
