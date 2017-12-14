@@ -173,11 +173,10 @@ VOID Initialize()
 	}
 	man.endGroup();
 	//////////////////////////
-#if 0
 	//////////////////////////
 	c = 10;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
-	count = 10;
+	count = 1;
 	for (k = 0; k < count; k++) {
 		EFTYPE x = rand() % 100;
 		EFTYPE z = rand() % 100;
@@ -284,6 +283,7 @@ VOID Initialize()
 	}
 	//////////////////////////
 
+#if 0
 
 	//////////////////////////
 	// generate teapot

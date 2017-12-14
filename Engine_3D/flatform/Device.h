@@ -767,7 +767,7 @@ struct Device {
 	}
 	void RenderRayTracing(Manager3D& man) {
 		//创建线程  
-		INT thread_count = 3;
+		INT thread_count = 4;
 		HANDLE thread_pool[128];
 		INT dx = width / thread_count;
 		INT dy = height / thread_count;
@@ -805,17 +805,13 @@ struct Device {
 		if (NULL == pthread) {
 			return 0;
 		}
-		//if (pthread->id == 0 || pthread->id == 1) 
-		{
-			RenderRayTracingSub(*pthread->man, pthread->sx, pthread->sy, pthread->ex, pthread->ey, pthread->id, hMutex, pthread->device);
-		}
+		RenderRayTracingSub(*pthread->man, pthread->sx, pthread->sy, pthread->ex, pthread->ey, pthread->id, hMutex, pthread->device);
 		return 0;
 	}
 	
 	//ray tracing
 	static void RenderRayTracingSub(Manager3D & man, INT sx, INT sy, INT ex, INT ey, INT id, HANDLE hMutex, Device* device = NULL) {
 		if (NULL == device) {
-			//device = this;
 			return;
 		}
 		if (ex < sx) return;
@@ -880,6 +876,7 @@ struct Device {
 
 				Lgt3D * cur_lgt = man.lgts.link;
 				shadow_count = 0;
+				//ray tracing depth
 				count = 4;
 				do {
 					// when the ray is reflection or refraction
@@ -937,8 +934,10 @@ struct Device {
 												trans = Vert3D::GetLineIntersectPointWithTriangle(v->v_c, v0->v_c, v1->v_c, ray.original, ray.direction, trans_last, p);
 												//trans is greate than zero, and litte than last trans
 												if (EP_GTZERO(trans)) {
-													//使用同一个pool因此要保证new的原子性
-													WaitForSingleObject(hMutex, 100);
+													if (hMutex) {
+														//使用同一个pool因此要保证new的原子性
+														WaitForSingleObject(hMutex, 100);
+													}
 													Verts * verts = new Verts();
 													if (!verts) {
 														verts = verts;
