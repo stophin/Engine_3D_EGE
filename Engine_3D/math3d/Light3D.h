@@ -72,7 +72,7 @@ public:
 			__f *= __f;
 			//__f = pow(__f, (FLOAT)5);
 		}
-		if (_f < 0) _f = -_f;
+		//if (_f < 0) _f = -_f;
 		f += _f + __f;
 
 		return f;

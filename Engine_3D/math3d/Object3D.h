@@ -208,7 +208,7 @@ public:
 			n2.set(n1)*obj->M_1;
 
 			if (v_n) {
-				v_n->set(v->n_r);
+				v_n->set(v->n_w);
 			}
 
 			//*__image = obj->getTexture(n2.y * obj->t_w, n2.z * obj->t_h);
@@ -587,7 +587,7 @@ public:
 		return *this;
 	}
 
-	Object3D& setIndice(INT pv, INT pv0, INT pv1) {
+	Object3D& setIndice(INT pv, INT pv0, INT pv1, INT anti_n = 0) {
 		if (this->indice.linkcount < 3) {
 			return *this;
 		}
@@ -608,7 +608,12 @@ public:
 					__v = _v;
 				}
 
-				addVert(__v->v.x, __v->v.y, __v->v.z, __v->n.x, __v->n.y, __v->n.z);
+				if (anti_n < 0) {
+					addVert(__v->v.x, __v->v.y, __v->v.z, -__v->n.x, -__v->n.y, -__v->n.z);
+				}
+				else {
+					addVert(__v->v.x, __v->v.y, __v->v.z, __v->n.x, __v->n.y, __v->n.z);
+				}
 				//addVert(__v);
 			}
 		}
@@ -791,6 +796,8 @@ public:
 					if (1){
 
 						// get normal vector
+						v->n_w.set(v->n) ^ M;
+						v->n_w.normalize();
 						v->n_r.set(v->n) ^ CM;
 						v->n_r.normalize();
 						// set x0 for all vertexes(this is point which is for render)

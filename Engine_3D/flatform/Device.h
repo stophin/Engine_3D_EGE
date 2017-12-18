@@ -31,6 +31,7 @@ struct Device {
 	Vert3D p;
 	ege_colpoint cps[3];
 	Vert3D n, n_1, n_2, n0, n1, n2, n3, r;
+	Vert3D _n0, _n1, _n2;
 	DWORD * _tango, *_image, *_trans, *_mirror;
 	EFTYPE * _depth;
 	DWORD * __image, *__tango, *__trans, *__mirror;
@@ -577,13 +578,25 @@ struct Device {
 
 													*__image = obj->getTextureColor(n0, n1, n2, n3, v);
 
+													//get interpolation normal vector from 3 point of a triangle
+													EFTYPE area0 = Vert3D::GetAreaOfTrangle(v->v_c, v0->v_c, v1->v_c);
+													_n0.set(v->n_w);
+													_n1.set(v0->n_w);
+													_n2.set(v1->n_w);
+													EFTYPE area1 = Vert3D::GetAreaOfTrangle(v->v_c, v0->v_c, v1->v_c, &_n0, &_n1, &_n2);
+													_n0.set(v->n_w);
+													if (EP_NTZERO(area0)) {
+														area0 = area1 / area0;
+ 														_n0 * area0;
+														_n0.normalize();
+													}
 
 													//calculate sumption of light factors
 													lgt = man.lgts.link;
 													f = 0;
 													if (lgt) {
 														do {
-															f += lgt->getFactor(v->n_r, n0);
+															f += lgt->getFactor(_n0, n0);
 
 															if (render_light < 0) {
 																break;
@@ -596,7 +609,9 @@ struct Device {
 													//step4: render transparent
 													if (!EP_ISZERO(obj->transparent)) {
 														r.set(n0);
-														t = r.negative() & v->n_r;
+														//t = r.negative() & v->n_r;
+														t = r.negative() & _n0;
+
 														if (t < 0) t = -t;
 														transparent = 1.0 / obj->transparent;
 														if (transparent < 0) transparent = -transparent;
@@ -898,6 +913,7 @@ struct Device {
 		Lgt3D * lgt;
 		EFTYPE f;
 		Vert3D n0, n1, n2, n3, p;
+		Vert3D _n0, _n1, _n2;
 		EFTYPE z;
 		Ray ray;
 		INT index;
@@ -1033,12 +1049,27 @@ struct Device {
 															//get texture and normal vector at the same time
 															*__image = obj->getTextureColor(n0, n1, n2, n3, v, &verts->v_n);
 
+															//get interpolation normal vector from 3 point of a triangle
+															/*EFTYPE area0 = Vert3D::GetAreaOfTrangle(v->v_c, v0->v_c, v1->v_c);
+															_n0.set(v->n_w);
+															_n1.set(v0->n_w);
+															_n2.set(v1->n_w);
+															EFTYPE area1 = Vert3D::GetAreaOfTrangle(v->v_c, v0->v_c, v1->v_c, &_n0, &_n1, &_n2);
+															_n0.set(verts->v_n);
+															if (EP_NTZERO(area0)) {
+																area0 = area1 / area0;
+																_n0 * area0;
+																_n0.normalize();
+															}*/
+															_n0.set(v->n_w) + v0->n_w + v1->n_w;
+															verts->v_3.set(_n0);
+
 															//calculate sumption of light factors
 															lgt = man.lgts.link;
 															f = 0;
 															if (lgt) {
 																do {
-																	f += lgt->getFactor(v->n_r, n0);
+																	f += lgt->getFactor(_n0, n0);
 
 																	if (device->render_light < 0) {
 																		break;
@@ -1047,6 +1078,7 @@ struct Device {
 																	lgt = man.lgts.next(lgt);
 																} while (lgt && lgt != man.lgts.link);
 															}
+
 
 															//normal verts
 															if (0 == render_state) {
@@ -1166,9 +1198,9 @@ struct Device {
 								//this color
 								ray.color = nearest_vert->color;
 								//this factor
-								ray.f = cur_lgt->getFactor(nearest_vert->n_r, nearest_vert->v);
+								ray.f = cur_lgt->getFactor(nearest_vert->v_3, nearest_vert->v);
 								//test same direction
-								EFTYPE cross = n2 & nearest_vert->n_r;
+								EFTYPE cross = n2 & nearest_vert->v_3;
 								if (cross < 0) {
 									//not same direction, this vertex is in shadow
 									nearest_vert->color = Light3D::multi(nearest_vert->color, ray.f / 5);
@@ -1192,7 +1224,8 @@ struct Device {
 							// reflection vector
 							// R = I -  N * ( dot(I , N)* 2 )
 							//get n3 = N
-							n3.set(nearest_vert->v_n);
+							//n3.set(nearest_vert->v_n);
+							n3.set(nearest_vert->v_3);
 							//get n2 = I
 							n2.set(ray.direction);
 							//get n2 = R
@@ -1213,7 +1246,8 @@ struct Device {
 							// refraction vector
 							//T = ((nL / nT) * N * L - SQRT(1 - (nL^2 / nT ^2)*[1 - (N * L)^2])) * N - (nL / nT) * L
 							//get n3 = N
-							n3.set(nearest_vert->v_n);
+							//n3.set(nearest_vert->v_n);
+							n3.set(nearest_vert->v_3);
 							//get n2 = L
 							//this formula used a negative I
 							n2.set(ray.direction).negative();

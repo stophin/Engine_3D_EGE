@@ -216,6 +216,30 @@ struct Vert3D {
 		}
 		return -1;
 	}
+	static EFTYPE GetAreaOfTrangle(const Vert3D& va, const Vert3D& vb, const Vert3D& vc, Vert3D* na = NULL, Vert3D* nb = NULL, Vert3D* nc = NULL) {
+		EFTYPE area = 0;
+		if (NULL == na || NULL == nb || NULL == nc) {
+			//S=(1/2)*|(x2-x1)(y3-y1)-(y2-y1)(x3-x1)|
+			//=(1/2)*(x1y2+x2y3+x3y1-x1y3-x2y1-x3y2)
+			area = (va.x * vb.y + vb.x * vc.y + vc.x * va.y - va.x * vc.y - vb.x * va.y - vc.x * vb.y) * 0.5;
+			//area = ((vb.x - va.x) * (vc.y - va.y) - (vb.y - va.y) * (vc.x - va.x)) * 0.5;
+		}
+		else {
+			//n must be normalized and be the pointer of temporary object
+			(*na) + va;
+			(*nb) + vb;
+			(*nc) + vc;
+			(*na) * 10;
+			(*nb) * 10;
+			(*nc) * 10;
+			area =  (na->x * nb->y + nb->x * nc->y + nc->x * na->y - na->x * nc->y - nb->x * na->y - nc->x * nb->y) * 0.5;
+			//area = ((nb->x - na->x) * (nc->y - na->y) - (nb->y - na->y) * (nc->x - na->x)) * 0.5;
+		}
+		if (area < 0) {
+			area = -area;
+		}
+		return area;
+	}
 
 	static EFTYPE GetLineIntersectPointWithTriangle(const Vert3D& va, const Vert3D& vb, const Vert3D& vc, const Vert3D& vo, const Vert3D& vd, EFTYPE max, Vert3D& p) {
 		EFTYPE beta, rama, tran;

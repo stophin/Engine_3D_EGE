@@ -161,18 +161,35 @@ VOID Initialize()
 	CLoad3DS loader;
 	INT loadIndex;
 
-
 	//////////////////////////
-	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
-		.scale(10, 10, 10).move(0, 100, -200).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
+	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1).scale(10, 10, 10).move(0, 100, -200).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
 	//////////////////////////
-
 
 	//////////////////////////
 	loadIndex = 0;
-	loader.Init("bone_blade.3ds", loadIndex);
+	loader.Init("3ds/lamp.3ds", loadIndex);
 	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
 		t3DObject & object = g_3DModel[0].pObject.at(i);
+		cur_op = &man.addObject(10).setVertexType(1);
+		for (int j = 0; j < object.numOfVerts; j++) {
+			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y);// , object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
+		}
+		for (int j = 0; j < object.numOfFaces; j++) {
+			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
+		}
+		cur_op->move(0, 0, 100).scale(0.1, 0.1, 0.1).rotate(-90, 0, 0).setColor(RED);
+		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
+			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
+		}
+	}
+	//////////////////////////
+#if 0
+
+	//////////////////////////
+	loadIndex = 1;
+	loader.Init("3ds/cleaner.3ds", loadIndex);
+	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
+		t3DObject & object = g_3DModel[loadIndex].pObject.at(i);
 		cur_op = &man.addObject(10).setVertexType(1);
 		for (int j = 0; j < object.numOfVerts; j++) {
 			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
@@ -180,16 +197,16 @@ VOID Initialize()
 		for (int j = 0; j < object.numOfFaces; j++) {
 			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
 		}
-		cur_op->move(0, 0, 0).scale(100, 100, 100).setColor(RED);
+		cur_op->move(0, 0, 0).rotate(-90, 0, 0).setColor(RED);
 		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
 			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
 		}
 	}
 	//////////////////////////
-#if 0
+
 	//////////////////////////
 	loadIndex = 0;
-	loader.Init("Redocn_2012081411324334.3ds", loadIndex);
+	loader.Init("3ds/venus.3ds", loadIndex);
 	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
 		t3DObject & object = g_3DModel[0].pObject.at(i);
 		cur_op = &man.addObject(10).setVertexType(1);
@@ -205,9 +222,28 @@ VOID Initialize()
 		}
 	}
 	//////////////////////////
+
 	//////////////////////////
 	loadIndex = 0;
-	loader.Init("025.3ds", loadIndex);
+	loader.Init("3ds/bone_blade/bone_blade.3ds", loadIndex);
+	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
+		t3DObject & object = g_3DModel[0].pObject.at(i);
+		cur_op = &man.addObject(10).setVertexType(1);
+		for (int j = 0; j < object.numOfVerts; j++) {
+			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
+		}
+		for (int j = 0; j < object.numOfFaces; j++) {
+			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
+		}
+		cur_op->move(0, 0, 0).scale(100, 100, 100).setColor(RED);
+		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
+			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
+		}
+	}
+	//////////////////////////
+	//////////////////////////
+	loadIndex = 0;
+	loader.Init("3ds/coffee_plate.3ds", loadIndex);
 	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
 		t3DObject & object = g_3DModel[0].pObject.at(i);
 		cur_op = &man.addObject(10).setVertexType(1);
@@ -226,7 +262,7 @@ VOID Initialize()
 
 	//////////////////////////
 	loadIndex = 0;
-	loader.Init("porshe-BOXTER.3ds", loadIndex);
+	loader.Init("3ds/porshe-BOXTER.3ds", loadIndex);
 	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
 		t3DObject & object = g_3DModel[0].pObject.at(i);
 		cur_op = &man.addObject(10).setVertexType(1);
@@ -237,43 +273,6 @@ VOID Initialize()
 			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
 		}
 		cur_op->move(0, 0, 0).scale(10, 10, 10).rotate(-90, 0, 0).setColor(RED);
-		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
-			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
-		}
-	}
-	//////////////////////////
-	//////////////////////////
-	loadIndex = 0;
-	loader.Init("Redocn_2013121708420722.3ds", loadIndex);
-	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
-		t3DObject & object = g_3DModel[0].pObject.at(i);
-		cur_op = &man.addTransparentObject(10).setVertexType(1);
-		for (int j = 0; j < object.numOfVerts; j++) {
-			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
-		}
-		for (int j = 0; j < object.numOfFaces; j++) {
-			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
-		}
-		cur_op->move(0, 0, 0).scale(0.1, 0.1, 0.1).rotate(-90, 0, 0).setColor(RED);
-		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
-			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
-		}
-	}
-	//////////////////////////
-
-	//////////////////////////
-	loadIndex = 1;
-	loader.Init("Redocn_2013121212394251.3ds", loadIndex);
-	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
-		t3DObject & object = g_3DModel[loadIndex].pObject.at(i);
-		cur_op = &man.addObject(10).setVertexType(1);
-		for (int j = 0; j < object.numOfVerts; j++) {
-			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
-		}
-		for (int j = 0; j < object.numOfFaces; j++) {
-			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
-		}
-		cur_op->move(0, 0, 0).rotate(-90, 0, 0).setColor(RED);
 		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
 			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
 		}

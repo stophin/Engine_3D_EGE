@@ -17,6 +17,7 @@ public:
 	EFTYPE trans;
 	DWORD color;
 	Vert3D v;
+	Vert3D v_3;
 	Vert3D v_n;
 	Vert3D n_r;
 	void * obj;
