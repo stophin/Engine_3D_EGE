@@ -311,6 +311,16 @@ struct Vert3D {
 		p.w = 1;
 		return tran;
 	}
+
+	static void GetLine(const Vert3D& v0, const Vert3D& v1, EPoint& p) {
+		if (EP_ISZERO(v0.y - v1.y)) {
+			p.Set(0, 0);
+			//p.Set(0, v1.x);
+			return;
+		}
+		EFTYPE k = (v0.x - v1.x) / (v0.y - v1.y);
+		p.Set(k, -k * v1.y + v1.x);
+	}
 };
 
 #endif

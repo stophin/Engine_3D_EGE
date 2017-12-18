@@ -162,7 +162,7 @@ VOID Initialize()
 	INT loadIndex;
 
 	//////////////////////////
-	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1).scale(10, 10, 10).move(0, 100, -200).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
+	cur_op = &man.addObject().addVert(-10, -10, 10);// .addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1).scale(10, 10, 10).move(0, 100, -200).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
 	//////////////////////////
 
 	//////////////////////////
@@ -172,10 +172,12 @@ VOID Initialize()
 		t3DObject & object = g_3DModel[0].pObject.at(i);
 		cur_op = &man.addObject(10).setVertexType(1);
 		for (int j = 0; j < object.numOfVerts; j++) {
-			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y);// , object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
+			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
 		}
+		INT anti_n = 1;
 		for (int j = 0; j < object.numOfFaces; j++) {
-			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
+			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1], anti_n);
+			//anti_n = -anti_n;
 		}
 		cur_op->move(0, 0, 100).scale(0.1, 0.1, 0.1).rotate(-90, 0, 0).setColor(RED);
 		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {

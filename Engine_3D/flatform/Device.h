@@ -31,7 +31,7 @@ struct Device {
 	Vert3D p;
 	ege_colpoint cps[3];
 	Vert3D n, n_1, n_2, n0, n1, n2, n3, r;
-	Vert3D _n0, _n1, _n2;
+	Vert3D _n0, _n1, _n2, _n3;
 	DWORD * _tango, *_image, *_trans, *_mirror;
 	EFTYPE * _depth;
 	DWORD * __image, *__tango, *__trans, *__mirror;
@@ -454,6 +454,8 @@ struct Device {
 			int trans_w0 = EP_MAX, trans_h0 = EP_MAX;
 			int trans_w1 = -EP_MAX, trans_h1 = -EP_MAX;
 			VObj * v, *v0, *v1, *vtemp;
+			VObj * _v, *_v0, *_v1;
+			EPoint l1, l0, l;
 
 			EFTYPE z;
 			INT index = 0, _index = 0;
@@ -535,6 +537,19 @@ struct Device {
 												___image = *__image;
 											}
 										}
+										//get line formula
+										//v0-v1
+										Vert3D::GetLine(v1->v_s, v0->v_s, l1);
+										//v1-v
+										Vert3D::GetLine(v->v_s, v1->v_s, l);
+										//v-v0
+										Vert3D::GetLine(v0->v_s, v->v_s, l0);
+										//get range x
+										EFTYPE __y = i;
+										EFTYPE __x;
+										INT _line_l1 = (INT)(l1.x * __y + l1.y);
+										INT _line_l = (INT)(l.x * __y + l.y);
+										INT _line_l0 = (INT)(l0.x * __y + l0.y);
 										for (j = xs; j <= xe  && j < width; j += 1) {
 											index = i * width + j;
 											__image = &_image[index];
@@ -579,16 +594,93 @@ struct Device {
 													*__image = obj->getTextureColor(n0, n1, n2, n3, v);
 
 													//get interpolation normal vector from 3 point of a triangle
-													EFTYPE area0 = Vert3D::GetAreaOfTrangle(v->v_c, v0->v_c, v1->v_c);
-													_n0.set(v->n_w);
-													_n1.set(v0->n_w);
-													_n2.set(v1->n_w);
-													EFTYPE area1 = Vert3D::GetAreaOfTrangle(v->v_c, v0->v_c, v1->v_c, &_n0, &_n1, &_n2);
-													_n0.set(v->n_w);
-													if (EP_NTZERO(area0)) {
-														area0 = area1 / area0;
- 														_n0 * area0;
-														_n0.normalize();
+													//EFTYPE area0 = Vert3D::GetAreaOfTrangle(v->v_c, v0->v_c, v1->v_c);
+													//_n0.set(v->n_w);
+													//_n1.set(v0->n_w);
+													//_n2.set(v1->n_w);
+													//EFTYPE area1 = Vert3D::GetAreaOfTrangle(v->v_c, v0->v_c, v1->v_c, &_n0, &_n1, &_n2);
+													//_n0.set(v->n_w);
+													//if (EP_NTZERO(area0)) {
+													//	area0 = area1 / area0;
+ 													//	_n0 * area0;
+													//	_n0.normalize();
+													//}
+													__x = j;
+													if (EP_ISZERO_INT(line_r - line_l)) {
+														_n0.set(v->n_w);
+													} else {
+														//get left point position
+														if (!EP_ISZERO_INT(_line_l1) && EP_ISZERO_INT(_line_l1 - line_l)) {
+															_v0 = v0;
+															_v1 = v1;
+														}
+														else if (!EP_ISZERO_INT(_line_l) && EP_ISZERO_INT(_line_l - line_l)) {
+															_v0 = v1;
+															_v1 = v;
+														}
+														else if (!EP_ISZERO_INT(_line_l0) && EP_ISZERO_INT(_line_l0 - line_l)) {
+															_v0 = v;
+															_v1 = v0;
+														}
+														else {
+															_v0 = v;
+															_v1 = v0;
+														}
+														if (_v0->y0 > _v1->y0) {
+															_v = _v0;
+															_v0 = _v1;
+															_v1 = _v;
+														}
+														if (EP_ISZERO(_v0->y0 - _v1->y0)) {
+															_n2.set(v0->n_w);
+														} else {
+															_n0.set(_v0->n_w);
+															_n1.set(_v1->n_w);
+															//Ns = (1 / (y1 - y2))[N1 * (ys - y2) + N2 * (y1 - ys)]
+															_n0 * ((i - _v1->y0) / (_v0->y0 - _v1->y0));
+															_n1 * ((_v0->y0 - i) / (_v0->y0 - _v1->y0));
+															_n2.set(_n0) + _n1;
+														}
+														//get right point position
+														if (!EP_ISZERO_INT(_line_l1) && EP_ISZERO_INT(_line_l1 - line_r)) {
+															_v0 = v0;
+															_v1 = v1;
+														}
+														else if (!EP_ISZERO_INT(_line_l) && EP_ISZERO_INT(_line_l - line_r)) {
+															_v0 = v1;
+															_v1 = v;
+														}
+														else if (!EP_ISZERO_INT(_line_l0) && EP_ISZERO_INT(_line_l0 - line_r)) {
+															_v0 = v;
+															_v1 = v0;
+														}
+														else {
+															_v0 = v;
+															_v1 = v0;
+														}
+														if (_v0->y0 > _v1->y0) {
+															_v = _v0;
+															_v0 = _v1;
+															_v1 = _v;
+														}
+														if (EP_ISZERO(_v0->y0 - _v1->y0)) {
+															_n3.set(v0->n_w);
+														}
+														else {
+															_n0.set(_v0->n_w);
+															_n1.set(_v1->n_w);
+															//Na or Nb = (1 / (y1 - y2))[N1 * (ys - y2) + N2 * (y1 - ys)]
+															_n0 * ((i - _v1->y0) / (_v0->y0 - _v1->y0));
+															_n1 * ((_v0->y0 - i) / (_v0->y0 - _v1->y0));
+															_n3.set(_n0) + _n1;
+														}
+														//get Ns
+														_n0.set(_n2);
+														_n1.set(_n3);
+														//Ns = (1 / (xb - xa))[Na * (xb - xs) + Nb * (xs - xa)]
+														_n0 * ((line_r - __x) / ((EFTYPE)(line_r - line_l)));
+														_n1 * ((__x - line_l) / ((EFTYPE)(line_r - line_l)));
+														_n0 + _n1;
 													}
 
 													//calculate sumption of light factors
