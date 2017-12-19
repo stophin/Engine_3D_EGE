@@ -106,7 +106,7 @@ typedef class Object3D Object3D;
 class Object3D {
 public:
 	Object3D() : 
-		_M(&M, &M_1, 1), texture(NULL), anti(1),
+		_M(&M, &M_1, 1), texture(NULL), anti(1), normal_type(0),
 		cam(NULL), indice(3), verts(0), verts_r(1), verts_f(2), transparent(0), reflection(0), v0(NULL), v1(NULL), render_aabb(0),
 		texture_type(0), vertex_type(0), backfaceculling(0){
 		center.init();
@@ -125,6 +125,16 @@ public:
 	}
 
 	void * octTree;
+
+	// normal type:
+	//0: flat
+	//1: phong interpolation
+	INT normal_type;
+	Object3D& setNormalType(INT n) {
+		this->normal_type = n;
+
+		return *this;
+	}
 
 	DWORD *texture;
 	INT t_w;
@@ -208,7 +218,7 @@ public:
 			n2.set(n1)*obj->M_1;
 
 			if (v_n) {
-				v_n->set(v->n_w);
+				v_n->set(v->n_r);
 			}
 
 			//*__image = obj->getTexture(n2.y * obj->t_w, n2.z * obj->t_h);
@@ -924,7 +934,7 @@ public:
 		const VObj * _v0, *_v1, *_v;
 
 		if (EP_ISZERO_INT(line_r - line_l)) {
-			_n0.set(v->n_w);
+			_n0.set(v->n_r);
 		}
 		else {
 			INT range = 5;
@@ -951,11 +961,11 @@ public:
 				_v1 = _v;
 			}
 			if (EP_ISZERO(_v0->y0 - _v1->y0)) {
-				_n2.set(v0->n_w);
+				_n2.set(v0->n_r);
 			}
 			else {
-				_n0.set(_v0->n_w);
-				_n1.set(_v1->n_w);
+				_n0.set(_v0->n_r);
+				_n1.set(_v1->n_r);
 				//Ns = (1 / (y1 - y2))[N1 * (ys - y2) + N2 * (y1 - ys)]
 				_n0 * ((__y - _v1->y0) / (_v0->y0 - _v1->y0));
 				_n1 * ((_v0->y0 - __y) / (_v0->y0 - _v1->y0));
@@ -984,11 +994,11 @@ public:
 				_v1 = _v;
 			}
 			if (EP_ISZERO(_v0->y0 - _v1->y0)) {
-				_n3.set(v0->n_w);
+				_n3.set(v0->n_r);
 			}
 			else {
-				_n0.set(_v0->n_w);
-				_n1.set(_v1->n_w);
+				_n0.set(_v0->n_r);
+				_n1.set(_v1->n_r);
 				//Na or Nb = (1 / (y1 - y2))[N1 * (ys - y2) + N2 * (y1 - ys)]
 				_n0 * ((__y - _v1->y0) / (_v0->y0 - _v1->y0));
 				_n1 * ((_v0->y0 - __y) / (_v0->y0 - _v1->y0));

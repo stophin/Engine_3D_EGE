@@ -594,9 +594,14 @@ struct Device {
 
 													//get interpolation normal vector from 3 point of a triangle
 													__x = j;
-													Object3D::GetInterpolationNormalVector(v0, v1, v, __x, __y,
-														line_r, line_l, _line_l1, _line_l, _line_l0,
-														5, _n0, _n1, _n2, _n3);
+													if (1 == obj->normal_type) {
+														Object3D::GetInterpolationNormalVector(v0, v1, v, __x, __y,
+															line_r, line_l, _line_l1, _line_l, _line_l0,
+															5, _n0, _n1, _n2, _n3);
+													}
+													else {
+														_n0.set(v->n_r);
+													}
 
 													//calculate sumption of light factors
 													lgt = man.lgts.link;
@@ -1057,50 +1062,56 @@ struct Device {
 															//get texture and normal vector at the same time
 															*__image = obj->getTextureColor(n0, n1, n2, n3, v, &verts->v_n);
 
-															//get line formula
-															//v0-v1
-															Vert3D::GetLine(v1->v_s, v0->v_s, l1);
-															//v1-v
-															Vert3D::GetLine(v->v_s, v1->v_s, l);
-															//v-v0
-															Vert3D::GetLine(v0->v_s, v->v_s, l0);
-															//get range x
-															_n1.set(n0);
-															cam->normalize(_n1);
-															_n2.set(_n1.x * cam->scale_w + cam->offset_w, _n1.y * cam->scale_h + cam->offset_h, _n1.z);
-															EFTYPE __y = _n2.y;
-															EFTYPE __x = _n2.x;
-															INT _line_l1 = (INT)(l1.x * __y + l1.y);
-															INT _line_l = (INT)(l.x * __y + l.y);
-															INT _line_l0 = (INT)(l0.x * __y + l0.y);
-															INT line_l, line_r;
-															INT minx, maxx;
-															minx = min(min(v->x0, v0->x0), min(v->x0, v1->x0));
-															maxx = max(max(v->x0, v0->x0), max(v->x0, v1->x0));
-															if (_line_l1 < minx || _line_l1 > maxx) {
-																_line_l1 = 0;
-																line_l = min(_line_l, _line_l0);
-																line_r = max(_line_l, _line_l0);
-															}
-															else if (_line_l < minx || _line_l > maxx) {
-																_line_l = 0;
-																line_l = min(_line_l1, _line_l0);
-																line_r = max(_line_l1, _line_l0);
-															}
-															else if (_line_l0 < minx || _line_l0 > maxx) {
-																_line_l0 = 0;
-																line_l = min(_line_l1, _line_l);
-																line_r = max(_line_l1, _line_l);
+															if (1 == obj->normal_type) {
+																//get line formula
+																//v0-v1
+																Vert3D::GetLine(v1->v_s, v0->v_s, l1);
+																//v1-v
+																Vert3D::GetLine(v->v_s, v1->v_s, l);
+																//v-v0
+																Vert3D::GetLine(v0->v_s, v->v_s, l0);
+																//get range x
+																_n1.set(n0);
+																cam->normalize(_n1);
+																_n2.set(_n1.x * cam->scale_w + cam->offset_w, _n1.y * cam->scale_h + cam->offset_h, _n1.z);
+																EFTYPE __y = _n2.y;
+																EFTYPE __x = _n2.x;
+																INT _line_l1 = (INT)(l1.x * __y + l1.y);
+																INT _line_l = (INT)(l.x * __y + l.y);
+																INT _line_l0 = (INT)(l0.x * __y + l0.y);
+																INT line_l, line_r;
+																INT minx, maxx;
+																minx = min(min(v->x0, v0->x0), min(v->x0, v1->x0));
+																maxx = max(max(v->x0, v0->x0), max(v->x0, v1->x0));
+																if (_line_l1 < minx || _line_l1 > maxx) {
+																	_line_l1 = 0;
+																	line_l = min(_line_l, _line_l0);
+																	line_r = max(_line_l, _line_l0);
+																}
+																else if (_line_l < minx || _line_l > maxx) {
+																	_line_l = 0;
+																	line_l = min(_line_l1, _line_l0);
+																	line_r = max(_line_l1, _line_l0);
+																}
+																else if (_line_l0 < minx || _line_l0 > maxx) {
+																	_line_l0 = 0;
+																	line_l = min(_line_l1, _line_l);
+																	line_r = max(_line_l1, _line_l);
+																}
+																else {
+																	line_l = min(min(_line_l, _line_l0), min(_line_l1, _line_l0));
+																	line_r = max(max(_line_l, _line_l0), max(_line_l1, _line_l0));
+																}
+																//get interpolation normal vector from 3 point of a triangle
+																Object3D::GetInterpolationNormalVector(v0, v1, v, __x, __y,
+																	line_r, line_l, _line_l1, _line_l, _line_l0,
+																	5, _n0, _n1, _n2, _n3);
+																verts->v_3.set(_n0);
 															}
 															else {
-																line_l = min(min(_line_l, _line_l0), min(_line_l1, _line_l0));
-																line_r = max(max(_line_l, _line_l0), max(_line_l1, _line_l0));
+																_n0.set(v->n_r);
+																verts->v_3.set(verts->v_n);
 															}
-															//get interpolation normal vector from 3 point of a triangle
-															Object3D::GetInterpolationNormalVector(v0, v1, v, __x, __y,
-																line_r, line_l, _line_l1, _line_l, _line_l0,
-																5, _n0, _n1, _n2, _n3);
-															verts->v_3.set(_n0);
 
 															//calculate sumption of light factors
 															lgt = man.lgts.link;
@@ -1126,15 +1137,15 @@ struct Device {
 															}
 															//reflection verts
 															else if (1 == render_state) {
-																//*__image = Light3D::add(*__image, BLACK, f);
-																*__image = Light3D::multi(BLACK, f);
+																*__image = Light3D::add(*__image, BLACK, f / 2);
+																//*__image = Light3D::multi(BLACK, f);
 																//set type reflection
 																verts->type = 1;
 															}
 															//transparent verts
 															else if (2 == render_state) {
-																//*__image = Light3D::add(*__image, BLACK, f);
-																*__image = Light3D::multi(BLACK, f);
+																*__image = Light3D::add(*__image, BLACK, f / 2);
+																//*__image = Light3D::multi(BLACK, f);
 																//set type transparent
 																verts->type = 2;
 															}
