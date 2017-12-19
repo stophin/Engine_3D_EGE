@@ -11,3 +11,6 @@ WHAT's INCLUDED:
 3. silmulated reflection object.  
 
 4. simulated texture renderer.
+
+NOTE:
+refer to https://github.com/stophin/3DSResource.git for the 3DS resource in /3ds folder.
