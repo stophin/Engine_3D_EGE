@@ -162,7 +162,7 @@ VOID Initialize()
 	INT loadIndex;
 
 	//////////////////////////
-	cur_op = &man.addObject().addVert(-10, -10, 10);// .addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1).scale(10, 10, 10).move(0, 100, -200).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
+	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1).scale(10, 10, 10).move(0, 100, -200).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
 	//////////////////////////
 
 	//////////////////////////
@@ -377,6 +377,8 @@ VOID Initialize()
 		man.endGroup();
 	}
 	//////////////////////////
+#endif
+#if 0
 	//////////////////////////
 	c = 10;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);

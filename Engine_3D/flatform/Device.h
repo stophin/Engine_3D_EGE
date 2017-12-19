@@ -454,7 +454,6 @@ struct Device {
 			int trans_w0 = EP_MAX, trans_h0 = EP_MAX;
 			int trans_w1 = -EP_MAX, trans_h1 = -EP_MAX;
 			VObj * v, *v0, *v1, *vtemp;
-			VObj * _v, *_v0, *_v1;
 			EPoint l1, l0, l;
 
 			EFTYPE z;
@@ -594,94 +593,10 @@ struct Device {
 													*__image = obj->getTextureColor(n0, n1, n2, n3, v);
 
 													//get interpolation normal vector from 3 point of a triangle
-													//EFTYPE area0 = Vert3D::GetAreaOfTrangle(v->v_c, v0->v_c, v1->v_c);
-													//_n0.set(v->n_w);
-													//_n1.set(v0->n_w);
-													//_n2.set(v1->n_w);
-													//EFTYPE area1 = Vert3D::GetAreaOfTrangle(v->v_c, v0->v_c, v1->v_c, &_n0, &_n1, &_n2);
-													//_n0.set(v->n_w);
-													//if (EP_NTZERO(area0)) {
-													//	area0 = area1 / area0;
- 													//	_n0 * area0;
-													//	_n0.normalize();
-													//}
 													__x = j;
-													if (EP_ISZERO_INT(line_r - line_l)) {
-														_n0.set(v->n_w);
-													} else {
-														//get left point position
-														if (!EP_ISZERO_INT(_line_l1) && EP_ISZERO_INT(_line_l1 - line_l)) {
-															_v0 = v0;
-															_v1 = v1;
-														}
-														else if (!EP_ISZERO_INT(_line_l) && EP_ISZERO_INT(_line_l - line_l)) {
-															_v0 = v1;
-															_v1 = v;
-														}
-														else if (!EP_ISZERO_INT(_line_l0) && EP_ISZERO_INT(_line_l0 - line_l)) {
-															_v0 = v;
-															_v1 = v0;
-														}
-														else {
-															_v0 = v;
-															_v1 = v0;
-														}
-														if (_v0->y0 > _v1->y0) {
-															_v = _v0;
-															_v0 = _v1;
-															_v1 = _v;
-														}
-														if (EP_ISZERO(_v0->y0 - _v1->y0)) {
-															_n2.set(v0->n_w);
-														} else {
-															_n0.set(_v0->n_w);
-															_n1.set(_v1->n_w);
-															//Ns = (1 / (y1 - y2))[N1 * (ys - y2) + N2 * (y1 - ys)]
-															_n0 * ((i - _v1->y0) / (_v0->y0 - _v1->y0));
-															_n1 * ((_v0->y0 - i) / (_v0->y0 - _v1->y0));
-															_n2.set(_n0) + _n1;
-														}
-														//get right point position
-														if (!EP_ISZERO_INT(_line_l1) && EP_ISZERO_INT(_line_l1 - line_r)) {
-															_v0 = v0;
-															_v1 = v1;
-														}
-														else if (!EP_ISZERO_INT(_line_l) && EP_ISZERO_INT(_line_l - line_r)) {
-															_v0 = v1;
-															_v1 = v;
-														}
-														else if (!EP_ISZERO_INT(_line_l0) && EP_ISZERO_INT(_line_l0 - line_r)) {
-															_v0 = v;
-															_v1 = v0;
-														}
-														else {
-															_v0 = v;
-															_v1 = v0;
-														}
-														if (_v0->y0 > _v1->y0) {
-															_v = _v0;
-															_v0 = _v1;
-															_v1 = _v;
-														}
-														if (EP_ISZERO(_v0->y0 - _v1->y0)) {
-															_n3.set(v0->n_w);
-														}
-														else {
-															_n0.set(_v0->n_w);
-															_n1.set(_v1->n_w);
-															//Na or Nb = (1 / (y1 - y2))[N1 * (ys - y2) + N2 * (y1 - ys)]
-															_n0 * ((i - _v1->y0) / (_v0->y0 - _v1->y0));
-															_n1 * ((_v0->y0 - i) / (_v0->y0 - _v1->y0));
-															_n3.set(_n0) + _n1;
-														}
-														//get Ns
-														_n0.set(_n2);
-														_n1.set(_n3);
-														//Ns = (1 / (xb - xa))[Na * (xb - xs) + Nb * (xs - xa)]
-														_n0 * ((line_r - __x) / ((EFTYPE)(line_r - line_l)));
-														_n1 * ((__x - line_l) / ((EFTYPE)(line_r - line_l)));
-														_n0 + _n1;
-													}
+													Object3D::GetInterpolationNormalVector(v0, v1, v, __x, __y,
+														line_r, line_l, _line_l1, _line_l, _line_l0,
+														5, _n0, _n1, _n2, _n3);
 
 													//calculate sumption of light factors
 													lgt = man.lgts.link;
@@ -1005,7 +920,8 @@ struct Device {
 		Lgt3D * lgt;
 		EFTYPE f;
 		Vert3D n0, n1, n2, n3, p;
-		Vert3D _n0, _n1, _n2;
+		Vert3D _n0, _n1, _n2, _n3;
+		EPoint l1, l0, l;
 		EFTYPE z;
 		Ray ray;
 		INT index;
@@ -1141,19 +1057,49 @@ struct Device {
 															//get texture and normal vector at the same time
 															*__image = obj->getTextureColor(n0, n1, n2, n3, v, &verts->v_n);
 
+															//get line formula
+															//v0-v1
+															Vert3D::GetLine(v1->v_s, v0->v_s, l1);
+															//v1-v
+															Vert3D::GetLine(v->v_s, v1->v_s, l);
+															//v-v0
+															Vert3D::GetLine(v0->v_s, v->v_s, l0);
+															//get range x
+															_n1.set(n0);
+															cam->normalize(_n1);
+															_n0.set(_n1.x * cam->scale_w + cam->offset_w, _n1.y * cam->scale_h + cam->offset_h, _n1.z);
+															EFTYPE __y = _n0.y;
+															EFTYPE __x = _n0.x;
+															INT _line_l1 = (INT)(l1.x * __y + l1.y);
+															INT _line_l = (INT)(l.x * __y + l.y);
+															INT _line_l0 = (INT)(l0.x * __y + l0.y);
+															INT line_l, line_r;
+															INT minx, maxx;
+															minx = min(min(v->x0, v0->x0), min(v->x0, v1->x0));
+															maxx = max(max(v->x0, v0->x0), max(v->x0, v1->x0));
+															if (_line_l1 < minx || _line_l1 > maxx) {
+																_line_l1 = 0;
+																line_l = min(_line_l, _line_l0);
+																line_r = max(_line_l, _line_l0);
+															}
+															else if (_line_l < minx || _line_l > maxx) {
+																_line_l = 0;
+																line_l = min(_line_l1, _line_l0);
+																line_r = max(_line_l1, _line_l0);
+															}
+															else if (_line_l0 < minx || _line_l0 > maxx) {
+																_line_l0 = 0;
+																line_l = min(_line_l1, _line_l);
+																line_r = max(_line_l1, _line_l);
+															}
+															else {
+																line_l = min(min(_line_l, _line_l0), min(_line_l1, _line_l0));
+																line_r = max(max(_line_l, _line_l0), max(_line_l1, _line_l0));
+															}
 															//get interpolation normal vector from 3 point of a triangle
-															/*EFTYPE area0 = Vert3D::GetAreaOfTrangle(v->v_c, v0->v_c, v1->v_c);
-															_n0.set(v->n_w);
-															_n1.set(v0->n_w);
-															_n2.set(v1->n_w);
-															EFTYPE area1 = Vert3D::GetAreaOfTrangle(v->v_c, v0->v_c, v1->v_c, &_n0, &_n1, &_n2);
-															_n0.set(verts->v_n);
-															if (EP_NTZERO(area0)) {
-																area0 = area1 / area0;
-																_n0 * area0;
-																_n0.normalize();
-															}*/
-															_n0.set(v->n_w) + v0->n_w + v1->n_w;
+															Object3D::GetInterpolationNormalVector(v0, v1, v, __x, __y,
+																line_r, line_l, _line_l1, _line_l, _line_l0,
+																5, _n0, _n1, _n2, _n3);
 															verts->v_3.set(_n0);
 
 															//calculate sumption of light factors

@@ -917,6 +917,92 @@ public:
 
 		return *this;
 	}
+
+	static void GetInterpolationNormalVector(const VObj * v0, const VObj * v1, const VObj * v,
+		INT __x, INT __y, INT line_r, INT line_l, INT _line_l1, INT _line_l, INT _line_l0, INT range,
+		Vert3D& _n0, Vert3D& _n1, Vert3D& _n2, Vert3D& _n3) {
+		const VObj * _v0, *_v1, *_v;
+
+		if (EP_ISZERO_INT(line_r - line_l)) {
+			_n0.set(v->n_w);
+		}
+		else {
+			INT range = 5;
+			//get left point position
+			if (!EP_ISZERO_INT(_line_l1) && EP_RANGE_INT(_line_l1 - line_l, range)) {
+				_v0 = v0;
+				_v1 = v1;
+			}
+			else if (!EP_ISZERO_INT(_line_l) && EP_RANGE_INT(_line_l - line_l, range)) {
+				_v0 = v1;
+				_v1 = v;
+			}
+			else if (!EP_ISZERO_INT(_line_l0) && EP_RANGE_INT(_line_l0 - line_l, range)) {
+				_v0 = v;
+				_v1 = v0;
+			}
+			else {
+				_v0 = v;
+				_v1 = v0;
+			}
+			if (_v0->y0 > _v1->y0) {
+				_v = _v0;
+				_v0 = _v1;
+				_v1 = _v;
+			}
+			if (EP_ISZERO(_v0->y0 - _v1->y0)) {
+				_n2.set(v0->n_w);
+			}
+			else {
+				_n0.set(_v0->n_w);
+				_n1.set(_v1->n_w);
+				//Ns = (1 / (y1 - y2))[N1 * (ys - y2) + N2 * (y1 - ys)]
+				_n0 * ((__y - _v1->y0) / (_v0->y0 - _v1->y0));
+				_n1 * ((_v0->y0 - __y) / (_v0->y0 - _v1->y0));
+				_n2.set(_n0) + _n1;
+			}
+			//get right point position
+			if (!EP_ISZERO_INT(_line_l1) && EP_RANGE_INT(_line_l1 - line_r, range)) {
+				_v0 = v0;
+				_v1 = v1;
+			}
+			else if (!EP_ISZERO_INT(_line_l) && EP_RANGE_INT(_line_l - line_r, range)) {
+				_v0 = v1;
+				_v1 = v;
+			}
+			else if (!EP_ISZERO_INT(_line_l0) && EP_RANGE_INT(_line_l0 - line_r, range)) {
+				_v0 = v;
+				_v1 = v0;
+			}
+			else {
+				_v0 = v;
+				_v1 = v0;
+			}
+			if (_v0->y0 > _v1->y0) {
+				_v = _v0;
+				_v0 = _v1;
+				_v1 = _v;
+			}
+			if (EP_ISZERO(_v0->y0 - _v1->y0)) {
+				_n3.set(v0->n_w);
+			}
+			else {
+				_n0.set(_v0->n_w);
+				_n1.set(_v1->n_w);
+				//Na or Nb = (1 / (y1 - y2))[N1 * (ys - y2) + N2 * (y1 - ys)]
+				_n0 * ((__y - _v1->y0) / (_v0->y0 - _v1->y0));
+				_n1 * ((_v0->y0 - __y) / (_v0->y0 - _v1->y0));
+				_n3.set(_n0) + _n1;
+			}
+			//get Ns
+			_n0.set(_n2);
+			_n1.set(_n3);
+			//Ns = (1 / (xb - xa))[Na * (xb - xs) + Nb * (xs - xa)]
+			_n0 * ((line_r - __x) / ((EFTYPE)(line_r - line_l)));
+			_n1 * ((__x - line_l) / ((EFTYPE)(line_r - line_l)));
+			_n0 + _n1;
+		}
+	}
 };
 
 
