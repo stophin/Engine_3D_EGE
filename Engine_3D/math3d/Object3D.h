@@ -1001,6 +1001,7 @@ public:
 			_n0 * ((line_r - __x) / ((EFTYPE)(line_r - line_l)));
 			_n1 * ((__x - line_l) / ((EFTYPE)(line_r - line_l)));
 			_n0 + _n1;
+			_n0.normalize();
 		}
 	}
 };

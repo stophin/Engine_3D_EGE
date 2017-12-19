@@ -597,7 +597,6 @@ struct Device {
 													Object3D::GetInterpolationNormalVector(v0, v1, v, __x, __y,
 														line_r, line_l, _line_l1, _line_l, _line_l0,
 														5, _n0, _n1, _n2, _n3);
-													_n0.normalize();
 
 													//calculate sumption of light factors
 													lgt = man.lgts.link;
@@ -1101,7 +1100,7 @@ struct Device {
 															Object3D::GetInterpolationNormalVector(v0, v1, v, __x, __y,
 																line_r, line_l, _line_l1, _line_l, _line_l0,
 																5, _n0, _n1, _n2, _n3);
-															verts->v_3.set(_n0).normalize();
+															verts->v_3.set(_n0);
 
 															//calculate sumption of light factors
 															lgt = man.lgts.link;
@@ -1127,15 +1126,15 @@ struct Device {
 															}
 															//reflection verts
 															else if (1 == render_state) {
-																*__image = Light3D::add(*__image, BLACK, f);
-																//*__image = Light3D::multi(BLACK, f);
+																//*__image = Light3D::add(*__image, BLACK, f);
+																*__image = Light3D::multi(BLACK, f);
 																//set type reflection
 																verts->type = 1;
 															}
 															//transparent verts
 															else if (2 == render_state) {
-																*__image = Light3D::add(*__image, BLACK, f);
-																//*__image = Light3D::multi(BLACK, f);
+																//*__image = Light3D::add(*__image, BLACK, f);
+																*__image = Light3D::multi(BLACK, f);
 																//set type transparent
 																verts->type = 2;
 															}
@@ -1239,11 +1238,11 @@ struct Device {
 								//this factor
 								ray.f = cur_lgt->getFactor(nearest_vert->v_3, nearest_vert->v);
 								//test same direction
-								EFTYPE cross = n2 & nearest_vert->v_n;
-								if (cross < 0) {
-									//not same direction, this vertex is in shadow
-									nearest_vert->color = Light3D::multi(nearest_vert->color, ray.f / 5);
-								}
+								//EFTYPE cross = n2 & nearest_vert->v_3;
+								//if (cross < 0) {
+								//	//not same direction, this vertex is in shadow
+								//	nearest_vert->color = Light3D::multi(nearest_vert->color, ray.f / 2);
+								//}
 
 								//shadow test does not affect ray tracing times
 								count++;

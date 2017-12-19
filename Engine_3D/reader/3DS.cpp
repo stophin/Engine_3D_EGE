@@ -144,7 +144,9 @@ bool CLoad3DS::Import3DS(t3DModel *pModel, char *strFileName)
 //  下面的函数释放所有的内存空间，并关闭文件
 void CLoad3DS::CleanUp()
 {        // 遍历场景中所有的对象
-	fclose(m_FilePointer);                                                // 关闭当前的文件指针
+	if (m_FilePointer) {
+		fclose(m_FilePointer);                                                // 关闭当前的文件指针
+	}
 	//delete m_CurrentChunk;                                                // 释放当前块
 	//delete m_TempChunk;                                                        // 释放临时块
 }

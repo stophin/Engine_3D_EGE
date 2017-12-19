@@ -164,13 +164,22 @@ VOID Initialize()
 	//////////////////////////
 	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1).scale(10, 10, 10).move(0, 100, -200).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
 	//////////////////////////
-
+	//////////////////////////
+	Group3D& gp = man.addGroup();
+	for (int i = 0; i < 5; i++) {
+		for (int j = 0; j < 5; j++) {
+			man.startGroup(gp.uniqueID).addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
+				.rotate(0, 0, 180).scale(5, 5, 5).move(250 - 100 * j, -40, 250 - 100 * i).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t0);
+		}
+	}
+	man.endGroup();
+	//////////////////////////
 	//////////////////////////
 	loadIndex = 0;
 	loader.Init("3ds/lamp.3ds", loadIndex);
 	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
 		t3DObject & object = g_3DModel[0].pObject.at(i);
-		cur_op = &man.addObject(10).setVertexType(1);
+		cur_op = &man.addReflectionObject(10).setVertexType(1);
 		for (int j = 0; j < object.numOfVerts; j++) {
 			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
 		}
@@ -179,19 +188,37 @@ VOID Initialize()
 			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1], anti_n);
 			//anti_n = -anti_n;
 		}
-		cur_op->move(0, 0, 100).scale(0.1, 0.1, 0.1).rotate(-90, 0, 0).setColor(RED);
+		cur_op->move(0, 50, 100).scale(0.1, 0.1, 0.1).rotate(-90, 0, 0).setColor(RED);
 		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
 			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
 		}
 	}
 	//////////////////////////
-#if 0
 
+#if 0
 	//////////////////////////
-	loadIndex = 1;
-	loader.Init("3ds/cleaner.3ds", loadIndex);
+	loadIndex = 0;
+	loader.Init("3ds/Chair_metal.3ds", loadIndex);
 	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
-		t3DObject & object = g_3DModel[loadIndex].pObject.at(i);
+		t3DObject & object = g_3DModel[0].pObject.at(i);
+		cur_op = &man.addObject(10).setVertexType(1);
+		for (int j = 0; j < object.numOfVerts; j++) {
+			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
+		}
+		for (int j = 0; j < object.numOfFaces; j++) {
+			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
+		}
+		cur_op->move(0, 0, 0).scale(5, 5, 5).rotate(-90, 0, 0).setColor(RED);
+		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
+			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
+		}
+	}
+	//////////////////////////
+	//////////////////////////
+	loadIndex = 0;
+	loader.Init("3ds/Ford T.3ds", loadIndex);
+	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
+		t3DObject & object = g_3DModel[0].pObject.at(i);
 		cur_op = &man.addObject(10).setVertexType(1);
 		for (int j = 0; j < object.numOfVerts; j++) {
 			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
@@ -205,6 +232,50 @@ VOID Initialize()
 		}
 	}
 	//////////////////////////
+
+	//////////////////////////
+	loadIndex = 0;
+	loader.Init("3ds/rose/õ�廨.3ds", loadIndex);
+	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
+		t3DObject & object = g_3DModel[0].pObject.at(i);
+		cur_op = &man.addObject(10).setVertexType(1);
+		for (int j = 0; j < object.numOfVerts; j++) {
+			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
+		}
+		for (int j = 0; j < object.numOfFaces; j++) {
+			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
+		}
+		cur_op->move(0, 0, 0).scale(10, 10, 10).rotate(-90, 0, 0).setColor(RED);
+		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
+			//cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
+			cur_op->setColor(RED);
+		}
+	}
+	//////////////////////////
+	//////////////////////////
+	loadIndex = 0;
+	loader.Init("3ds/coffee_plate.3ds", loadIndex);
+	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
+		t3DObject & object = g_3DModel[0].pObject.at(i);
+		cur_op = &man.addObject(10).setVertexType(1);
+		for (int j = 0; j < object.numOfVerts; j++) {
+			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
+		}
+		for (int j = 0; j < object.numOfFaces; j++) {
+			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
+		}
+		cur_op->move(0, 0, 0).scale(10, 10, 10).rotate(-90, 0, 0).setColor(RED);
+		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
+			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
+		}
+	}
+	//////////////////////////
+	////////////////////////
+	cur_op = &man.addObject(-1).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
+		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
+		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
+		.scale(5, 5, 5).move(15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t11, 4).setBackfaceCulling(1);
+	////////////////////////
 
 	//////////////////////////
 	loadIndex = 0;
@@ -224,6 +295,25 @@ VOID Initialize()
 		}
 	}
 	//////////////////////////
+	//////////////////////////
+	loadIndex = 1;
+	loader.Init("3ds/cleaner.3ds", loadIndex);
+	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
+		t3DObject & object = g_3DModel[loadIndex].pObject.at(i);
+		cur_op = &man.addObject(10).setVertexType(1);
+		for (int j = 0; j < object.numOfVerts; j++) {
+			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
+		}
+		for (int j = 0; j < object.numOfFaces; j++) {
+			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
+		}
+		cur_op->move(0, 0, 0).rotate(-90, 0, 0).setColor(RED);
+		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
+			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
+		}
+	}
+	//////////////////////////
+
 
 	//////////////////////////
 	loadIndex = 0;
@@ -238,24 +328,6 @@ VOID Initialize()
 			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
 		}
 		cur_op->move(0, 0, 0).scale(100, 100, 100).setColor(RED);
-		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
-			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
-		}
-	}
-	//////////////////////////
-	//////////////////////////
-	loadIndex = 0;
-	loader.Init("3ds/coffee_plate.3ds", loadIndex);
-	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
-		t3DObject & object = g_3DModel[0].pObject.at(i);
-		cur_op = &man.addObject(10).setVertexType(1);
-		for (int j = 0; j < object.numOfVerts; j++) {
-			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
-		}
-		for (int j = 0; j < object.numOfFaces; j++) {
-			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
-		}
-		cur_op->move(0, 0, 0).scale(10, 10, 10).rotate(-90, 0, 0).setColor(RED);
 		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
 			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
 		}
@@ -280,22 +352,38 @@ VOID Initialize()
 		}
 	}
 	//////////////////////////
+	//////////////////////////
+	// generate teapot
+	{
+		Object3D& obj = man.addReflectionObject(5).renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
+		int normal = -1;
+		int vertex_count = 0;
+		int triangle_count = 0;
+		for (int i = 0; i <= g_teapotPositionNum - 3; i += 3) {
+			vertex_count++;
+			obj.addIndice(g_teapotPositions[i], g_teapotPositions[i + 1], g_teapotPositions[i + 2]
+				,g_teapotNormals[i], g_teapotNormals[i + 1], g_teapotNormals[i + 2]);
+		}
+		for (int i = 0; i <= g_teapotIndicesNum - 3; i += 3) {
+			triangle_count++;
+			obj.setIndice(g_teapotIndices[i], g_teapotIndices[i + 1], g_teapotIndices[i + 2]);
+		}
+		obj.move(50, -30, 20).rotate(-90, 30, 0).setTexture(tman, t9, 3).setUV(0, -300);// .setTexture(tman, t7, 1);
+		cur_op = &obj;
+	}
+	//////////////////////////
+	//////////////////////////
+	cur_op = &man.addObject(-1).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
+		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
+		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
+		.scale(30, 30, 30).move(15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t11, 4).setBackfaceCulling(1);
+	//////////////////////////
 
 	//////////////////////////
 	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.scale(10, 10, 10).move(0, 100, -200).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
 	//////////////////////////
 
-	//////////////////////////
-	Group3D& gp = man.addGroup();
-	for (int i = 0; i < 5; i++) {
-		for (int j = 0; j < 5; j++) {
-			man.startGroup(gp.uniqueID).addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
-				.rotate(0, 0, 180).scale(5, 5, 5).move(250 - 100 * j, -40, 250 - 100 * i).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t0);
-		}
-	}
-	man.endGroup();
-	//////////////////////////
 	//////////////////////////
 	c = 10;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
@@ -310,44 +398,18 @@ VOID Initialize()
 			r_1 = r * sin(i * p_1);
 			x_2 = r * cos((i + 1) * p_1);
 			r_2 = r * sin((i + 1) * p_1);
-			Object3D& obj = man.startGroup(gp.uniqueID).addReflectionObject(1).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
+			Object3D& obj = man.startGroup(gp.uniqueID).addObject(1).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
 			for (j = 1; j < c; j++) {
 				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
 					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
 			}
 			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(2, 2, 2).move(x, y, z).rotate(0, 0, 0)
-				.setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 3);
+				.setColor(GREEN).setLineColor(RED);// .setTexture(tman, t6, 3);
 
 			cur_op = &obj;
 		}
 		man.endGroup();
 	}
-	//////////////////////////
-	//////////////////////////
-	// generate teapot
-	{
-		Object3D& obj = man.addTransparentObject(5).renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
-		int normal = -1;
-		int vertex_count = 0;
-		int triangle_count = 0;
-		for (int i = 0; i <= g_teapotPositionNum - 3; i += 3) {
-			vertex_count++;
-			obj.addIndice(g_teapotPositions[i], g_teapotPositions[i + 1], g_teapotPositions[i + 2]);
-			//,g_teapotNormals[i], g_teapotNormals[i + 1], g_teapotNormals[i + 2]);
-		}
-		for (int i = 0; i <= g_teapotIndicesNum - 3; i += 3) {
-			triangle_count++;
-			obj.setIndice(g_teapotIndices[i], g_teapotIndices[i + 1], g_teapotIndices[i + 2]);
-		}
-		obj.move(50, -30, 20).rotate(-90, 30, 0).setTexture(tman, t9, 3).setUV(0, -300);// .setTexture(tman, t7, 1);
-		cur_op = &obj;
-	}
-	//////////////////////////
-	//////////////////////////
-	//cur_op = &man.addObject(-1).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
-	//	.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
-	//	.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
-	//	.scale(5, 5, 5).move(15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t11, 4).setBackfaceCulling(1);
 	//////////////////////////
 	//////////////////////////
 	c = 10;
@@ -427,12 +489,6 @@ VOID Initialize()
 		obj.move(-50, -30, 20).rotate(-90, 30, 0).setTexture(tman, t9, 3).setUV(0, -300);// .setTexture(tman, t7, 1);
 		cur_op = &obj;
 	}
-	//////////////////////////
-	//////////////////////////
-	//cur_op = &man.addObject(-1).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
-	//	.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
-	//	.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
-	//	.scale(30, 30, 30).move(15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t11, 4).setBackfaceCulling(1);
 	//////////////////////////
 	//////////////////////////
 	cur_op = &man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
