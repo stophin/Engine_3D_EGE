@@ -597,6 +597,7 @@ struct Device {
 													Object3D::GetInterpolationNormalVector(v0, v1, v, __x, __y,
 														line_r, line_l, _line_l1, _line_l, _line_l0,
 														5, _n0, _n1, _n2, _n3);
+													_n0.normalize();
 
 													//calculate sumption of light factors
 													lgt = man.lgts.link;
@@ -1067,9 +1068,9 @@ struct Device {
 															//get range x
 															_n1.set(n0);
 															cam->normalize(_n1);
-															_n0.set(_n1.x * cam->scale_w + cam->offset_w, _n1.y * cam->scale_h + cam->offset_h, _n1.z);
-															EFTYPE __y = _n0.y;
-															EFTYPE __x = _n0.x;
+															_n2.set(_n1.x * cam->scale_w + cam->offset_w, _n1.y * cam->scale_h + cam->offset_h, _n1.z);
+															EFTYPE __y = _n2.y;
+															EFTYPE __x = _n2.x;
 															INT _line_l1 = (INT)(l1.x * __y + l1.y);
 															INT _line_l = (INT)(l.x * __y + l.y);
 															INT _line_l0 = (INT)(l0.x * __y + l0.y);
@@ -1100,7 +1101,7 @@ struct Device {
 															Object3D::GetInterpolationNormalVector(v0, v1, v, __x, __y,
 																line_r, line_l, _line_l1, _line_l, _line_l0,
 																5, _n0, _n1, _n2, _n3);
-															verts->v_3.set(_n0);
+															verts->v_3.set(_n0).normalize();
 
 															//calculate sumption of light factors
 															lgt = man.lgts.link;
@@ -1225,7 +1226,7 @@ struct Device {
 						if (0 == nearest_vert->type) {
 							//get shadow test ray
 							if (cur_lgt && (shadow_count == 0 || cur_lgt != man.lgts.link)) {
-								n2.set(0, 0, 0, 1) * cur_lgt->M * cam->M;
+								n2.set(0, 0, 0, 1) * cur_lgt->M *cam->M;
 								n2 - nearest_vert->v;
 								n2.normalize();
 								ray.set(nearest_vert->v, n2);
@@ -1238,7 +1239,7 @@ struct Device {
 								//this factor
 								ray.f = cur_lgt->getFactor(nearest_vert->v_3, nearest_vert->v);
 								//test same direction
-								EFTYPE cross = n2 & nearest_vert->v_3;
+								EFTYPE cross = n2 & nearest_vert->v_n;
 								if (cross < 0) {
 									//not same direction, this vertex is in shadow
 									nearest_vert->color = Light3D::multi(nearest_vert->color, ray.f / 5);
