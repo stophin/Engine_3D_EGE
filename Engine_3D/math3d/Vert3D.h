@@ -323,4 +323,97 @@ struct Vert3D {
 	}
 };
 
+
+typedef class VObj VObj;
+class VObj {
+public:
+	VObj(EFTYPE x, EFTYPE y, EFTYPE z) {
+		this->v.set(x, y, z, 1);
+
+		this->v_c.init();
+		this->v_r.init();
+		this->n.init();
+		this->n_r.init();
+		this->n_d.init();
+		this->n_z.init();
+		this->v_w.init();
+		this->n_w.init();
+		this->n_1_z.init();
+
+		initialize();
+	}
+
+	void initialize() {
+		for (INT i = 0; i < 3; i++)
+		{
+			this->prev[i] = NULL;
+			this->next[i] = NULL;
+		}
+		aabb[0].set(-EP_MAX, -EP_MAX, -EP_MAX, 1);
+		aabb[1].set(EP_MAX, EP_MAX, EP_MAX, 1);
+	}
+	Vert3D v;
+	Vert3D v_c;
+	union {
+		Vert3D v_r;
+		struct {
+			EFTYPE x;
+			EFTYPE y;
+			EFTYPE z;
+			EFTYPE w;
+		};
+	};
+	union {
+		Vert3D v_s;
+		struct {
+			EFTYPE x0;
+			EFTYPE y0;
+			EFTYPE z0;
+			EFTYPE w0;
+		};
+	};
+	Vert3D v_w;
+	Vert3D n;
+	Vert3D n_w;
+	Vert3D n_r;
+	Vert3D n_d;
+	Vert3D n_z;
+	Vert3D n_1_z;
+
+	EFTYPE zz;
+
+	INT ys;
+	INT ye;
+	INT xs;
+	INT xe;
+
+	Mat3D R;
+	Mat3D R_r;
+
+	EFTYPE backface;
+	INT cut;
+
+	Vert3D aabb[2];
+
+	// for multilinklist
+#define MAX_VOBJ_LINK	4
+	INT uniqueID;
+	VObj * prev[MAX_VOBJ_LINK];
+	VObj * next[MAX_VOBJ_LINK];
+	void operator delete(void * _ptr){
+		if (_ptr == NULL)
+		{
+			return;
+		}
+		for (INT i = 0; i < MAX_VOBJ_LINK; i++)
+		{
+			if (((VObj*)_ptr)->prev[i] != NULL || ((VObj*)_ptr)->next[i] != NULL)
+			{
+				return;
+			}
+		}
+		delete(_ptr);
+	}
+};
+
 #endif

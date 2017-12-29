@@ -979,7 +979,7 @@ struct Device {
 				Lgt3D * cur_lgt = man.lgts.link;
 				shadow_count = 0;
 				//ray tracing depth
-				count = 4;
+				count = 2;
 				do {
 					// when the ray is reflection or refraction
 					// use the objects around instead of all the objects

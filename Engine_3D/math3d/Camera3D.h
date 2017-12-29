@@ -70,31 +70,57 @@ public:
 
 	}
 
+	//using v.v_r or say, v.x, v.y, v.z, v.w
+	int normalize_cut(VObj& v, const VObj& v0, const VObj& v1) {
+		if (this->lookat.z > 0) {
+			if (EP_GTZERO(v.z - zfar)) {
+				v.z = zfar;
+			}
+			else if (EP_GTZERO(v.z - znear)) {
+				v.z = znear;
+			}
+			//return -2;
+		}
+		else if (this->lookat.z < 0) {
+			if (EP_GTZERO(v.z + znear)) {
+				v.z = -znear;
+			}
+			else if (EP_LTZERO(v.z + zfar)) {
+				v.z = -zfar;
+			}
+			//return -3;
+		}
+		EFTYPE w = tanwidth * v.z, h = tanheight * v.z;
+		if (w < 0) w = -w;
+		if (h < 0) h = -h;
+
+		if (v.x > w) {
+			v.x = w;
+		}
+		else if (v.x < -w) {
+			v.x = -w;
+		}
+		else if (v.y > h) {
+			v.y = h;
+		}
+		else if (v.y < -h) {
+			v.y = -h;
+		}
+		if (EP_ISZERO(v.z)) {
+			return -1;
+		}
+		else if (!EP_ISZERO(v.w - EP_MAX)){
+			project(v.v_r);
+		}
+		return 0;
+	}
 	int normalize(Vert3D& v) {
 		if (this->lookat.z > 0 && (EP_GTZERO(v.z - zfar) || EP_GTZERO(v.z - znear))) {
 			return -2;
 		}
-		//if (this->lookat.z > 0) {
-		//	if (EP_GTZERO(v.z - zfar)) {
-		//		v.z = zfar;
-		//	}
-		//	else if (EP_GTZERO(v.z - znear)) {
-		//		v.z = znear;
-		//	}
-		//	//return -2;
-		//}
 		else if (this->lookat.z < 0 && (EP_GTZERO(v.z + znear) || EP_LTZERO(v.z + zfar))) {
 			return -3;
 		}
-		//else if (this->lookat.z < 0) {
-		//	if (EP_GTZERO(v.z + znear)) {
-		//		v.z = -znear;
-		//	}
-		//	else if (EP_LTZERO(v.z + zfar)) {
-		//		v.z = -zfar;
-		//	}
-		//	//return -3;
-		//}
 		EFTYPE w = tanwidth * v.z, h = tanheight * v.z;
 		if (w < 0) w = -w;
 		if (h < 0) h = -h;
@@ -104,18 +130,6 @@ public:
 		else if (v.y > h || v.y < -h) {
 			return -5;
 		}
-		//if (v.x > w) {
-		//	v.x = w;
-		//}
-		//else if (v.x < -w) {
-		//	v.x = -w;
-		//}
-		//else if (v.y > h) {
-		//	v.y = h;
-		//}
-		//else if (v.y < -h) {
-		//	v.y = -h;
-		//}
 		if (EP_ISZERO(v.z)) {
 			return -1;
 		}

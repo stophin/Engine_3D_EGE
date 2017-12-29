@@ -10,98 +10,6 @@
 #include "../common/MultiLinkList.h"
 #include "../math3d/Texture.h"
 
-typedef class VObj VObj;
-class VObj {
-public:
-	VObj(EFTYPE x, EFTYPE y, EFTYPE z) {
-		this->v.set(x, y, z, 1);
-
-		this->v_c.init();
-		this->v_r.init();
-		this->n.init();
-		this->n_r.init();
-		this->n_d.init();
-		this->n_z.init();
-		this->v_w.init();
-		this->n_w.init();
-		this->n_1_z.init();
-
-		initialize();
-	}
-
-	void initialize() {
-		for (INT i = 0; i < 3; i++)
-		{
-			this->prev[i] = NULL;
-			this->next[i] = NULL;
-		}
-		aabb[0].set(-EP_MAX, -EP_MAX, -EP_MAX, 1);
-		aabb[1].set(EP_MAX, EP_MAX, EP_MAX, 1);
-	}
-	Vert3D v;
-	Vert3D v_c;
-	union {
-		Vert3D v_r;
-		struct {
-			EFTYPE x;
-			EFTYPE y;
-			EFTYPE z;
-			EFTYPE w;
-		};
-	};
-	union {
-		Vert3D v_s;
-		struct {
-			EFTYPE x0;
-			EFTYPE y0;
-			EFTYPE z0;
-			EFTYPE w0;
-		};
-	};
-	Vert3D v_w;
-	Vert3D n;
-	Vert3D n_w;
-	Vert3D n_r;
-	Vert3D n_d;
-	Vert3D n_z;
-	Vert3D n_1_z;
-
-	EFTYPE zz;
-
-	INT ys;
-	INT ye;
-	INT xs;
-	INT xe;
-
-	Mat3D R;
-	Mat3D R_r;
-
-	EFTYPE backface;
-	INT cut;
-
-	Vert3D aabb[2];
-
-	// for multilinklist
-#define MAX_VOBJ_LINK	4
-	INT uniqueID;
-	VObj * prev[MAX_VOBJ_LINK];
-	VObj * next[MAX_VOBJ_LINK];
-	void operator delete(void * _ptr){
-		if (_ptr == NULL)
-		{
-			return;
-		}
-		for (INT i = 0; i < MAX_VOBJ_LINK; i++)
-		{
-			if (((VObj*)_ptr)->prev[i] != NULL || ((VObj*)_ptr)->next[i] != NULL)
-			{
-				return;
-			}
-		}
-		delete(_ptr);
-	}
-};
-
 typedef class Object3D Object3D;
 class Object3D {
 public:
@@ -690,10 +598,11 @@ public:
 	}
 
 	//mode:
-	//0: normal
-	//1: object changed only
-	//2: camera changed only
-	//3: object and camera changed
+	//change object's AABB
+	//0: normal, do not change object's AABB
+	//1: object changed only, change object's world AABB only
+	//2: camera changed only, change object's camera AABB only
+	//3: object and camera changed, change object's world and camera AABB
 	void render_normalize(int mode = 0) {
 		if (this->cam == NULL) {
 			return;
@@ -800,7 +709,8 @@ public:
 				v->zz = v->v_c.z;
 				v->v_r.set(v->v_c);
 				// camera coordinate -> view region
-				v->cut = !this->cam->normalize(v->v_r);
+				//v->cut = !this->cam->normalize(v->v_r);
+				v->cut = !this->cam->normalize_cut(*v, *v0, *v1);
 				if (v->cut) {
 
 					if (1){
