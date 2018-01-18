@@ -56,8 +56,8 @@ enum OctTree_Link {
 
 #define MAX_QUARDANTS	8
 #define MAX_OBJECTS		5
-#define MAX_LEVELS		MAX_OBJ3D_LINK - 3
-#define GET_LINK_INDEX(level)	(level + 3 - 1)
+#define MAX_LEVELS		MAX_OBJ3D_LINK - MAX_OBJ3D_END
+#define GET_LINK_INDEX(level)	(level + MAX_OBJ3D_END - 1)
 class OctTree {
 public:
 	OctTree(INT level,
