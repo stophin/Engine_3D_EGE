@@ -983,7 +983,7 @@ struct Device {
 				do {
 					// when the ray is reflection or refraction
 					// use the objects around instead of all the objects
-					if (0 && 1 == ray.type || 2 == ray.type) {
+					if (1 == ray.type || 2 == ray.type) {
 						if (!ray.obj) {
 							ray.obj = ray.obj;
 						}

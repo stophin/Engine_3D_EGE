@@ -942,7 +942,7 @@ public:
 	}
 
 #define MAX_OBJ3D_LINK	13
-#define MAX_OBJ3D_END	4 //reserved for normal linklist use
+#define MAX_OBJ3D_END	6 //reserved for normal linklist use
 	INT uniqueID;
 	Obj3D * prev[MAX_OBJ3D_LINK];
 	Obj3D * next[MAX_OBJ3D_LINK];
