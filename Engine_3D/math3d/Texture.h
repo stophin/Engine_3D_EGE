@@ -11,7 +11,7 @@ using namespace std;
 class Texture {
 public:
 	Texture() : texture(NULL) {
-
+		initialize();
 	}
 
 	~Texture() {
@@ -73,6 +73,13 @@ public:
 
 	// for multilinklist
 #define MAX_TEXTURE_LINK	3
+	void initialize() {
+		for (INT i = 0; i < MAX_TEXTURE_LINK; i++)
+		{
+			this->prev[i] = NULL;
+			this->next[i] = NULL;
+		}
+	}
 	INT uniqueID;
 	Texture * prev[MAX_TEXTURE_LINK];
 	Texture * next[MAX_TEXTURE_LINK];

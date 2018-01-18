@@ -933,25 +933,26 @@ public:
 	Obj3D() : Object3D() {
 		initialize();
 	}
+
+#define MAX_OBJ3D_MAX	50
+#define MAX_OBJ3D_LINK	13
+#define MAX_OBJ3D_END	6 //reserved for normal linklist use
 	void initialize() {
-		for (INT i = 0; i < 2; i++)
+		for (INT i = 0; i < MAX_OBJ3D_MAX; i++)
 		{
 			this->prev[i] = NULL;
 			this->next[i] = NULL;
 		}
 	}
-
-#define MAX_OBJ3D_LINK	13
-#define MAX_OBJ3D_END	6 //reserved for normal linklist use
 	INT uniqueID;
-	Obj3D * prev[MAX_OBJ3D_LINK];
-	Obj3D * next[MAX_OBJ3D_LINK];
+	Obj3D * prev[MAX_OBJ3D_MAX];
+	Obj3D * next[MAX_OBJ3D_MAX];
 	void operator delete(void * _ptr){
 		if (_ptr == NULL)
 		{
 			return;
 		}
-		for (INT i = 0; i < MAX_OBJ3D_LINK; i++)
+		for (INT i = 0; i < MAX_OBJ3D_MAX; i++)
 		{
 			if (((Obj3D*)_ptr)->prev[i] != NULL || ((Obj3D*)_ptr)->next[i] != NULL)
 			{
@@ -975,15 +976,15 @@ public:
 
 	MultiLinkList<Obj3D> objs;
 
+#define MAX_GROUP3D_LINK	1
 	void initialize() {
-		for (INT i = 0; i < 1; i++)
+		for (INT i = 0; i < MAX_GROUP3D_LINK; i++)
 		{
 			this->prev[i] = NULL;
 			this->next[i] = NULL;
 		}
 	}
 
-#define MAX_GROUP3D_LINK	1
 	INT uniqueID;
 	Group3D * prev[MAX_GROUP3D_LINK];
 	Group3D * next[MAX_GROUP3D_LINK];

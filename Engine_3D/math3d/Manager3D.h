@@ -13,7 +13,7 @@
 typedef class Manager3D Manager3D;
 class Manager3D {
 public:
-	Manager3D() : cams(0), objs(0), lgts(0), tras(0), refl(0), grps(0), octs(1),
+	Manager3D() : cams(0), objs(0), lgts(0), tras(0), refl(0), grps(0), octs(2),
 		group(NULL){
 
 	}

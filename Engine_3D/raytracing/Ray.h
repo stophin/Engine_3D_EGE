@@ -10,6 +10,7 @@ class Verts {
 public:
 	Verts() :
 		type(0){
+		initialize();
 	}
 	~Verts() {
 	}
@@ -30,6 +31,13 @@ public:
 
 	// for multilinklist
 #define MAX_VERTS_LINK	2
+	void initialize() {
+		for (INT i = 0; i < MAX_VERTS_LINK; i++)
+		{
+			this->prev[i] = NULL;
+			this->next[i] = NULL;
+		}
+	}
 	INT uniqueID;
 	Verts * prev[MAX_VERTS_LINK];
 	Verts * next[MAX_VERTS_LINK];
@@ -99,6 +107,7 @@ public:
 				j = index - i * MAP_SHIFT;
 				this->map[i] |= (0x01 << j);
 				used--;
+				memset(o, 0, sizeof(Verts));
 				return;
 			}
 		}

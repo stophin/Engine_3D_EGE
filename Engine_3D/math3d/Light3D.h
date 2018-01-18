@@ -113,15 +113,15 @@ public:
 	Lgt3D() : Light3D() {
 		initialize();
 	}
+
+#define MAX_LGT3D_LINK	1
 	void initialize() {
-		for (INT i = 0; i < 1; i++)
+		for (INT i = 0; i < MAX_LGT3D_LINK; i++)
 		{
 			this->prev[i] = NULL;
 			this->next[i] = NULL;
 		}
 	}
-
-#define MAX_LGT3D_LINK	1
 	INT uniqueID;
 	Lgt3D * prev[MAX_LGT3D_LINK];
 	Lgt3D * next[MAX_LGT3D_LINK];

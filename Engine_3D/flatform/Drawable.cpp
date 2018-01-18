@@ -80,6 +80,7 @@ VOID onPaint(HWND hWnd)
 		device.ClearBeforeRayTracing();
 		//device.RenderRayTracing_SingleThread(man);
 		device.RenderRayTracing(man);
+		device.drawThreadSplit();
 		//Blt buffer to window buffer
 		DWORD * _tango = EP_GetImageBuffer();
 		int i, j, index;
@@ -174,6 +175,29 @@ VOID Initialize()
 	}
 	man.endGroup();
 	//////////////////////////
+	//////////////////////////
+	loadIndex = 0;
+	loader.Init("3ds/GeoSphere.3ds", loadIndex);
+	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
+		t3DObject & object = g_3DModel[0].pObject.at(i);
+		cur_op = &man.addReflectionObject(10).setVertexType(1);
+		for (int j = 0; j < object.numOfVerts; j++) {
+			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
+		}
+		INT anti_n = 1;
+		for (int j = 0; j < object.numOfFaces; j++) {
+			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1], anti_n);
+			//anti_n = -anti_n;
+		}
+		cur_op->move(0, 0, 0).rotate(-90, -180, 0).setNormalType(1).setColor(RED);
+		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
+			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
+			//cur_op->setColor(RED);
+		}
+		//cur_op->setTexture(tman, t10, 2);
+	}
+	//////////////////////////
+#if 0
 
 	//////////////////////////
 	// generate teapot
@@ -191,13 +215,13 @@ VOID Initialize()
 			triangle_count++;
 			obj.setIndice(g_teapotIndices[i], g_teapotIndices[i + 1], g_teapotIndices[i + 2]);
 		}
-		obj.move(-50, -30, 20).rotate(-90, 30, 0).setTexture(tman, t9, 3).setNormalType(1).setUV(0, -300);// .setTexture(tman, t7, 1);
+		obj.move(-100, -30, 20).rotate(-90, 30, 0).setTexture(tman, t9, 3).setNormalType(1).setUV(0, -300);// .setTexture(tman, t7, 1);
 		cur_op = &obj;
 	}
 	//////////////////////////
 	//////////////////////////
 	loadIndex = 0;
-	loader.Init("3ds/StandfordBunny.3ds", loadIndex);
+	loader.Init("3ds/306016.3ds", loadIndex);
 	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
 		t3DObject & object = g_3DModel[0].pObject.at(i);
 		cur_op = &man.addObject(10).setVertexType(1);
@@ -209,14 +233,13 @@ VOID Initialize()
 			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1], anti_n);
 			//anti_n = -anti_n;
 		}
-		cur_op->move(0, 50, 100).scale(10, 10, 10).rotate(-90, 0, 0).setNormalType(1).setColor(RED);
+		cur_op->move(-400, 0, -1000).rotate(-90, -180, 0).setNormalType(1).setColor(RED);
 		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
 			//cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
 			cur_op->setColor(RED);
 		}
 	}
 	//////////////////////////
-#if 0
 	//////////////////////////
 	// generate teapot
 	{
@@ -268,7 +291,6 @@ VOID Initialize()
 	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.scale(10, 10, 10).move(0, 100, -200).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
 	//////////////////////////
-
 	//////////////////////////
 	c = 10;
 	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
@@ -352,6 +374,7 @@ VOID Initialize()
 		man.endGroup();
 	}
 	//////////////////////////
+#endif
 	//////////////////////////
 	cur_op = &man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
 		.scale(10, 10, 10).rotate(-90, -90, -90).move(-50, -80, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t0);
@@ -369,7 +392,6 @@ VOID Initialize()
 	man.addReflectionObject(0.05).addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
 		.scale(10, 10, 10).rotate(90, 90, 0).move(200, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t1);
 	//////////////////////////
-#endif
 #if 0
 	//////////////////////////
 	//sphere world map

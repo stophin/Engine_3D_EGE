@@ -341,17 +341,10 @@ public:
 		this->n_1_z.init();
 
 		initialize();
-	}
-
-	void initialize() {
-		for (INT i = 0; i < 3; i++)
-		{
-			this->prev[i] = NULL;
-			this->next[i] = NULL;
-		}
 		aabb[0].set(-EP_MAX, -EP_MAX, -EP_MAX, 1);
 		aabb[1].set(EP_MAX, EP_MAX, EP_MAX, 1);
 	}
+
 	Vert3D v;
 	Vert3D v_c;
 	union {
@@ -397,6 +390,13 @@ public:
 
 	// for multilinklist
 #define MAX_VOBJ_LINK	4
+	void initialize() {
+		for (INT i = 0; i < MAX_VOBJ_LINK; i++)
+		{
+			this->prev[i] = NULL;
+			this->next[i] = NULL;
+		}
+	}
 	INT uniqueID;
 	VObj * prev[MAX_VOBJ_LINK];
 	VObj * next[MAX_VOBJ_LINK];

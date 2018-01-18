@@ -806,6 +806,18 @@ struct Device {
 	INT thread_ready;
 	INT thread_status[128];
 
+	void drawThreadSplit() {
+		INT dx = width / thread_count;
+		INT dy = height / thread_count;
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				if (j % dx == 0 || i % dy == 0) {
+					raytracing[j + i * width] = RED;
+				}
+			}
+		}
+	}
+
 	void RenderRayTracing(Manager3D& man) {
 		if (0 == thread_ready) {
 			//Ïß³ÌÊý thread_count * thread_count
@@ -938,6 +950,7 @@ struct Device {
 		MultiLinkList<Verts> raytracing_verts_accumulated(1);
 		MultiLinkList<VObj> * link = NULL;
 		MultiLinkList<Obj3D> * olink;
+		MultiLinkList<Obj3D> octs(MAX_OBJ3D_LINK + 1 + id);
 		DWORD * __image;
 		//reflection times
 		INT count, shadow_count;
@@ -987,9 +1000,10 @@ struct Device {
 						if (!ray.obj) {
 							ray.obj = ray.obj;
 						}
-						man.octs.clearLink();
-						man.octTree.Collision((Obj3D*)ray.obj, &man.octs);
-						olink = &man.octs;
+						olink = &octs;
+						//olink = &man.octs;
+						//olink->clearLink();
+						man.octTree.Collision((Obj3D*)ray.obj, olink);
 					}
 					else {
 						olink = &man.objs;
@@ -1215,6 +1229,12 @@ struct Device {
 								}
 							}
 						} while (obj);
+					}
+					//make sure all temporary links are cleaned
+					if (&man.objs == olink) {
+					}
+					else {
+						olink->clearLink();
 					}
 					//get the nearest verts from all the ray traced verts
 					Verts * verts = raytracing_verts.link;

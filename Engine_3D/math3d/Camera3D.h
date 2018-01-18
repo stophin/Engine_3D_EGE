@@ -205,13 +205,6 @@ public:
 		Camera3D(width, height, znear, zfar, angle_width, angle_height), type(0) {
 		initialize();
 	}
-	void initialize() {
-		for (INT i = 0; i < 1; i++)
-		{
-			this->prev[i] = NULL;
-			this->next[i] = NULL;
-		}
-	}
 	// camera type
 	// 0 : normal camera
 	// 1 : shadow camera
@@ -219,6 +212,13 @@ public:
 	int type;
 
 #define MAX_CAM3D_LINK	1
+	void initialize() {
+		for (INT i = 0; i < MAX_CAM3D_LINK; i++)
+		{
+			this->prev[i] = NULL;
+			this->next[i] = NULL;
+		}
+	}
 	INT uniqueID;
 	Cam3D * prev[MAX_CAM3D_LINK];
 	Cam3D * next[MAX_CAM3D_LINK];
