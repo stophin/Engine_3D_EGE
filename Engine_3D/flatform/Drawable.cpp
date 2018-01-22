@@ -16,6 +16,12 @@ INT draw_line = 1;
 INT move_light = -1;
 INT move_trans = -1;
 
+INT isInputBlocked() {
+	//光线追踪线程运行时
+	//屏蔽所有按键，防止操作（如退出）造成资源泄漏
+	return device.thread_all_done;
+}
+
 VOID onResize(FLOAT width, FLOAT height)
 {
 	isresize = 1;
@@ -61,6 +67,7 @@ VOID onPaint(HWND hWnd)
 	//Render in device buffer
 	if (device.render_raytracing > 0) {
 		if (enter_once < 0) {
+			isrefresh = 1;
 			//Blt buffer to window buffer
 			DWORD * _tango = EP_GetImageBuffer();
 			int i, j, index;
@@ -74,13 +81,16 @@ VOID onPaint(HWND hWnd)
 					}
 				}
 			}
+			if (draw_line > 0) {
+				device.drawThreadSplit();
+			}
 			return;
 		}
 		enter_once = -1;
+		isrefresh = 1;
 		device.ClearBeforeRayTracing();
 		//device.RenderRayTracing_SingleThread(man);
 		device.RenderRayTracing(man);
-		device.drawThreadSplit();
 		//Blt buffer to window buffer
 		DWORD * _tango = EP_GetImageBuffer();
 		int i, j, index;
@@ -197,8 +207,8 @@ VOID Initialize()
 		//cur_op->setTexture(tman, t10, 2);
 	}
 	//////////////////////////
-#if 0
 
+#if 0
 	//////////////////////////
 	// generate teapot
 	{

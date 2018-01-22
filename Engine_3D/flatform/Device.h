@@ -800,19 +800,22 @@ struct Device {
 		p.ey = ey;
 	}
 	INT thread_count;
+	HANDLE thread_main;
 	HANDLE thread_pool[128];
 	HANDLE hMutex;
 	RenderParameters param[128];
 	INT thread_ready;
 	INT thread_status[128];
+	INT thread_all_done;
 
 	void drawThreadSplit() {
+		DWORD * _tango = EP_GetImageBuffer();
 		INT dx = width / thread_count;
 		INT dy = height / thread_count;
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
 				if (j % dx == 0 || i % dy == 0) {
-					raytracing[j + i * width] = RED;
+					_tango[j + i * width] = RED;
 				}
 			}
 		}
@@ -821,7 +824,8 @@ struct Device {
 	void RenderRayTracing(Manager3D& man) {
 		if (0 == thread_ready) {
 			//线程数 thread_count * thread_count
-			thread_count = 5;
+			//max is 9, which is limit MAX_OBJ3D_MAX macro
+			thread_count = 9;
 			//创建互斥体  
 			hMutex = CreateMutex(NULL, FALSE, TEXT("Mutex"));
 			//创建线程  
@@ -856,26 +860,10 @@ struct Device {
 				}
 			}
 		}
-		//等待线程退出
-		INT thread_all_done;
-		while (1) {
-			thread_all_done = 1;
-			for (int i = 0; i < thread_count; i++) {
-				for (int j = 0; j < thread_count; j++) {
-					INT index = i * thread_count + j;
-					if (1 == thread_status[index]) {
-						thread_all_done = 0;
-						break;
-					}
-				}
-				if (0 == thread_all_done) {
-					break;
-				}
-			}
-			if (thread_all_done) {
-				break;
-			}
-		}
+		//最后启动主线程并运行
+		thread_main = CreateThread(NULL, 0, RenderThreadMain, this, 0, NULL);
+		//调用的线程退出以进行后续显示工作
+		return;
 	}
 	void EndAllThread() {
 		for (int i = 0; i < thread_count; i++) {
@@ -900,6 +888,35 @@ struct Device {
 				CloseHandle(thread_pool[i * thread_count + j]);
 			}
 		}
+	}
+	static DWORD WINAPI RenderThreadMain(LPVOID lpThreadParameter) {
+		Device * device = (Device*)lpThreadParameter;
+		if (NULL == device) {
+			return 0;
+		}
+		device->thread_all_done = 1;
+		//等待线程退出
+		INT _thread_all_done;
+		while (1) {
+			_thread_all_done = 1;
+			for (int i = 0; i < device->thread_count; i++) {
+				for (int j = 0; j < device->thread_count; j++) {
+					INT index = i * device->thread_count + j;
+					if (1 == device->thread_status[index]) {
+						_thread_all_done = 0;
+						break;
+					}
+				}
+				if (0 == _thread_all_done) {
+					break;
+				}
+			}
+			if (_thread_all_done) {
+				break;
+			}
+		}
+		device->thread_all_done = 0;
+		return 0;
 	}
 	static DWORD WINAPI RenderThreadProc(LPVOID lpThreadParameter) {
 		RenderParameters * pthread = (RenderParameters*)lpThreadParameter;

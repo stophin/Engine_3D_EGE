@@ -17,51 +17,56 @@ int main(int argc, char* argv[])
 	{
 		onPaint(getHWnd());
 
-		while (mousemsg())
-		{
-			mouse_msg msg = getmouse();
-			if (msg.is_wheel()) {
-				onScroll(msg.wheel);
-			}
-			if (msg.is_right())
+		if (!isInputBlocked()) {
+			while (mousemsg())
 			{
-				if (msg.is_down())
-				{
-					onMenu(msg.x, msg.y, 1);
+				mouse_msg msg = getmouse();
+				if (msg.is_wheel()) {
+					onScroll(msg.wheel);
 				}
-				else if (msg.is_up())
+				if (msg.is_right())
 				{
-					onMenu(msg.x, msg.y, 0);
+					if (msg.is_down())
+					{
+						onMenu(msg.x, msg.y, 1);
+					}
+					else if (msg.is_up())
+					{
+						onMenu(msg.x, msg.y, 0);
+					}
+				}
+				else
+				{
+					if (msg.is_down())
+					{
+						onDrag(msg.x, msg.y, 1);
+					}
+					else if (msg.is_up())
+					{
+						onDrag(msg.x, msg.y, 0);
+					}
+				}
+				if (msg.is_move())
+				{
+					onMenu(msg.x, msg.y, 2);
+					onDrag(msg.x, msg.y, 2);
 				}
 			}
-			else
-			{
-				if (msg.is_down())
-				{
-					onDrag(msg.x, msg.y, 1);
+			if (kbmsg()) {
+				key_msg msg = getkey();
+				if (msg.msg == key_msg_up) {
+					onKeyUp(msg.key);
 				}
-				else if (msg.is_up())
-				{
-					onDrag(msg.x, msg.y, 0);
+				else if (msg.msg == key_msg_down) {
+					onKeyDown(msg.key);
+					if (msg.key == VK_ESCAPE) {
+						break;
+					}
 				}
-			}
-			if (msg.is_move())
-			{
-				onMenu(msg.x, msg.y, 2);
-				onDrag(msg.x, msg.y, 2);
 			}
 		}
-		if (kbmsg()) {
-			key_msg msg = getkey();
-			if (msg.msg == key_msg_up) {
-				onKeyUp(msg.key);
-			}
-			else if (msg.msg == key_msg_down) {
-				onKeyDown(msg.key);
-				if (msg.key == VK_ESCAPE) {
-					break;
-				}
-			}
+		else {
+			delay_ms(1000);
 		}
 		flushkey();
 		flushmouse();
