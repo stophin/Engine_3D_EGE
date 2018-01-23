@@ -825,7 +825,7 @@ struct Device {
 		if (0 == thread_ready) {
 			//线程数 thread_count * thread_count
 			//max is 9, which is limit MAX_OBJ3D_MAX macro
-			thread_count = 9;
+			thread_count = 4;
 			//创建互斥体  
 			hMutex = CreateMutex(NULL, FALSE, TEXT("Mutex"));
 			//创建线程  
@@ -1009,11 +1009,12 @@ struct Device {
 				Lgt3D * cur_lgt = man.lgts.link;
 				shadow_count = 0;
 				//ray tracing depth
-				count = 2;
+				count = 3;
 				do {
 					// when the ray is reflection or refraction
 					// use the objects around instead of all the objects
-					if (1 == ray.type || 2 == ray.type) {
+
+					if (0 && 1 == ray.type || 2 == ray.type) {
 						if (!ray.obj) {
 							ray.obj = ray.obj;
 						}
@@ -1182,6 +1183,7 @@ struct Device {
 															}
 														}
 													}
+													break;
 												}
 											}
 

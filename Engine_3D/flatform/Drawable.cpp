@@ -251,6 +251,27 @@ VOID Initialize()
 	}
 	//////////////////////////
 	//////////////////////////
+	loadIndex = 0;
+	loader.Init("3ds/venus.3ds", loadIndex);
+	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
+		t3DObject & object = g_3DModel[0].pObject.at(i);
+		cur_op = &man.addObject(10).setVertexType(1);
+		for (int j = 0; j < object.numOfVerts; j++) {
+			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
+		}
+		INT anti_n = 1;
+		for (int j = 0; j < object.numOfFaces; j++) {
+			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1], anti_n);
+			//anti_n = -anti_n;
+		}
+		cur_op->move(0, 0, 0).scale(0.05, 0.05, 0.05).rotate(90, 0, 180).setNormalType(1).setColor(RED);
+		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
+			//cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
+			cur_op->setColor(RED);
+		}
+	}
+	//////////////////////////
+	//////////////////////////
 	// generate teapot
 	{
 		Object3D& obj = man.addObject(5).renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
