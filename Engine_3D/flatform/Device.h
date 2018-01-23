@@ -862,6 +862,8 @@ struct Device {
 		}
 		//最后启动主线程并运行
 		thread_main = CreateThread(NULL, 0, RenderThreadMain, this, 0, NULL);
+		//句柄不再用到就关闭
+		CloseHandle(thread_main);
 		//调用的线程退出以进行后续显示工作
 		return;
 	}
@@ -888,6 +890,8 @@ struct Device {
 				CloseHandle(thread_pool[i * thread_count + j]);
 			}
 		}
+		//释放互斥资源
+		CloseHandle(hMutex);
 	}
 	static DWORD WINAPI RenderThreadMain(LPVOID lpThreadParameter) {
 		Device * device = (Device*)lpThreadParameter;
@@ -1183,7 +1187,13 @@ struct Device {
 															}
 														}
 													}
-													break;
+													//when the ray is reflection,
+													//there will be one or two hit point
+													//in other case, because of using backface cull,
+													//there will be only one hit point
+													if (!(1 == ray.type)) {
+														break;
+													}
 												}
 											}
 
