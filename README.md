@@ -2,7 +2,7 @@
 Engine_3D_EGE: Simple 3D using EGE  
 
 WHAT's INCLUDED:  
-0. basical coordinate transformation.
+0. basical coordinate transformation.  
 
 1. simluated light renderer.  
 
