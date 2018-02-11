@@ -2,15 +2,15 @@
 Engine_3D_EGE: Simple 3D using EGE  
 
 WHAT's INCLUDED:  
-0. basical coordinate transformation.  
+1. basical coordinate transformation.  
 
-1. simluated light renderer.  
+2. simluated light renderer.  
 
-2. simulated transparent object.  
+3. simulated transparent object.  
 
-3. silmulated reflection object.  
+4. silmulated reflection object.  
 
-4. simulated texture renderer.
+5. simulated texture renderer.
 
 NOTE:
 refer to https://github.com/stophin/3DSResource.git for the 3DS resource in /3ds folder.
