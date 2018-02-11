@@ -10,7 +10,11 @@ WHAT's INCLUDED:
 
 4. silmulated reflection object.  
 
-5. simulated texture renderer.
+5. simulated texture renderer.  
 
-NOTE:
+6. realtime shadow using shadowmap  
+
+7. using 'V' key to render ray tracing at any time.
+
+NOTE:  
 refer to https://github.com/stophin/3DSResource.git for the 3DS resource in /3ds folder.
