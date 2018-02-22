@@ -20,4 +20,4 @@ NOTE:
 refer to https://github.com/stophin/3DSResource.git for the 3DS resource in /3ds folder.  
 
 Preview:  
-![Alt text](https://github.com/stophin/Engine_3D_EGE/raw/master/Engine_3D/Previce.png)  
+![Alt text](https://github.com/stophin/Engine_3D_EGE/blob/master/Engine_3D/Preview.png)  
