@@ -151,17 +151,17 @@ VOID Initialize()
 
 	//load resource
 	INT t0 = tman.addTexture(480, 480, 10);
-	INT t1 = tman.addTexture("1.jpg");
-	INT t2 = tman.addTexture("2.jpg");
-	INT t3 = tman.addTexture("3.jpg");
+	INT t1 = tman.addTexture("image/1.jpg");
+	INT t2 = tman.addTexture("image/2.jpg");
+	INT t3 = tman.addTexture("image/3.jpg");
 	INT t4 = tman.addTexture(64, 64, 8);
 	INT t5 = tman.addTexture(64, 64, 2);
-	INT t6 = tman.addTexture("6.jpg");
-	INT t7 = tman.addTexture("7.jpg");
-	INT t8 = tman.addTexture("8.jpg");
-	INT t9 = tman.addTexture("9.jpg");
-	INT t10 = tman.addTexture("10.jpg");
-	INT t11 = tman.addTexture("11.jpg");
+	INT t6 = tman.addTexture("image/6.jpg");
+	INT t7 = tman.addTexture("image/7.jpg");
+	INT t8 = tman.addTexture("image/8.jpg");
+	INT t9 = tman.addTexture("image/9.jpg");
+	INT t10 = tman.addTexture("image/10.jpg");
+	INT t11 = tman.addTexture("image/11.jpg");
 
 	int count = 2;
 	int c = 30;
@@ -204,11 +204,10 @@ VOID Initialize()
 			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
 			//cur_op->setColor(RED);
 		}
-		//cur_op->setTexture(tman, t10, 2);
+		cur_op->setTexture(tman, t10, 2);
 	}
 	//////////////////////////
 
-#if 0
 	//////////////////////////
 	// generate teapot
 	{
@@ -229,6 +228,7 @@ VOID Initialize()
 		cur_op = &obj;
 	}
 	//////////////////////////
+#if 0
 	//////////////////////////
 	loadIndex = 0;
 	loader.Init("3ds/306016.3ds", loadIndex);
@@ -317,6 +317,7 @@ VOID Initialize()
 	//	.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
 	//	.scale(30, 30, 30).move(15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t11, 4).setBackfaceCulling(1);
 	////////////////////////////
+#endif
 
 	//////////////////////////
 	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
@@ -405,7 +406,6 @@ VOID Initialize()
 		man.endGroup();
 	}
 	//////////////////////////
-#endif
 	//////////////////////////
 	cur_op = &man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
 		.scale(10, 10, 10).rotate(-90, -90, -90).move(-50, -80, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t0);
