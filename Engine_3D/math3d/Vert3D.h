@@ -182,10 +182,21 @@ struct Vert3D {
 		return (INT)(p1.y < p2.y ? (p2.y < p3.y ? p3.y : p2.y) : (p1.y < p3.y ? p3.y : p1.y));
 	}
 	static EFTYPE getZ(const Vert3D& n, EFTYPE x0, EFTYPE y0, EFTYPE z0, EFTYPE x, EFTYPE y) {
-		return (-n.x * (x - x0) - n.y * (y - y0)) / n.z + z0;
+		EFTYPE z_1 = 1;
+		if (!EP_ISZERO(n.z)) {
+			z_1 = 1 / n.z;
+		}
+		return (-n.x * (x - x0) - n.y * (y - y0)) * z_1 + z0;
 	}
 	static EFTYPE getXFromY(const Vert3D& v0, const Vert3D& v1, EFTYPE y) {
-		return ((y - v0.y) / (v1.y - v0.y)) * (v1.x - v0.x) + v0.x;
+		EFTYPE dy_1 = v1.y - v0.y;
+		if (!EP_ISZERO(dy_1)) {
+			dy_1 = 1 / dy_1;
+		}
+		else {
+			dy_1 = 1;
+		}
+		return ((y - v0.y) * dy_1) * (v1.x - v0.x) + v0.x;
 	}
 
 	static EFTYPE cross(const Vert3D& a, const Vert3D& b, const Vert3D& p) {
