@@ -37,7 +37,7 @@ public:
 
 		texture = new DWORD[sizeof(DWORD)* height * width];
 		DWORD * buffer = EP_GetImageBuffer(image);
-		INT index, index_r, index_t = width * height;
+		INT index, index_r, index_t = width * height - 1;
 		for (int y = 0; y < height; y++){
 			for (int x = 0; x < width; x++)
 			{
