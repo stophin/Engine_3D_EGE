@@ -61,8 +61,8 @@ VOID onPaint(HWND hWnd)
 	}
 	isrefresh = -1;
 	// Place draw code here
-	setcolor(BLACK);
-	cleardevice();
+	EP_SetColor(BLACK);
+	EP_ClearDevice();
 	//device.drawAABB(man, &man.octTree);
 	//Render in device buffer
 	if (device.render_raytracing > 0) {
@@ -231,6 +231,24 @@ VOID Initialize()
 #if 0
 	//////////////////////////
 	loadIndex = 0;
+	loader.Init("3ds/bone_blade/bone_blade.3ds", loadIndex);
+	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
+		t3DObject & object = g_3DModel[0].pObject.at(i);
+		cur_op = &man.addObject(10).setVertexType(1);
+		for (int j = 0; j < object.numOfVerts; j++) {
+			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
+		}
+		for (int j = 0; j < object.numOfFaces; j++) {
+			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
+		}
+		cur_op->move(0, 0, 0).scale(100, 100, 100).setColor(RED);
+		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
+			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
+		}
+	}
+	//////////////////////////
+	//////////////////////////
+	loadIndex = 0;
 	loader.Init("3ds/306016.3ds", loadIndex);
 	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
 		t3DObject & object = g_3DModel[0].pObject.at(i);
@@ -266,8 +284,8 @@ VOID Initialize()
 		}
 		cur_op->move(0, 0, 0).scale(0.05, 0.05, 0.05).rotate(90, 0, 180).setNormalType(1).setColor(RED);
 		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
-			//cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
-			cur_op->setColor(RED);
+			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
+			//cur_op->setColor(RED);
 		}
 	}
 	//////////////////////////
