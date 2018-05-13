@@ -105,7 +105,7 @@ VOID onPaint(HWND hWnd)
 		}
 	}
 	else  {
-		device.drawAABB(man, &man.octTree);
+		//device.drawAABB(man, &man.octTree);
 		enter_once = 1;
 		if (move_light > 0) {
 			device.RenderShade(man);
