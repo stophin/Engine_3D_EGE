@@ -63,7 +63,6 @@ VOID onPaint(HWND hWnd)
 	// Place draw code here
 	EP_SetColor(BLACK);
 	EP_ClearDevice();
-	//device.drawAABB(man, &man.octTree);
 	//Render in device buffer
 	if (device.render_raytracing > 0) {
 		if (enter_once < 0) {
@@ -106,6 +105,7 @@ VOID onPaint(HWND hWnd)
 		}
 	}
 	else  {
+		device.drawAABB(man, &man.octTree);
 		enter_once = 1;
 		if (move_light > 0) {
 			device.RenderShade(man);
@@ -176,14 +176,65 @@ VOID Initialize()
 	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1).scale(10, 10, 10).move(0, 100, -200).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
 	//////////////////////////
 	//////////////////////////
+	loadIndex = 0;
+	loader.Init("3ds/GeoSphere.3ds", loadIndex);
+	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
+		t3DObject & object = g_3DModel[0].pObject.at(i);
+		cur_op = &man.addReflectionObject(10).renderAABB().setVertexType(1);
+		for (int j = 0; j < object.numOfVerts; j++) {
+			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
+		}
+		INT anti_n = 1;
+		for (int j = 0; j < object.numOfFaces; j++) {
+			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1], anti_n);
+			//anti_n = -anti_n;
+		}
+		cur_op->move(100, 0, 0).rotate(-90, -180, 0).setNormalType(1).setColor(RED);
+		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
+			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
+			//cur_op->setColor(RED);
+		}
+		cur_op->setTexture(tman, t10, 2);
+	}
+	//////////////////////////
+	//////////////////////////
 	Group3D& gp = man.addGroup();
 	for (int i = 0; i < 5; i++) {
 		for (int j = 0; j < 5; j++) {
-			man.startGroup(gp.uniqueID).addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
+			man.startGroup(gp.uniqueID).addReflectionObject(1).renderAABB().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
 				.rotate(0, 0, 180).scale(5, 5, 5).move(250 - 100 * j, -40, 250 - 100 * i).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t0);
 		}
 	}
 	man.endGroup();
+	//////////////////////////
+#if 0
+	//////////////////////////
+	c = 10;
+	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
+	count = 1;
+	for (k = 0; k < count; k++) {
+		//EFTYPE x = rand() % 300;
+		//EFTYPE z = rand() % 300;
+		//EFTYPE y = rand() % 100;
+		EFTYPE x = -60, y = 20, z = 30;
+		Group3D& gp = man.addGroup();
+		for (i = 0; i < c; i++) {
+			x_1 = r * cos(i * p_1);
+			r_1 = r * sin(i * p_1);
+			x_2 = r * cos((i + 1) * p_1);
+			r_2 = r * sin((i + 1) * p_1);
+			Object3D& obj = man.startGroup(gp.uniqueID).addObject(1).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
+			for (j = 1; j < c; j++) {
+				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
+					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
+			}
+			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(2, 2, 2).move(x, y, z).rotate(0, 0, 0)
+				.setColor(GREEN).setLineColor(RED);// .setTexture(tman, t6, 3);
+
+			cur_op = &obj;
+		}
+		man.endGroup();
+	}
 	//////////////////////////
 	//////////////////////////
 	loadIndex = 0;
@@ -228,7 +279,6 @@ VOID Initialize()
 		cur_op = &obj;
 	}
 	//////////////////////////
-#if 0
 	//////////////////////////
 	loadIndex = 0;
 	loader.Init("3ds/bone_blade/bone_blade.3ds", loadIndex);
@@ -335,38 +385,10 @@ VOID Initialize()
 	//	.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
 	//	.scale(30, 30, 30).move(15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t11, 4).setBackfaceCulling(1);
 	////////////////////////////
-#endif
 
 	//////////////////////////
 	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
 		.scale(10, 10, 10).move(0, 100, -200).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
-	//////////////////////////
-	//////////////////////////
-	c = 10;
-	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
-	count = 1;
-	for (k = 0; k < count; k++) {
-		EFTYPE x = rand() % 100;
-		EFTYPE z = rand() % 100;
-		EFTYPE y = rand() % 100;
-		Group3D& gp = man.addGroup();
-		for (i = 0; i < c; i++) {
-			x_1 = r * cos(i * p_1);
-			r_1 = r * sin(i * p_1);
-			x_2 = r * cos((i + 1) * p_1);
-			r_2 = r * sin((i + 1) * p_1);
-			Object3D& obj = man.startGroup(gp.uniqueID).addObject(1).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
-			for (j = 1; j < c; j++) {
-				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
-					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
-			}
-			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(2, 2, 2).move(x, y, z).rotate(0, 0, 0)
-				.setColor(GREEN).setLineColor(RED);// .setTexture(tman, t6, 3);
-
-			cur_op = &obj;
-		}
-		man.endGroup();
-	}
 	//////////////////////////
 	//////////////////////////
 	c = 10;
@@ -441,7 +463,6 @@ VOID Initialize()
 	man.addReflectionObject(0.05).addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
 		.scale(10, 10, 10).rotate(90, 90, 0).move(200, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t1);
 	//////////////////////////
-#if 0
 	//////////////////////////
 	//sphere world map
 	c = 10;

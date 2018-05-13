@@ -918,6 +918,7 @@ struct Device {
 			if (_thread_all_done) {
 				break;
 			}
+			Sleep(500);
 		}
 		device->thread_all_done = 0;
 		return 0;
@@ -934,6 +935,7 @@ struct Device {
 			RenderRayTracingSub(*pthread->man, pthread->sx, pthread->sy, pthread->ex, pthread->ey, pthread->id, pthread->hMutex, pthread->device);
 			pthread->device->thread_status[pthread->id] = 0;
 			SuspendThread(pthread->hThread);
+			Sleep(100);
 		}
 		return 0;
 	}
@@ -1024,7 +1026,7 @@ struct Device {
 						}
 						olink = &octs;
 						//olink = &man.octs;
-						//olink->clearLink();
+						olink->clearLink();
 						man.octTree.Collision((Obj3D*)ray.obj, olink);
 					}
 					else {

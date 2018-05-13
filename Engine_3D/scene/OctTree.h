@@ -56,8 +56,8 @@ enum OctTree_Link {
 
 #define MAX_QUARDANTS	8
 #define MAX_OBJECTS		5
-#define MAX_LEVELS		MAX_OBJ3D_LINK - MAX_OBJ3D_END
-#define GET_LINK_INDEX(level)	(level + MAX_OBJ3D_END - 1)
+#define MAX_LEVELS		(MAX_OBJ3D_LINK - MAX_OBJ3D_END) / (MAX_QUARDANTS + 1)
+#define GET_LINK_INDEX(level, position)	(level * MAX_QUARDANTS + position + MAX_OBJ3D_END)
 class OctTree {
 public:
 	OctTree(INT level,
@@ -68,7 +68,7 @@ public:
 		bounds(x, y, z, w, h, d),
 		maxObjects(MAX_OBJECTS),
 		maxLevels(MAX_LEVELS),
-		objects(GET_LINK_INDEX(level)),
+		objects(GET_LINK_INDEX(level, position)),
 		parent(parent),
 		hasChild(0){
 		for (int i = 0; i < OctTreeLinkMax; i++) {
@@ -80,7 +80,7 @@ public:
 		position(-1),
 		maxObjects(MAX_OBJECTS),
 		maxLevels(MAX_LEVELS),
-		objects(GET_LINK_INDEX(level)),
+		objects(GET_LINK_INDEX(level, -1)),
 		parent(NULL),
 		hasChild(0) {
 	}
@@ -91,7 +91,7 @@ public:
 		EFTYPE x, EFTYPE y, EFTYPE z, EFTYPE w, EFTYPE h, EFTYPE d,
 		OctTree * parent, INT position) {
 		this->level = level;
-		this->objects.linkindex = GET_LINK_INDEX(level);
+		this->objects.linkindex = GET_LINK_INDEX(level, position);
 		this->position = position;
 		this->bounds.set(x, y, z, w, h, d);
 		this->parent = parent;
@@ -123,21 +123,21 @@ public:
 		EFTYPE z = this->bounds.z;
 
 		this->children[OctTree_Link::RightTopFront] =
-			new OctTree(this->level + 1, x + subWidth, y, z, subWidth, subHeight, subDepth, this, OctTree_Link::RightTopFront);
+			new OctTree(this->level + 1, x, y + subHeight, z + subDepth, subWidth, subHeight, subDepth, this, OctTree_Link::RightTopFront);
 		this->children[OctTree_Link::LeftTopFront] =
-			new OctTree(this->level + 1, x, y, z, subWidth, subHeight, subDepth, this, OctTree_Link::LeftTopFront);
+			new OctTree(this->level + 1, x + subWidth, y + subHeight, z + subDepth, subWidth, subHeight, subDepth, this, OctTree_Link::LeftTopFront);
 		this->children[OctTree_Link::LeftBottomFront] =
-			new OctTree(this->level + 1, x, y + subHeight, z, subWidth, subHeight, subDepth, this, OctTree_Link::LeftBottomFront);
+			new OctTree(this->level + 1, x + subWidth, y, z + subDepth, subWidth, subHeight, subDepth, this, OctTree_Link::LeftBottomFront);
 		this->children[OctTree_Link::RightBottomFront] =
-			new OctTree(this->level + 1, x + subWidth, y + subHeight, z, subWidth, subHeight, subDepth, this, OctTree_Link::RightBottomFront);
+			new OctTree(this->level + 1, x, y, z + subDepth, subWidth, subHeight, subDepth, this, OctTree_Link::RightBottomFront);
 		this->children[OctTree_Link::RightTopBack] =
-			new OctTree(this->level + 1, x + subWidth, y, z + subDepth, subWidth, subHeight, subDepth, this, OctTree_Link::RightTopBack);
+			new OctTree(this->level + 1, x, y + subHeight, z, subWidth, subHeight, subDepth, this, OctTree_Link::RightTopBack);
 		this->children[OctTree_Link::LeftTopBack] =
-			new OctTree(this->level + 1, x, y, z + subDepth, subWidth, subHeight, subDepth, this, OctTree_Link::LeftTopBack);
+			new OctTree(this->level + 1, x + subWidth, y + subHeight, z, subWidth, subHeight, subDepth, this, OctTree_Link::LeftTopBack);
 		this->children[OctTree_Link::LeftBottomBack] =
-			new OctTree(this->level + 1, x, y + subHeight, z + subDepth, subWidth, subHeight, subDepth, this, OctTree_Link::LeftBottomBack);
+			new OctTree(this->level + 1, x + subWidth, y, z, subWidth, subHeight, subDepth, this, OctTree_Link::LeftBottomBack);
 		this->children[OctTree_Link::RightBottomBack] =
-			new OctTree(this->level + 1, x + subWidth, y + subHeight, z + subDepth, subWidth, subHeight, subDepth, this, OctTree_Link::RightBottomBack);
+			new OctTree(this->level + 1, x, y, z, subWidth, subHeight, subDepth, this, OctTree_Link::RightBottomBack);
 		this->hasChild = true;
 	}
 
@@ -147,44 +147,44 @@ public:
 		EFTYPE yMidPoint = this->bounds.y + this->bounds.height / 2;
 		EFTYPE zMidPoint = this->bounds.z + this->bounds.depth / 2;
 
-		EFTYPE topQuad = (rect.y > this->bounds.y && rect.y + rect.height < yMidPoint);
-		EFTYPE bottomQuad = (rect.y > yMidPoint && rect.y + rect.height < this->bounds.y + this->bounds.height);
-		EFTYPE frontQuad = (rect.z > this->bounds.z && rect.z + rect.depth < zMidPoint);
-		EFTYPE backQuad = (rect.z > zMidPoint && rect.z + rect.depth < this->bounds.z + this->bounds.depth);
+		EFTYPE bottomQuad = (EP_GEZERO(rect.y - this->bounds.y) && EP_LEZERO(rect.y + rect.height - yMidPoint));
+		EFTYPE topQuad = (EP_GEZERO(rect.y - yMidPoint) && EP_LEZERO(rect.y + rect.height -( this->bounds.y + this->bounds.height)));
+		EFTYPE backQuad = (EP_GEZERO(rect.z - this->bounds.z) && EP_LEZERO(rect.z + rect.depth - zMidPoint));
+		EFTYPE frontQuad = (EP_GEZERO(rect.z - zMidPoint) && EP_LEZERO(rect.z + rect.depth - ( this->bounds.z + this->bounds.depth)));
 
-		if (rect.x > this->bounds.x && rect.x + rect.width < xMidPoint) {//leftQuad
+		if (EP_GEZERO(rect.x - xMidPoint) && EP_LEZERO(rect.x + rect.width - ( this->bounds.x + this->bounds.width))) {//leftQuad
 			if (topQuad) {
 				if (frontQuad) {
-					index = 1;//leftTopFront
+					index = OctTree_Link::LeftTopFront;//leftTopFront
 				}
 				else if (backQuad) {
-					index = 5;//leftTopBack
+					index = OctTree_Link::LeftTopBack;//leftTopBack
 				}
 			}
 			else if (bottomQuad) {
 				if (frontQuad) {
-					index = 2;//leftBottomFront
+					index = OctTree_Link::LeftBottomFront;//leftBottomFront
 				}
 				else if (backQuad) {
-					index = 6;//leftBottomBack
+					index = OctTree_Link::LeftBottomBack;//leftBottomBack
 				}
 			}
 		}
-		else if (rect.x > xMidPoint && rect.x + rect.width < this->bounds.x + this->bounds.width) {//rightQuad
+		else if (EP_GEZERO(rect.x - this->bounds.x) && EP_LEZERO( rect.x + rect.width - xMidPoint)) {//rightQuad
 			if (topQuad) {
 				if (frontQuad) {
-					index = 0;//rightTopFront
+					index = OctTree_Link::RightTopFront;//rightTopFront
 				}
 				else if (backQuad) {
-					index = 4;//rightTopBack
+					index = OctTree_Link::RightTopBack;//rightTopBack
 				}
 			}
 			else if (bottomQuad) {
 				if (frontQuad) {
-					index = 3;//rightBottmFront
+					index = OctTree_Link::RightBottomFront;//rightBottmFront
 				}
 				else if (backQuad) {
-					index = 7;//rightBottomBack
+					index = OctTree_Link::RightBottomBack;//rightBottomBack
 				}
 			}
 		}
@@ -202,15 +202,10 @@ public:
 			INT index = this->GetIndex(rect);
 			if (index != -1) {
 				this->children[index]->Insert(obj);
-			}
-			else {
-				this->objects.insertLink(obj);
 				obj->octTree = this;
 			}
-			return;
 		}
 		this->objects.insertLink(obj);
-		obj->octTree = this;
 		if (this->objects.linkcount > this->maxObjects && this->level < this->maxLevels) {
 			this->Split();
 			Obj3D * _obj = this->objects.link, *_next;
