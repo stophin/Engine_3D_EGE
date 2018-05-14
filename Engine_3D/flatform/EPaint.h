@@ -58,6 +58,8 @@ void EP_SetColor(ECOLOR c);
 void EP_SetFillColor(ECOLOR c);
 void EP_SetBKColor(ECOLOR c);
 
+ECOLOR EP_ColorConvert(const EPCHAR * c);
+
 int EP_GetImageWidth(EIMAGE image);
 int EP_GetImageHeight(EIMAGE image);
 

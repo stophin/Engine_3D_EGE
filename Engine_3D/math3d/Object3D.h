@@ -934,7 +934,7 @@ public:
 		initialize();
 	}
 
-#define MAX_OBJ3D_MAX	100 //used for thread
+#define MAX_OBJ3D_MAX	300 //used for thread
 #define MAX_OBJ3D_LINK	60
 #define MAX_OBJ3D_END	6 //reserved for normal linklist use
 	void initialize() {

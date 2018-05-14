@@ -84,9 +84,6 @@
     <ClInclude Include="math3d\Matrix3D.h">
       <Filter>头文件\math3d</Filter>
     </ClInclude>
-    <ClInclude Include="teapot.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="raytracing\Ray.h">
       <Filter>头文件\raytracing</Filter>
     </ClInclude>

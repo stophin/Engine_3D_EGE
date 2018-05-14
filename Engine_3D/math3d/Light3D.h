@@ -57,7 +57,11 @@ public:
 	Vert3D n1;
 	Vert3D r;
 	EFTYPE getFactor(const Vert3D& n, const Vert3D& n0) {
-		// amibent :  Ka * GlobalAmibent
+		//Phong module:
+		//I = kaIa + KdId(n*l) + KsIs(r*v)^2
+		//a: ambient, d: diffuse, s: specular
+		//here we assume ambient is zero
+		// ambient :  Ka * GlobalAmibent
 		EFTYPE f = 0, _f = 0, __f = 0;
 		// diffuse :  Kd * LightColor * dot(L, N)
 		n1.set(this->pos_r);

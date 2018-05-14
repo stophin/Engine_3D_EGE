@@ -1,0 +1,165 @@
+camera	1001
+	param 	50	50	50	1000	90	90
+	move	0	0	-200
+camera
+camera	1002
+	param	30	30	60	600	30	30
+	move	0	0	-100
+camera
+camera	shadow
+camera
+camera	reflection
+camera
+light	2001
+	param	9	100	300
+light
+texture	0
+	param	480	480	10
+texture
+texture	1
+	url	image/1.jpg
+texture
+texture	2
+	url	image/2.jpg
+texture
+texture	3
+	url	image/3.jpg
+texture
+texture	4
+	param	64	64	8
+texture
+texture	5
+	param	64	64	2
+texture
+texture	6
+	url	image/6.jpg
+texture
+texture	7
+	url	image/7.jpg
+texture
+texture	8
+	url	image/8.jpg
+texture
+texture	9
+	url	image/9.jpg
+texture
+texture	10
+	url	image/10.jpg
+texture
+texture	11
+	url	image/11.jpg
+texture
+
+#object back vertical wall
+object	normal	normal
+	verts	-10	-10	10
+	verts	10	-10	10
+	verts	-10	10	10
+	verts	10	10	10	-1
+	verts	10	10	10
+	verts	0	100	-200
+	scale	10	10	10
+	move	0	100	-200
+	color	GREEN
+	texture	1
+	uv	30	30
+object
+
+#object floor
+object	group	normal	10
+	maxx	5	5
+	verts	-10	0	-10
+	verts	10	0	-10
+	verts	-10	0	10
+	verts	10	0	10	-1
+	rotate	0	0	180
+	scale	5	5	5
+	move	250	-40	250
+	movex	-100	0	-100
+	color	LIGHTGRAY
+	line_color	RED
+	texture	4
+object
+
+#object 3ds sphere
+object 3ds	reflection	10
+	url	3ds/GeoSphere.3DS
+	vertext_type	1
+	move	0	0	0
+	rotate	-90	-180	0
+	normal_type	1
+	color	RED
+	texture	10	2
+object
+
+#object sphere
+object sphere	normal
+	round	10
+	count	1
+	diameter	10
+	move	-50	0	30
+	scale	2	2	2
+	rotate	0	0	0
+	color	GREEN
+	texture	6	3
+object
+
+
+#object teapot from file
+object file	reflection	10
+	url	teapot.txt
+	vertext_type	1
+	move	100	0	0
+	rotate	-90	-180	0
+	normal_type	1
+	color	RED
+	texture	7	2
+	uv	30	30
+object
+
+#object box
+object normal normal	0.05
+	verts	-10	-10	10
+	verts	10	-10	10
+	verts	-10	10	10
+	verts	10	10	10	-1
+	verts	10	10	-10
+	verts	10	-10	10	-1
+	verts	10	-10	-10
+	verts	-10	-10	10	-1
+	verts	-10	-10	-10
+	verts	-10	10	10	-1
+	verts	-10	10	-10
+	verts	10	10	-10	-1
+	verts	-10	-10	-10
+	verts	10	-10	-10	-1
+	scale	2	2	2
+	move	20	0	-50
+	color	RED
+	texture	3
+object
+
+#object Concave box
+object	normal	normal	-1
+	verts	-10	-10	10
+	verts	10	-10	10
+	verts	-10	10	10
+	verts	10	10	10	-1
+	verts	10	10	-10
+	verts	10	-10	10	-1
+	verts	10	-10	-10
+	verts	-10	-10	10	-1
+	verts	-10	-10	-10
+	verts	-10	10	10	-1
+	verts	-10	10	-10
+	verts	10	10	-10	-1
+	verts	-10	-10	-10
+	verts	10	-10	-10	-1
+	scale	30	30	30
+	move	15	0	-50
+	vertex_type	0
+	color	RED
+	line_color	BLUE
+	texture	11	4
+	backfaceculling	1
+object

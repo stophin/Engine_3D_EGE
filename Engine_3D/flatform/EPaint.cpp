@@ -134,6 +134,56 @@ void EP_SetBKColor(ECOLOR c)
 	setfontbkcolor(c);
 }
 
+ECOLOR EP_ColorConvert(const EPCHAR * c) {
+	ECOLOR col = BLACK;
+	if (!strcmp(c, "CYAN")) {
+		col = CYAN;
+	}
+	else if (!strcmp(c, "MAGENTA")) {
+		col = MAGENTA;
+	}
+	else if (!strcmp(c, "BROWN")) {
+		col = BROWN;
+	}
+	else if (!strcmp(c, "LIGHTGRAY")) {
+		col = LIGHTGRAY;
+	}
+	else if (!strcmp(c, "DARKGRAY")) {
+		col = DARKGRAY;
+	}
+	else if (!strcmp(c, "LIGHTBLUE")) {
+		col = LIGHTBLUE;
+	}
+	else if (!strcmp(c, "LIGHTGREEN")) {
+		col = LIGHTGREEN;
+	}
+	else if (!strcmp(c, "LIGHTCYAN")) {
+		col = LIGHTCYAN;
+	}
+	else if (!strcmp(c, "LIGHTRED")) {
+		col = LIGHTRED;
+	}
+	else if (!strcmp(c, "LIGHTMAGENTA")) {
+		col = LIGHTMAGENTA;
+	}
+	else if (!strcmp(c, "YELLOW")) {
+		col = YELLOW;
+	}
+	else if (!strcmp(c, "WHITE")) {
+		col = WHITE;
+	}
+	else if (!strcmp(c, "GREEN")) {
+		col = GREEN;
+	}
+	else if (!strcmp(c, "RED")) {
+		col = RED;
+	}
+	else if (!strcmp(c, "BLUE")) {
+		col = BLUE;
+	}
+	return col;
+}
+
 //Load image width file name, and resize
 //image				: the image buffer
 //fname				: file name

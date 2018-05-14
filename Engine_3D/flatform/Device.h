@@ -824,8 +824,8 @@ struct Device {
 	void RenderRayTracing(Manager3D& man) {
 		if (0 == thread_ready) {
 			//线程数 thread_count * thread_count
-			//max is 9, which is limit MAX_OBJ3D_MAX macro
-			thread_count = 4;
+			//max is limit by MAX_OBJ3D_MAX macro
+			thread_count = 10;
 			//创建互斥体  
 			hMutex = CreateMutex(NULL, FALSE, TEXT("Mutex"));
 			//创建线程  

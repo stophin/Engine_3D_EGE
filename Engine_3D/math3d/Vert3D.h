@@ -15,6 +15,8 @@ struct Vert3D {
 	EFTYPE z;
 	EFTYPE w;
 
+	INT anti;
+
 	void init() {
 		this->x = 0;
 		this->y = 0;

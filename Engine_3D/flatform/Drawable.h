@@ -20,5 +20,3 @@ VOID onDrag(FLOAT x, FLOAT y, INT mode);
 INT isInputBlocked();
 
 #include "Device.h"
-
-void render(VObj * range, VObj * range0, VObj * range1);

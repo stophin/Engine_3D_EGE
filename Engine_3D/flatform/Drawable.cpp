@@ -13,6 +13,7 @@ INT isrefresh = -1;
 INT width;
 INT height;
 INT draw_line = 1;
+INT draw_oct = -1;
 INT move_light = -1;
 INT move_trans = -1;
 
@@ -105,7 +106,9 @@ VOID onPaint(HWND hWnd)
 		}
 	}
 	else  {
-		//device.drawAABB(man, &man.octTree);
+		if (draw_oct > 0) {
+			device.drawAABB(man, &man.octTree);
+		}
 		enter_once = 1;
 		if (move_light > 0) {
 			device.RenderShade(man);
@@ -134,363 +137,714 @@ VOID onPaint(HWND hWnd)
 #include "../reader/3DS.h"
 
 extern t3DModel g_3DModel[10];
-#include "../teapot.h"
 
 Object3D * cur_op = NULL;
+
+#define MAX_VERTS	100
+#define MAX_OBJS	100
+
+#define MAX_STR 100
+#define MAX_PAR	10
+INT parseParameter(CHAR buffer[], CHAR command[], CHAR parameters[][MAX_STR], INT maxP = 0)
+{
+	int i, j;
+	int cp = 0;
+	int pp = 0;
+	int pc = 0;
+	int flag = 0;
+	int lspc = 0;
+	for (i = 0; buffer[i] != '\0' && (buffer[i] == '\t' || buffer[i] == ' '); i++);
+	for (j = i; buffer[j] != '\0'; j++)
+	{
+		if (buffer[j] == '\n')
+		{
+			buffer[j] = '\0';
+			break;
+		}
+	}
+	for (; buffer[i] != '\0'; i++)
+	{
+		if (buffer[i] == '\t' || buffer[i] == ' ')
+		{
+			if (lspc == 0)
+			{
+				if (flag)
+				{
+					parameters[pc][pp] = '\0';
+					pc++;
+					if (maxP && pc > maxP) {
+						break;
+					}
+					pp = 0;
+				}
+				else
+				{
+					command[cp] = '\0';
+					flag = 1;
+				}
+			}
+			lspc++;
+			continue;
+		}
+		else
+		{
+			lspc = 0;
+		}
+		if (flag)
+		{
+			parameters[pc][pp++] = buffer[i];
+			if (pp >= MAX_STR)
+			{
+				break;
+			}
+		}
+		else
+		{
+			command[cp++] = buffer[i];
+			if (cp >= MAX_STR)
+			{
+				break;
+			}
+		}
+	}
+	if (flag)
+	{
+		parameters[pc][pp] = '\0';
+	}
+	else
+	{
+		command[cp] = '\0';
+		pc = pc - 1;
+	}
+	return pc + 1;
+}
 VOID Initialize()
 {
+	FILE * fp = NULL;
+	fopen_s(&fp, "scene.json", "r");
+	if (!fp) {
+		exit(0);
+	}
+	CHAR buffer[MAX_STR];
+	CHAR command[MAX_STR];
+	CHAR parameters[MAX_PAR][MAX_STR];
+	CHAR attrs[MAX_PAR][MAX_STR];
+	int attrCount = 0;
+	int paramCount = 0;
 
-	man.addCamera(50, 50, 50, 1000, 90, 90).move(0, 0, -200);
-	man.addCamera(30, 30, 60, 600, 30, 30).move(0, 0, -100);
-	man.addShadowCamera();
-	man.addReflectionCamera();
-
-	man.addLight(9, 100, 300);
-	//man.addLight(5, 100, 300);
-	//man.addLight(-1000, 100, 100);
-
-	//load resource
-	INT t0 = tman.addTexture(480, 480, 10);
-	INT t1 = tman.addTexture("image/1.jpg");
-	INT t2 = tman.addTexture("image/2.jpg");
-	INT t3 = tman.addTexture("image/3.jpg");
-	INT t4 = tman.addTexture(64, 64, 8);
-	INT t5 = tman.addTexture(64, 64, 2);
-	INT t6 = tman.addTexture("image/6.jpg");
-	INT t7 = tman.addTexture("image/7.jpg");
-	INT t8 = tman.addTexture("image/8.jpg");
-	INT t9 = tman.addTexture("image/9.jpg");
-	INT t10 = tman.addTexture("image/10.jpg");
-	INT t11 = tman.addTexture("image/11.jpg");
-
-	int count = 2;
-	int c = 30;
-	int i, j, k;
-	EFTYPE r = 10;
-	EFTYPE x_1, x_2, r_1, r_2, p_1 = PI / ((EFTYPE)c), p_2 = 2 * PI / ((EFTYPE)c);
-	//3ds file loader
 	CLoad3DS loader;
-	INT loadIndex;
+	INT loadIndex = 0;
+	while (!feof(fp)) {
+		fgets(buffer, MAX_STR, fp);
 
-	//////////////////////////
-	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1).scale(10, 10, 10).move(0, 100, -200).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
-	//////////////////////////
-	//////////////////////////
-	loadIndex = 0;
-	loader.Init("3ds/GeoSphere.3ds", loadIndex);
-	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
-		t3DObject & object = g_3DModel[0].pObject.at(i);
-		cur_op = &man.addReflectionObject(10).renderAABB().setVertexType(1);
-		for (int j = 0; j < object.numOfVerts; j++) {
-			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
-		}
-		INT anti_n = 1;
-		for (int j = 0; j < object.numOfFaces; j++) {
-			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1], anti_n);
-			//anti_n = -anti_n;
-		}
-		cur_op->move(100, 0, 0).rotate(-90, -180, 0).setNormalType(1).setColor(RED);
-		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
-			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
-			//cur_op->setColor(RED);
-		}
-		cur_op->setTexture(tman, t10, 2);
-	}
-	//////////////////////////
-	//////////////////////////
-	Group3D& gp = man.addGroup();
-	for (int i = 0; i < 5; i++) {
-		for (int j = 0; j < 5; j++) {
-			man.startGroup(gp.uniqueID).addReflectionObject(1).renderAABB().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
-				.rotate(0, 0, 180).scale(5, 5, 5).move(250 - 100 * j, -40, 250 - 100 * i).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t0);
-		}
-	}
-	man.endGroup();
-	//////////////////////////
-#if 0
-	//////////////////////////
-	c = 10;
-	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
-	count = 1;
-	for (k = 0; k < count; k++) {
-		//EFTYPE x = rand() % 300;
-		//EFTYPE z = rand() % 300;
-		//EFTYPE y = rand() % 100;
-		EFTYPE x = -60, y = 20, z = 30;
-		Group3D& gp = man.addGroup();
-		for (i = 0; i < c; i++) {
-			x_1 = r * cos(i * p_1);
-			r_1 = r * sin(i * p_1);
-			x_2 = r * cos((i + 1) * p_1);
-			r_2 = r * sin((i + 1) * p_1);
-			Object3D& obj = man.startGroup(gp.uniqueID).addObject(1).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
-			for (j = 1; j < c; j++) {
-				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
-					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
+		paramCount = parseParameter(buffer, command, parameters);
+
+		if (!strcmp(command, "camera"))
+		{
+			if (paramCount > 0) {
+				Camera3D * cam = NULL;
+				while (!feof(fp)) {
+					fgets(buffer, MAX_STR, fp);
+
+					attrCount = parseParameter(buffer, command, attrs);
+
+					if (!cam) {
+						if (!strcmp(parameters[0], "shadow")) {
+							cam = &man.addShadowCamera();
+						}
+						else if (!strcmp(parameters[0], "reflection")) {
+							cam = &man.addReflectionCamera();
+						}
+					}
+					if (!strcmp(command, "camera")) {
+						break;
+					}
+					else if (!strcmp(command, "param")) {
+						EFTYPE param[6];
+						for (int i = 0; i < 6; i++) {
+							if (i < attrCount) {
+								param[i] = atof(attrs[i]);
+							}
+							else {
+								param[i] = 0;
+							}
+						}
+						if (!cam) {
+							cam = &man.addCamera(param[0], param[1], param[2], param[3], param[4], param[5]);
+						}
+					}
+					else if (!strcmp(command, "move")) {
+						EFTYPE param[3];
+						for (int i = 0; i < 3; i++) {
+							if (i < attrCount) {
+								param[i] = atof(attrs[i]);
+							}
+							else {
+								param[i] = 0;
+							}
+						}
+						if (cam) {
+							cam->move(param[0], param[1], param[2]);
+						}
+					}
+				}
 			}
-			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(2, 2, 2).move(x, y, z).rotate(0, 0, 0)
-				.setColor(GREEN).setLineColor(RED);// .setTexture(tman, t6, 3);
+		}
+		else if (!strcmp(command, "light"))
+		{
+			if (paramCount > 0) {
+				Light3D * lgt = NULL;
+				while (!feof(fp)) {
 
-			cur_op = &obj;
-		}
-		man.endGroup();
-	}
-	//////////////////////////
-	//////////////////////////
-	loadIndex = 0;
-	loader.Init("3ds/GeoSphere.3ds", loadIndex);
-	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
-		t3DObject & object = g_3DModel[0].pObject.at(i);
-		cur_op = &man.addReflectionObject(10).setVertexType(1);
-		for (int j = 0; j < object.numOfVerts; j++) {
-			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
-		}
-		INT anti_n = 1;
-		for (int j = 0; j < object.numOfFaces; j++) {
-			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1], anti_n);
-			//anti_n = -anti_n;
-		}
-		cur_op->move(0, 0, 0).rotate(-90, -180, 0).setNormalType(1).setColor(RED);
-		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
-			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
-			//cur_op->setColor(RED);
-		}
-		cur_op->setTexture(tman, t10, 2);
-	}
-	//////////////////////////
+					fgets(buffer, MAX_STR, fp);
 
-	//////////////////////////
-	// generate teapot
-	{
-		Object3D& obj = man.addReflectionObject(0.05).renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
-		int normal = -1;
-		int vertex_count = 0;
-		int triangle_count = 0;
-		for (int i = 0; i <= g_teapotPositionNum - 3; i += 3) {
-			vertex_count++;
-			obj.addIndice(g_teapotPositions[i], g_teapotPositions[i + 1], g_teapotPositions[i + 2]
-				,g_teapotNormals[i], g_teapotNormals[i + 1], g_teapotNormals[i + 2]);
-		}
-		for (int i = 0; i <= g_teapotIndicesNum - 3; i += 3) {
-			triangle_count++;
-			obj.setIndice(g_teapotIndices[i], g_teapotIndices[i + 1], g_teapotIndices[i + 2]);
-		}
-		obj.move(-100, -30, 20).rotate(-90, 30, 0).setTexture(tman, t9, 3).setNormalType(1).setUV(0, -300);// .setTexture(tman, t7, 1);
-		cur_op = &obj;
-	}
-	//////////////////////////
-	//////////////////////////
-	loadIndex = 0;
-	loader.Init("3ds/bone_blade/bone_blade.3ds", loadIndex);
-	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
-		t3DObject & object = g_3DModel[0].pObject.at(i);
-		cur_op = &man.addObject(10).setVertexType(1);
-		for (int j = 0; j < object.numOfVerts; j++) {
-			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
-		}
-		for (int j = 0; j < object.numOfFaces; j++) {
-			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1]);
-		}
-		cur_op->move(0, 0, 0).scale(100, 100, 100).setColor(RED);
-		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
-			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
-		}
-	}
-	//////////////////////////
-	//////////////////////////
-	loadIndex = 0;
-	loader.Init("3ds/306016.3ds", loadIndex);
-	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
-		t3DObject & object = g_3DModel[0].pObject.at(i);
-		cur_op = &man.addObject(10).setVertexType(1);
-		for (int j = 0; j < object.numOfVerts; j++) {
-			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
-		}
-		INT anti_n = 1;
-		for (int j = 0; j < object.numOfFaces; j++) {
-			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1], anti_n);
-			//anti_n = -anti_n;
-		}
-		cur_op->move(-400, 0, -1000).rotate(-90, -180, 0).setNormalType(1).setColor(RED);
-		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
-			//cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
-			cur_op->setColor(RED);
-		}
-	}
-	//////////////////////////
-	//////////////////////////
-	loadIndex = 0;
-	loader.Init("3ds/venus.3ds", loadIndex);
-	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
-		t3DObject & object = g_3DModel[0].pObject.at(i);
-		cur_op = &man.addObject(10).setVertexType(1);
-		for (int j = 0; j < object.numOfVerts; j++) {
-			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
-		}
-		INT anti_n = 1;
-		for (int j = 0; j < object.numOfFaces; j++) {
-			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1], anti_n);
-			//anti_n = -anti_n;
-		}
-		cur_op->move(0, 0, 0).scale(0.05, 0.05, 0.05).rotate(90, 0, 180).setNormalType(1).setColor(RED);
-		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
-			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
-			//cur_op->setColor(RED);
-		}
-	}
-	//////////////////////////
-	//////////////////////////
-	// generate teapot
-	{
-		Object3D& obj = man.addObject(5).renderAABB().setColor(RED).setLineColor(RED).setVertexType(1);
-		int normal = -1;
-		int vertex_count = 0;
-		int triangle_count = 0;
-		for (int i = 0; i <= g_teapotPositionNum - 3; i += 3) {
-			vertex_count++;
-			obj.addIndice(g_teapotPositions[i], g_teapotPositions[i + 1], g_teapotPositions[i + 2]
-				, g_teapotNormals[i], g_teapotNormals[i + 1], g_teapotNormals[i + 2]);
-		}
-		for (int i = 0; i <= g_teapotIndicesNum - 3; i += 3) {
-			triangle_count++;
-			obj.setIndice(g_teapotIndices[i], g_teapotIndices[i + 1], g_teapotIndices[i + 2]);
-		}
-		obj.move(50, -30, 20).rotate(-90, 30, 0).setNormalType(1).setTexture(tman, t9, 2).setUV(0, -300);// .setTexture(tman, t7, 1);
-		cur_op = &obj;
-	}
-	//////////////////////////
-	//////////////////////////
-	loadIndex = 0;
-	loader.Init("3ds/MonkeyWorld.3ds", loadIndex);
-	for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
-		t3DObject & object = g_3DModel[0].pObject.at(i);
-		cur_op = &man.addReflectionObject(10).setVertexType(1);
-		for (int j = 0; j < object.numOfVerts; j++) {
-			cur_op->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
-		}
-		INT anti_n = 1;
-		for (int j = 0; j < object.numOfFaces; j++) {
-			cur_op->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1], anti_n);
-			//anti_n = -anti_n;
-		}
-		cur_op->move(0, 50, 100).scale(5, 5, 5).rotate(-90, 0, 0).setNormalType(1).setColor(RED);
-		if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
-			cur_op->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
-		}
-	}
-	//////////////////////////
-	////////////////////////////
-	//cur_op = &man.addObject(-1).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
-	//	.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
-	//	.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
-	//	.scale(30, 30, 30).move(15, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t11, 4).setBackfaceCulling(1);
-	////////////////////////////
+					attrCount = parseParameter(buffer, command, attrs);
 
-	//////////////////////////
-	cur_op = &man.addObject().addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
-		.scale(10, 10, 10).move(0, 100, -200).setColor(GREEN).setTexture(tman, t1).setUV(30, 30);
-	//////////////////////////
-	//////////////////////////
-	c = 10;
-	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
-	count = 1;
-	for (k = 0; k < count; k++) {
-		//EFTYPE x = rand() % 300;
-		//EFTYPE z = rand() % 300;
-		//EFTYPE y = rand() % 100;
-		EFTYPE x = 20, y = 0, z = -10;
-		Group3D& gp = man.addGroup();
-		for (i = 0; i < c; i++) {
-			x_1 = r * cos(i * p_1);
-			r_1 = r * sin(i * p_1);
-			x_2 = r * cos((i + 1) * p_1);
-			r_2 = r * sin((i + 1) * p_1);
-			Object3D& obj = man.startGroup(gp.uniqueID).addReflectionObject(0.05).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
-			for (j = 1; j < c; j++) {
-				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
-					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
+					if (!strcmp(command, "light")) {
+						break;
+					}
+					else if (!strcmp(command, "param")) {
+						EFTYPE param[3];
+						for (int i = 0; i < 3; i++) {
+							if (i < attrCount) {
+								param[i] = atof(attrs[i]);
+							}
+							else {
+								param[i] = 0;
+							}
+						}
+						if (!lgt) {
+							lgt = &man.addLight(param[0], param[1], param[2]);
+						}
+					}
+					else if (!strcmp(command, "move")) {
+						EFTYPE param[3];
+						for (int i = 0; i < 3; i++) {
+							if (i < attrCount) {
+								param[i] = atof(attrs[i]);
+							}
+							else {
+								param[i] = 0;
+							}
+						}
+						if (lgt) {
+							lgt->move(param[0], param[1], param[2]);
+						}
+					}
+				}
 			}
-			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(2, 2, 2).move(x, y, z).rotate(0, 0, 0)
-				.setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 3);
-
-			cur_op = &obj;
 		}
-		man.endGroup();
-	}
-	//////////////////////////
-	//////////////////////////
-	c = 10;
-	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
-	count = 1;
-	for (k = 0; k < count; k++) {
-		//EFTYPE x = rand() % 300;
-		//EFTYPE z = rand() % 300;
-		//EFTYPE y = rand() % 100;
-		EFTYPE x = -20, y = 0, z = 30;
-		Group3D& gp = man.addGroup();
-		for (i = 0; i < c; i++) {
-			x_1 = r * cos(i * p_1);
-			r_1 = r * sin(i * p_1);
-			x_2 = r * cos((i + 1) * p_1);
-			r_2 = r * sin((i + 1) * p_1);
-			Object3D& obj = man.startGroup(gp.uniqueID).addTransparentObject(5).renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
-			for (j = 1; j < c; j++) {
-				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
-					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
+		else if (!strcmp(command, "texture"))
+		{
+			if (paramCount > 0) {
+				INT textureID = 0;
+				while (!feof(fp)) {
+
+					fgets(buffer, MAX_STR, fp);
+
+					attrCount = parseParameter(buffer, command, attrs);
+
+					if (!strcmp(command, "texture")) {
+						break;
+					}
+					else if (!strcmp(command, "param")) {
+						EFTYPE param[3];
+						for (int i = 0; i < 3; i++) {
+							if (i < attrCount) {
+								param[i] = atof(attrs[i]);
+							}
+							else {
+								param[i] = 0;
+							}
+						}
+						if (!textureID) {
+							textureID = tman.addTexture(param[0], param[1], param[2]);
+						}
+					}
+					else if (!strcmp(command, "url")) {
+						if (!textureID) {
+							textureID = tman.addTexture(attrs[0]);
+						}
+					}
+				}
 			}
-			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(2, 2, 2).move(x, y, z).rotate(0, 0, 0)
-				.setColor(GREEN).setLineColor(RED).setTexture(tman, t6, 3);
-
-			cur_op = &obj;
 		}
-		man.endGroup();
-	}
-	//////////////////////////
-	//////////////////////////
-	cur_op = &man.addObject().addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
-		.scale(10, 10, 10).rotate(-90, -90, -90).move(-50, -80, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t0);
-	//////////////////////////
+		else if (!strcmp(command, "object"))
+		{
+			if (paramCount > 1) {
+				INT vertextType = 0;
+				INT isUV = 0;
+				EFTYPE uv[2];
+				INT isMove = 0;
+				EFTYPE move[3];
+				INT isRotate = 0;
+				EFTYPE rotate[3];
+				INT isScale = 0;
+				EFTYPE scale[3];
+				INT normalType = 0;
+				ECOLOR color = BLACK;
+				ECOLOR lineColor = BLACK;
+				INT textureID = 0;
+				INT textureType = 0;
 
-	//////////////////////////
-	cur_op = &man.addReflectionObject(0.05).addVert(-10, -10, 10).addVert(10, -10, 10).addVert(-10, 10, 10).addVert(10, 10, 10, -1)
-		.addVert(10, 10, -10).addVert(10, -10, 10, -1).addVert(10, -10, -10).addVert(-10, -10, 10, -1).addVert(-10, -10, -10)
-		.addVert(-10, 10, 10, -1).addVert(-10, 10, -10).addVert(10, 10, -10, -1).addVert(-10, -10, -10).addVert(10, -10, -10, -1)
-		.scale(2, 2, 2).move(20, 0, -50).setColor(RED).setLineColor(BLUE).setTexture(tman, t3);
-	//////////////////////////
+				INT isMaxx = 0;
+				INT maxx[3];
+				INT isMovex = 0;
+				EFTYPE movex[3];
+
+				INT	round = 0;
+				INT count = 0;
+				EFTYPE diameter = 0;
+				INT backfaceculling = 0;
+				INT revert = 0;
+
+				Vert3D verts[MAX_VERTS];
+				INT vertsIndex = 0;
+
+				CHAR url[MAX_STR];
+
+				while (!feof(fp)) {
+
+					fgets(buffer, MAX_STR, fp);
+
+					attrCount = parseParameter(buffer, command, attrs);
+
+					if (!strcmp(command, "object")) {
+						Object3D * objs[MAX_OBJS];
+						Object3D * obj = NULL;
+						INT index = 0;
+
+						INT type = 0;
+						EFTYPE parameter = 0;
+						if (!strcmp(parameters[1], "normal")) {
+							type = 1;
+							parameter = 1;
+							if (paramCount > 2) {
+								parameter = atoi(parameters[2]);
+							}
+						}
+						else if (!strcmp(parameters[1], "reflection")) {
+							type = 2;
+							if (paramCount > 2) {
+								parameter = atof(parameters[2]);
+							}
+						}
+						else if (!strcmp(parameters[1], "transparent")) {
+							type = 3;
+							if (paramCount > 2) {
+								parameter = atof(parameters[2]);
+							}
+						}
+						if (!strcmp(parameters[0], "normal")) {
+							if (type == 2) {
+								obj = &man.addReflectionObject(parameter);
+							}
+							else if (type == 3) {
+								obj = &man.addTransparentObject(parameter);
+							} else {
+								obj = &man.addObject((INT)parameter);
+							}
+
+							for (int i = 0; i < vertsIndex; i++) {
+								obj->addVert(verts[i].x, verts[i].y, verts[i].z, verts[i].anti);
+							}
+
+							objs[index++] = obj;
+							if (index > MAX_OBJS) {
+								index = MAX_OBJS - 1;
+							}
+						}
+						if (!strcmp(parameters[0], "3ds")) {
+							loader.Init(url, loadIndex);
+
+							for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
+								t3DObject & object = g_3DModel[0].pObject.at(i);
+
+								if (type == 2) {
+									obj = &man.addReflectionObject(parameter);
+								}
+								else if (type == 3) {
+									obj = &man.addTransparentObject(parameter);
+								}
+								else {
+									obj = &man.addObject((INT)parameter);
+								}
+
+								if (vertextType) {
+									obj->setVertexType(vertextType);
+								}
+
+								for (int j = 0; j < object.numOfVerts; j++) {
+									obj->addIndice(object.pVerts[j].x, object.pVerts[j].z, object.pVerts[j].y, object.pNormals[j].x, object.pNormals[j].z, object.pNormals[j].y);
+								}
+								INT anti_n = 1;
+								for (int j = 0; j < object.numOfFaces; j++) {
+									obj->setIndice(object.pFaces[j].vertIndex[0], object.pFaces[j].vertIndex[2], object.pFaces[j].vertIndex[1], anti_n);
+									if (revert) {
+										anti_n = -anti_n;
+									}
+								}
+
+								if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
+									obj->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
+								}
+
+								objs[index++] = obj;
+								if (index > MAX_OBJS) {
+									index = MAX_OBJS - 1;
+								}
+							}
+						}
+						else if (!strcmp(parameters[0], "group")) {
+
+							if (isMaxx) {
+
+								Group3D& gp = man.addGroup();
+
+								for (int i = 0; i < maxx[0]; i++) {
+									for (int j = 0; j < maxx[1]; j++) {
+
+										if (type == 2) {
+											obj = &man.addReflectionObject(parameter);
+										}
+										else if (type == 3) {
+											obj = &man.addTransparentObject(parameter);
+										}
+										else {
+											obj = &man.addObject((INT)parameter);
+										}
 
 
-	//////////////////////////
-	man.addReflectionObject(0.05).addVert(-10, 0, -10).addVert(10, 0, -10).addVert(-10, 0, 10).addVert(10, 0, 10, -1)
-		.scale(10, 10, 10).rotate(90, 90, 0).move(200, -20, 0).setColor(LIGHTGRAY).setLineColor(RED).setTexture(tman, t1);
-	//////////////////////////
-	//////////////////////////
-	//sphere world map
-	c = 10;
-	p_1 = PI / ((EFTYPE)c); p_2 = 2 * PI / ((EFTYPE)c);
-	count = 1;
-	for (k = 0; k < count; k++) {
-		EFTYPE x = rand() % 300 - 300;
-		EFTYPE z = rand() % 300 - 150;
-		EFTYPE y = rand() % 100;
-		Group3D& gp = man.addGroup();
-		for (i = 0; i < c; i++) {
-			x_1 = r * cos(i * p_1);
-			r_1 = r * sin(i * p_1);
-			x_2 = r * cos((i + 1) * p_1);
-			r_2 = r * sin((i + 1) * p_1);
-			Object3D& obj = man.startGroup(gp.uniqueID).addObject().renderAABB().addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
-			for (j = 1; j < c; j++) {
-				obj.addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
-					.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
+										for (int i = 0; i < vertsIndex; i++) {
+											obj->addVert(verts[i].x, verts[i].y, verts[i].z, verts[i].anti);
+										}
+
+
+										if (isMovex) {
+											if (isMovex == 1) {
+												obj->move(0, movex[0] * i, movex[2] * j);
+											}
+											else if (isMovex == 2) {
+												obj->move(movex[0] * i, 0, movex[2] * j);
+											}
+											else if (isMovex == 3) {
+												obj->move(movex[0] * i, movex[1] * j, 0);
+											}
+										}
+
+										objs[index++] = obj;
+										if (index > MAX_OBJS) {
+											index = MAX_OBJS - 1;
+										}
+									}
+								}
+								man.endGroup();
+							}
+						}
+						else if (!strcmp(parameters[0], "sphere")) {
+
+							if (count && round) {
+								EFTYPE x_1, r_1, x_2, r_2;
+								EFTYPE r = diameter;
+								EFTYPE p_1 = PI / ((EFTYPE)round);
+								EFTYPE p_2 = 2 * PI / ((EFTYPE)round);
+								for (int k = 0; k < count; k++) {
+									Group3D& gp = man.addGroup();
+									for (int i = 0; i < round; i++) {
+										x_1 = r * cos(i * p_1);
+										r_1 = r * sin(i * p_1);
+										x_2 = r * cos((i + 1) * p_1);
+										r_2 = r * sin((i + 1) * p_1);
+
+										if (type == 2) {
+											obj = &man.addReflectionObject(parameter);
+										}
+										else if (type == 3) {
+											obj = &man.addTransparentObject(parameter);
+										}
+										else {
+											obj = &man.addObject((INT)parameter);
+										}
+
+										obj->addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2);
+										for (int j = 1; j < round; j++) {
+											obj->addVert(x_1, r_1 * sin(j * p_2), -r_1 * cos(j * p_2))
+												.addVert(x_2, r_2 * sin(j * p_2), -r_2 * cos(j * p_2), -1);
+										}
+										obj->addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0);
+
+										objs[index++] = obj;
+										if (index > MAX_OBJS) {
+											index = MAX_OBJS - 1;
+										}
+									}
+								}
+								man.endGroup();
+							}
+						}
+						else if (!strcmp(parameters[0], "file")) {
+
+							FILE * _fp = NULL;
+							fopen_s(&_fp, url, "r");
+							if (_fp) {
+
+								static CHAR largeBuffer[102400];
+								static CHAR largeParameters[4][5000][100];
+								INT teapotPositions = 0;
+								INT teapotNormals = 0;
+								INT teapotIndices = 0;
+								INT teapotPositionsNum = 0;
+								INT teapotNormalsNum = 0;
+								INT teapotIndicesNum = 0;
+								INT curIndex = 0;
+								while (!feof(_fp)) {
+									fgets(largeBuffer, 102400, _fp);
+
+									if (curIndex > 3) {
+										curIndex = 3;
+									}
+
+									attrCount = parseParameter(largeBuffer, command, largeParameters[curIndex], 5000);
+
+									if (!strcmp(command, "teapotPositions")) {
+										teapotPositions = curIndex;
+										teapotPositionsNum = attrCount;
+										curIndex++;
+									}
+									else if (!strcmp(command, "teapotNormals")) {
+										teapotNormals = curIndex;
+										teapotNormalsNum = attrCount;
+										curIndex++;
+									}
+									else if (!strcmp(command, "teapotIndices")) {
+										teapotIndices = curIndex;
+										teapotIndicesNum = attrCount;
+										curIndex++;
+									}
+								}
+								fclose(_fp);
+
+								if (type == 2) {
+									obj = &man.addReflectionObject(parameter);
+								}
+								else if (type == 3) {
+									obj = &man.addTransparentObject(parameter);
+								}
+								else {
+									obj = &man.addObject((INT)parameter);
+								}
+
+								if (vertextType) {
+									obj->setVertexType(vertextType);
+								}
+
+								int normal = -1;
+								int vertex_count = 0;
+								int triangle_count = 0;
+								for (int i = 0; i <= teapotPositionsNum - 3; i += 3) {
+									vertex_count++;
+									obj->addIndice(atof(largeParameters[teapotPositions][i]), atof(largeParameters[teapotPositions][i + 1]), atof(largeParameters[teapotPositions][i + 2])
+										, atof(largeParameters[teapotNormals][i]), atof(largeParameters[teapotNormals][i + 1]), atof(largeParameters[teapotNormals][i + 2]));
+								}
+								for (int i = 0; i <= teapotIndicesNum - 3; i += 3) {
+									triangle_count++;
+									obj->setIndice(atof(largeParameters[teapotIndices][i]), atof(largeParameters[teapotIndices][i + 1]), atof(largeParameters[teapotIndices][i + 2]));
+								}
+
+								objs[index++] = obj;
+								if (index > MAX_OBJS) {
+									index = MAX_OBJS - 1;
+								}
+							}
+						}
+
+						for (int i = 0; i < index; i++) {
+							obj = objs[i];
+							if (!obj) {
+								break;
+							}
+
+							if (isMove) {
+								obj->move(move[0], move[1], move[2]);
+							}
+							if (isRotate) {
+								obj->rotate(rotate[0], rotate[1], rotate[2]);
+							}
+							if (isScale) {
+								obj->scale(scale[0], scale[1], scale[2]);
+							}
+							if (normalType) {
+								obj->setNormalType(normalType);
+							}
+							if (color) {
+								obj->setColor(color);
+							}
+							if (textureID) {
+								obj->setTexture(tman, textureID, textureType);
+							}
+							if (isUV) {
+								obj->setUV(uv[0], uv[1]);
+							}
+							if (backfaceculling) {
+								obj->setBackfaceCulling(backfaceculling);
+							}
+							cur_op = obj;
+						}
+						break;
+					}
+					else if (!strcmp(command, "verts")) {
+						EFTYPE param[3];
+						int anti = 1;
+						for (int i = 0; i < 3; i++) {
+							if (i < attrCount) {
+								param[i] = atof(attrs[i]);
+							}
+							else {
+								param[i] = 0;
+							}
+						}
+						if (attrCount >= 4) {
+							anti = atoi(attrs[3]);
+						}
+						verts[vertsIndex].set(param[0], param[1], param[2]);
+						verts[vertsIndex].anti = anti;
+						vertsIndex++;
+						if (vertsIndex > MAX_VERTS) {
+							vertsIndex = MAX_VERTS - 1;
+						}
+					}
+					else if (!strcmp(command, "rotate")) {
+						for (int i = 0; i < 3; i++) {
+							if (i < attrCount) {
+								rotate[i] = atof(attrs[i]);
+								isRotate++;
+							}
+							else {
+								rotate[i] = 0;
+							}
+						}
+					}
+					else if (!strcmp(command, "scale")) {
+						for (int i = 0; i < 3; i++) {
+							if (i < attrCount) {
+								scale[i] = atof(attrs[i]);
+								isScale++;
+							}
+							else {
+								scale[i] = 0;
+							}
+						}
+					}
+					else if (!strcmp(command, "move")) {
+						for (int i = 0; i < 3; i++) {
+							if (i < attrCount) {
+								move[i] = atof(attrs[i]);
+								isMove++;
+							}
+							else {
+								move[i] = 0;
+							}
+						}
+					}
+					else if (!strcmp(command, "uv")) {
+						for (int i = 0; i < 2; i++) {
+							if (i < attrCount) {
+								uv[i] = atof(attrs[i]);
+								isUV++;
+							}
+							else {
+								uv[i] = 0;
+							}
+						}
+					}
+					else if (!strcmp(command, "texture")) {
+						if (attrCount > 0) {
+							textureID = atoi(attrs[0]);
+							if (attrCount > 1) {
+								textureType = atoi(attrs[1]);
+							}
+						}
+					}
+					else if (!strcmp(command, "color")) {
+						if (attrCount > 0) {
+							color = EP_ColorConvert(attrs[0]);
+						}
+					}
+					else if (!strcmp(command, "line_color")) {
+						if (attrCount > 0) {
+							lineColor = EP_ColorConvert(attrs[0]);
+						}
+					}
+					else if (!strcmp(command, "url")) {
+						if (attrCount > 0) {
+							memcpy(url, attrs[0], MAX_STR);
+						}
+					}
+					else if (!strcmp(command, "vertext_type")) {
+						if (attrCount > 0) {
+							vertextType = atoi(attrs[0]);
+						}
+					}
+					else if (!strcmp(command, "normal_type")) {
+						if (attrCount > 0) {
+							normalType = atoi(attrs[0]);
+						}
+					}
+					else if (!strcmp(command, "maxx")) {
+						for (int i = 0; i < 3; i++) {
+							if (i < attrCount) {
+								maxx[i] = atoi(attrs[i]);
+								isMaxx++;
+							}
+							else {
+								maxx[i] = 0;
+							}
+						}
+					}
+					else if (!strcmp(command, "movex")) {
+						for (int i = 0; i < 3; i++) {
+							if (i < attrCount) {
+								movex[i] = atoi(attrs[i]);
+								if (EP_ISZERO(movex[i])) {
+									isMovex = i + 1;
+								}
+							}
+							else {
+								movex[i] = 0;
+							}
+						}
+					}
+					else if (!strcmp(command, "round")) {
+						if (attrCount > 0) {
+							round = atoi(attrs[0]);
+						}
+					}
+					else if (!strcmp(command, "count")) {
+						if (attrCount > 0) {
+							count = atoi(attrs[0]);
+						}
+					}
+					else if (!strcmp(command, "diameter")) {
+						if (attrCount > 0) {
+							diameter = atof(attrs[0]);
+						}
+					}
+					else if (!strcmp(command, "revert")) {
+						if (attrCount > 0) {
+							revert = atof(attrs[0]);
+						}
+					}
+					else if (!strcmp(command, "backfaceculling")) {
+						if (attrCount > 0) {
+							backfaceculling = atof(attrs[0]);
+						}
+					}
+				}
 			}
-			obj.addVert(x_1, 0, -r_1).addVert(x_2, 0, -r_2, -1).setCenter(0, 0, 0).scale(10, 10, 10).move(x, y, z).rotate(0, 0, 0)
-				.setColor(GREEN).setLineColor(RED).setTexture(tman, t10, 3);
-			cur_op = &obj;
 		}
-		man.endGroup();
 	}
-	//////////////////////////
-#endif
+	fclose(fp);
+
 	//do this after all done
 	man.createOctTree();
 }
@@ -893,6 +1247,9 @@ VOID onKeyDown(WPARAM wParam)
 		break;
 	case '4':
 		cur_op->texture_type = 4;
+		break;
+	case '5':
+		draw_oct = -draw_oct;
 		break;
 	case 'B':
 		DEBUG_MODE = DEBUG_MODE >> 1;
