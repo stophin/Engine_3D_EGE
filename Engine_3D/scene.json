@@ -141,8 +141,6 @@ object
 
 #object Concave box
 object	normal	normal	-1
-	verts	-10	-10	10
-	verts	10	-10	10
 	verts	-10	10	10
 	verts	10	10	10	-1
 	verts	10	10	-10

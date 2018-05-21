@@ -294,7 +294,7 @@ public:
 			n.set(n0) * n1;
 			//back face culling
 			EFTYPE cross = vd  & n;
-			if (cross < 0) {
+			if (cross * _obj->anti < 0) {
 				continue;
 			}
 			EFTYPE trans = Vert3D::GetLineIntersectPointWithTriangle(v0, v1, v2, vo, vd, 10000, p);
