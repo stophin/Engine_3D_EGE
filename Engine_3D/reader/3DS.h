@@ -81,6 +81,9 @@ struct tChunk        //保存块信息的结构
 class CLoad3DS// CLoad3DS类处理所有的装入代码
 {
 public:
+	UINT m_Texture[MAX_TEXTURES];
+	t3DModel m_3DModel;
+
 	CLoad3DS();                                                                // 初始化数据成员
 	virtual ~CLoad3DS();
 	void show3ds(int j0, float tx, float ty, float tz, float size);//显示3ds模型

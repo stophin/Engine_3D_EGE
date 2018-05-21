@@ -74,7 +74,7 @@ public:
 			r * (2 * _f) + n1;
 			__f = (r.negative() & n0);
 			__f *= __f;
-			//__f = pow(__f, (FLOAT)5);
+			__f = pow(__f, (FLOAT)5);
 		}
 		//if (_f < 0) _f = -_f;
 		f += _f + __f;

@@ -1,38 +1,52 @@
 
 #include "3DS.H"
 
-UINT g_Texture[10][MAX_TEXTURES] = { 0 };
-t3DModel g_3DModel[10];
-
 //int   g_ViewMode = GL_TRIANGLES;
 bool  g_bLighting = true;
 
 CLoad3DS::CLoad3DS()//  构造函数的功能是初始化tChunk数据
 {
+	for (int i = 0; i < MAX_TEXTURES; i++) {
+		m_Texture[i] = 0;
+	}
 	m_CurrentChunk = new tChunk;        // 初始化并为当前的块分配空间
 	m_TempChunk = new tChunk;                // 初始化一个临时块并分配空间
 }
 CLoad3DS::~CLoad3DS()
 {
 	CleanUp();// 释放内存空间
-	for (int j = 0; j <10; j++)
-	for (int i = 0; i < g_3DModel[j].numOfObjects; i++)
-	{
-		delete[] g_3DModel[j].pObject[i].pFaces;// 删除所有的变量
-		delete[] g_3DModel[j].pObject[i].pNormals;
-		delete[] g_3DModel[j].pObject[i].pVerts;
-		delete[] g_3DModel[j].pObject[i].pTexVerts;
+	if (m_CurrentChunk) {
+		delete m_CurrentChunk;
+	}
+	if (m_TempChunk) {
+		delete m_TempChunk;
+	}
+	for (int i = 0; i < m_3DModel.numOfObjects; i++) {
+		t3DObject & object = m_3DModel.pObject.at(i);
+
+		if (object.pFaces) {
+			delete[] object.pFaces;
+		}
+		if (object.pTexVerts) {
+			delete[] object.pTexVerts;
+		}
+		if (object.pVerts) {
+			delete[] object.pVerts;
+		}
+		if (object.pNormals) {
+			delete[] object.pNormals;
+		}
 	}
 }
 ////////////////////////////////////////////////////////////////////////
 void CLoad3DS::Init(char *filename, int j)//
 {
-	Import3DS(&g_3DModel[j], filename);                        // 将3ds文件装入到模型结构体中
-	for (int i = 0; i<g_3DModel[j].numOfMaterials; i++)
+	Import3DS(&m_3DModel, filename);                        // 将3ds文件装入到模型结构体中
+	for (int i = 0; i<m_3DModel.numOfMaterials; i++)
 	{
-		if (strlen(g_3DModel[j].pMaterials[i].strFile)>0)// 判断是否是一个文件名
-			CreateTexture(g_Texture[j], g_3DModel[j].pMaterials[i].strFile, i);//使用纹理文件名称来装入位图                        
-		g_3DModel[j].pMaterials[i].texureId = i;// 设置材质的纹理ID
+		if (strlen(m_3DModel.pMaterials[i].strFile)>0)// 判断是否是一个文件名
+			CreateTexture(m_Texture, m_3DModel.pMaterials[i].strFile, i);//使用纹理文件名称来装入位图                        
+		m_3DModel.pMaterials[i].texureId = i;// 设置材质的纹理ID
 	}
 }
 //  从文件中创建纹理

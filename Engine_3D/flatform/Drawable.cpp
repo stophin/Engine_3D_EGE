@@ -232,8 +232,6 @@ VOID Initialize()
 	int attrCount = 0;
 	int paramCount = 0;
 
-	CLoad3DS loader;
-	INT loadIndex = 0;
 	while (!feof(fp)) {
 		fgets(buffer, MAX_STR, fp);
 
@@ -456,10 +454,12 @@ VOID Initialize()
 							}
 						}
 						if (!strcmp(parameters[0], "3ds")) {
+							CLoad3DS loader;
+							INT loadIndex = 0;
 							loader.Init(url, loadIndex);
 
-							for (int i = 0; i < g_3DModel[loadIndex].numOfObjects; i++) {
-								t3DObject & object = g_3DModel[0].pObject.at(i);
+							for (int i = 0; i < loader.m_3DModel.numOfObjects; i++) {
+								t3DObject & object = loader.m_3DModel.pObject.at(i);
 
 								if (type == 2) {
 									obj = &man.addReflectionObject(parameter);
@@ -486,8 +486,8 @@ VOID Initialize()
 									}
 								}
 
-								if (g_3DModel[loadIndex].pMaterials.size() > object.materialID) {
-									obj->setColor(g_3DModel[loadIndex].pMaterials[object.materialID].color);
+								if (loader.m_3DModel.pMaterials.size() > object.materialID) {
+									obj->setColor(loader.m_3DModel.pMaterials[object.materialID].color);
 								}
 
 								objs[index++] = obj;
