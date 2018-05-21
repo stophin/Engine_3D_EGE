@@ -52,12 +52,12 @@ texture
 
 #object back vertical wall
 object	normal	normal
+	id	11
 	verts	-10	-10	10
 	verts	10	-10	10
 	verts	-10	10	10
 	verts	10	10	10	-1
 	verts	10	10	10
-	verts	0	100	-200
 	scale	10	10	10
 	move	0	100	-200
 	color	GREEN
@@ -118,7 +118,7 @@ object file	reflection	10
 object
 
 #object box
-object normal normal	0.05
+object normal reflection	0.05
 	verts	-10	-10	10
 	verts	10	-10	10
 	verts	-10	10	10

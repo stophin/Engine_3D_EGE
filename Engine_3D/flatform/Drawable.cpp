@@ -397,6 +397,7 @@ VOID Initialize()
 				EFTYPE diameter = 0;
 				INT backfaceculling = 0;
 				INT revert = 0;
+				INT uniqueID = 0;
 
 				Vert3D verts[MAX_VERTS];
 				INT vertsIndex = 0;
@@ -688,6 +689,9 @@ VOID Initialize()
 							if (backfaceculling) {
 								obj->setBackfaceCulling(backfaceculling);
 							}
+							if (uniqueID){
+								((Obj3D *)obj)->uniqueID = uniqueID;
+							}
 							cur_op = obj;
 						}
 						break;
@@ -837,6 +841,11 @@ VOID Initialize()
 					else if (!strcmp(command, "backfaceculling")) {
 						if (attrCount > 0) {
 							backfaceculling = atof(attrs[0]);
+						}
+					}
+					else if (!strcmp(command, "id")) {
+						if (attrCount > 0) {
+							uniqueID = atof(attrs[0]);
 						}
 					}
 				}

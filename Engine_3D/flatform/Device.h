@@ -29,7 +29,6 @@ struct Device {
 
 	EPoint e, s, v, c;
 	Vert3D p;
-	ege_colpoint cps[3];
 	Vert3D n, n_1, n_2, n0, n1, n2, n3, r;
 	Vert3D _n0, _n1, _n2, _n3;
 	DWORD * _tango, *_image, *_trans, *_mirror;
