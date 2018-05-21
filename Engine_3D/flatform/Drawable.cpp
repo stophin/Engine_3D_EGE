@@ -12,7 +12,7 @@ INT isresize = -1;
 INT isrefresh = -1;
 INT width;
 INT height;
-INT draw_line = 1;
+INT draw_line = -1;
 INT draw_oct = -1;
 INT move_light = -1;
 INT move_trans = -1;
