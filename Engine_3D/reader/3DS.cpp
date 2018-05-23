@@ -170,7 +170,10 @@ void CLoad3DS::ReadNextChunk(t3DModel *pModel, tChunk *pPreChunk)
 {
 	t3DObject newObject = { 0 };                                        // 用来添加到对象链表
 	tMatInfo newTexture = { 0 };                                // 用来添加到材质链表
-	unsigned int version = 0;                                        // 保存文件版本
+	union {
+		unsigned int version = 0;                                        // 保存文件版本
+		unsigned int _version[5];
+	};
 	int buffer[50000] = { 0 };                                        // 用来跳过不需要的数据
 	m_CurrentChunk = new tChunk;                                // 为新的块分配空间                
 	//  下面每读一个新块，都要判断一下块的ID，如果该块是需要的读入的，则继续进行

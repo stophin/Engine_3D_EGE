@@ -488,6 +488,23 @@ VOID Initialize()
 
 								if (loader.m_3DModel.pMaterials.size() > object.materialID) {
 									obj->setColor(loader.m_3DModel.pMaterials[object.materialID].color);
+									if (object.bHasTexture) {
+										int start = 0;
+										for (int j = 0; url[j] != '\0'; j++) {
+											if (url[j] == '/') {
+												start = j;
+											}
+										}
+										url[start] = '/';
+										for (int j = 0; j + start + 1< 100; j++) {
+											url[j + start + 1] = loader.m_3DModel.pMaterials[object.materialID].strFile[j];
+											if (url[j + start + 1] == '\0') {
+												break;
+											}
+										}
+										int tID = tman.addTexture(url);
+										obj->setTexture(tman, tID, 3);
+									}
 								}
 
 								objs[index++] = obj;
