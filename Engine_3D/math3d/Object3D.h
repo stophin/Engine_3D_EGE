@@ -90,6 +90,27 @@ public:
 		return *this;
 	}
 
+	DWORD getTextureActual(EFTYPE x, EFTYPE y) {
+		if (NULL == texture) {
+			return this->color;
+		}
+		if (t_w == 0 || t_w == 0) {
+			return this->color;
+		}
+		INT _u = x, _v = y;
+		_u += this->u;// -t_w / 2.0;
+		_v += this->v;// -t_h / 2.0;
+		_u %= t_w;
+		_v %= t_h;
+		if (_u < 0) {
+			_u = t_w + _u;
+		}
+		if (_v < 0) {
+			_v = t_h + _v;
+		}
+		return texture[_u + _v * t_w];
+	}
+
 	DWORD getTexture(EFTYPE x, EFTYPE y) {
 		if (NULL == texture) {
 			return this->color;
@@ -294,26 +315,48 @@ public:
 			if (syz < 0) syz = -syz;
 			if (sxz < 0) sxz = -sxz;
 			EFTYPE dw = 1.0 / 4.0, dh = 1.0 / 3.0;
-			EFTYPE _dw = dw, _dh = dh;
+			EFTYPE _dw = dw * obj->t_w, _dh = dh * obj->t_h;
 			if (sxy > sxz) {
 				if (sxy > syz) {
 					if (_sxy < 0) {
 						//-z
-						*__image = obj->getTexture(n2.x * _dw + 0 * dw, n2.y * _dh + 1 * dh);
+						//*__image = obj->getTexture(n2.x * _dw + 0 * dw, n2.y * _dh + 1 * dh);
+						//updown  flip
+						//*__image = obj->getTexture(n2.x * _dw + 2 * dw, dh - (n2.y * _dh) + 1 * dh);
+						//updown flip and left right flip
+						//*__image = obj->getTexture(dw - (n2.x * _dw) + 2 * dw, dh - (n2.y * _dh) + 1 * dh);
+						*__image = obj->getTextureActual(_dw - (n2.x * _dw) + 2 * _dw, _dh - (n2.y * _dh) + 1 * _dh);
 					}
 					else {
 						//+z
-						*__image = obj->getTexture(n2.x * _dw + 2 * dw, n2.y * _dh + 1 * dh);
+						//*__image = obj->getTexture(n2.x * _dw + 2 * dw, n2.y * _dh + 1 * dh);
+						//+180 flip
+						//*__image = obj->getTexture(n2.x * _dw + 0 * dw, dh - ( n2.y * _dh) + 1 * dh);
+						*__image = obj->getTextureActual(n2.x * _dw + 0 * _dw, _dh - (n2.y * _dh) + 1 * _dh);
 					}
 				}
 				else {
 					if (_syz < 0) {
 						//-x
-						*__image = obj->getTexture(n2.y * _dw + 1 * dw, n2.z * _dh + 1 * dh);
+						//*__image = obj->getTexture(n2.y * _dw + 1 * dw, n2.z * _dh + 1 * dh);
+						//+90 rotate
+						//*__image = obj->getTexture(dw - (n2.z * _dh) + 1 * dw, n2.y * _dw + 1 * dh);
+						//-90 rotate and left right flip
+						//*__image = obj->getTexture(dw - (n2.z * _dh) + 1 * dw, dh - (n2.y * _dw) + 1 * dh);
+						//-90 rotate
+						//*__image = obj->getTexture(n2.z * _dh + 1 * dw, dh - (n2.y * _dw) + 1 * dh);
+						*__image = obj->getTextureActual(n2.z * _dh + 1 * _dw, _dh - (n2.y * _dw) + 1 * _dh);
 					}
 					else {
 						//+x
-						*__image = obj->getTexture(n2.y * _dw + 3 * dw, n2.z * _dh + 1 * dh);
+						//*__image = obj->getTexture(n2.y * _dw + 3 * dw, n2.z * _dh + 1 * dh);
+						//+90 rotate
+						//*__image = obj->getTexture(dw - (n2.z * _dh) + 3 * dw, n2.y * _dw + 1 * dh);
+						//-90 rotate
+						//*__image = obj->getTexture(n2.z * _dh + 3 * dw, dh - (n2.y * _dw) + 1 * dh);
+						//-90 rotate and left right flip
+						//*__image = obj->getTexture(dw - (n2.z * _dh) + 3 * dw, dh - (n2.y * _dw) + 1 * dh);
+						*__image = obj->getTextureActual(_dw - (n2.z * _dh) + 3 * _dw, _dh - (n2.y * _dw) + 1 * _dh);
 					}
 				}
 			}
@@ -321,21 +364,53 @@ public:
 				if (sxz > syz) {
 					if (_sxz < 0) {
 						//-y
-						*__image = obj->getTexture(n2.x * _dw + 2 * dw, n2.z * _dh + 0 * dh);
+						//*__image = obj->getTexture(n2.x * _dw + 2 * dw, n2.z * _dh + 0 * dh);
+						//+90 rotate
+						//*__image = obj->getTexture(dw - (n2.z * _dh) + 2 * dw, n2.x * _dw + 0 * dh);
+						//up down flip
+						//*__image = obj->getTexture(n2.x * _dw + 2 * dw, dh - (n2.z * _dh) + 0 * dh);
+						//up down flip and left right flip
+						//*__image = obj->getTexture(dw - (n2.x * _dw) + 2 * dw, dh - (n2.z * _dh) + 0 * dh);
+						//left right flip
+						//*__image = obj->getTexture(dw - (n2.x * _dw) + 2 * dw, n2.z * _dh + 0 * dh);
+						*__image = obj->getTextureActual(_dw - (n2.x * _dw) + 2 * _dw, n2.z * _dh + 0 * _dh);
 					}
 					else {
 						//+y
-						*__image = obj->getTexture(n2.x * _dw + 2 * dw, n2.z * _dh + 2 * dh);
+						//*__image = obj->getTexture(n2.x * _dw + 2 * dw, n2.z * _dh + 2 * dh);
+						//+90 rotate
+						//*__image = obj->getTexture(dw - (n2.z * _dh )+ 2 * dw, n2.x * _dw + 2 * dh);
+						//up down flip
+						//*__image = obj->getTexture(n2.x * _dw + 2 * dw, dh - (n2.z * _dh) + 2 * dh);
+						//up down flip and left right flip
+						//*__image = obj->getTexture(dw - (n2.x * _dw) + 2 * dw, dh - (n2.z * _dh) + 2 * dh);
+						//up down flip and left right flip
+						//*__image = obj->getTexture(dw - (n2.x * _dw) + 2 * dw, n2.z * _dh + 2 * dh);
+						*__image = obj->getTextureActual(_dw - (n2.x * _dw) + 2 * _dw, n2.z * _dh + 2 * _dh);
 					}
 				}
 				else {
 					if (_syz < 0) {
 						//-x
-						*__image = obj->getTexture(n2.y * _dw + 1 * dw, n2.z * _dh + 1 * dh);
+						//*__image = obj->getTexture(n2.y * _dw + 1 * dw, n2.z * _dh + 1 * dh);
+						//+90 rotate
+						//*__image = obj->getTexture(dw - (n2.z * _dh) + 1 * dw, n2.y * _dw + 1 * dh);
+						//-90 rotate and left right flip
+						//*__image = obj->getTexture(dw - (n2.z * _dh) + 1 * dw, dh - (n2.y * _dw) + 1 * dh);
+						//-90 rotate
+						//*__image = obj->getTexture(n2.z * _dh + 1 * dw, dh - (n2.y * _dw) + 1 * dh);
+						*__image = obj->getTextureActual(n2.z * _dh + 1 * _dw, _dh - (n2.y * _dw) + 1 * _dh);
 					}
 					else {
 						//+x
-						*__image = obj->getTexture(n2.y * _dw + 3 * dw, n2.z * _dh + 1 * dh);
+						//*__image = obj->getTexture(n2.y * _dw + 3 * dw, n2.z * _dh + 1 * dh);
+						//+90 rotate
+						//*__image = obj->getTexture(dw - (n2.z * _dh) + 3 * dw, n2.y * _dw + 1 * dh);
+						//-90 rotate
+						//*__image = obj->getTexture(n2.z * _dh + 3 * dw, dh - (n2.y * _dw) + 1 * dh);
+						//-90 rotate and left right flip
+						//*__image = obj->getTexture(dw - (n2.z * _dh) + 3 * dw, dh - (n2.y * _dw) + 1 * dh);
+						*__image = obj->getTextureActual(_dw - (n2.z * _dh) + 3 * _dw, _dh - (n2.y * _dw) + 1 * _dh);
 					}
 				}
 			}

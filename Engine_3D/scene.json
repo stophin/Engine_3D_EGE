@@ -47,7 +47,13 @@ texture	10
 	url	image/10.jpg
 texture
 texture	11
-	url	image/11.jpg
+	url	image/sky.jpg
+texture
+texture	12
+	url	image/dice.jpg
+texture
+texture	13
+	url	image/grass.jpg
 texture
 
 #object back vertical wall
@@ -64,6 +70,52 @@ object	normal	normal
 	texture	1
 	uv	30	30
 object
+#object  box
+object	normal	normal	1
+	verts	-10	-10	10
+	verts	10	-10	10
+	verts	-10	10	10
+	verts	10	10	10	-1
+	verts	10	10	-10
+	verts	10	-10	10	-1
+	verts	10	-10	-10
+	verts	-10	-10	10	-1
+	verts	-10	-10	-10
+	verts	-10	10	10	-1
+	verts	-10	10	-10
+	verts	10	10	-10	-1
+	verts	-10	-10	-10
+	verts	10	-10	-10	-1
+	move	100	50	100
+	normal_type	1
+	color	RED
+	line_color	BLUE
+	texture	12	4
+object
+
+#object Concave box
+object	normal	normal	-1
+	verts	-10	10	10
+	verts	10	10	10	-1
+	verts	10	10	-10
+	verts	10	-10	10	-1
+	verts	10	-10	-10
+	verts	-10	-10	10	-1
+	verts	-10	-10	-10
+	verts	-10	10	10	-1
+	verts	-10	10	-10
+	verts	10	10	-10	-1
+	verts	-10	-10	-10
+	verts	10	-10	-10	-1
+	scale	35	35	35
+	move	15	0	0
+	normal_type	1
+	vertex_type	0
+	color	RED
+	line_color	BLUE
+	texture	11	4
+	backfaceculling	1
+object
 
 #object floor
 object	group	normal	10
@@ -78,7 +130,38 @@ object	group	normal	10
 	movex	-100	0	-100
 	color	LIGHTGRAY
 	line_color	RED
-	texture	4
+	texture	13
+object
+
+#object 3ds
+object 3ds	normal	10
+	url	3ds/Cabinet-3Drawer_36-90.3DS
+	vertext_type	1
+	move	0	0	200
+	rotate	-90	-180	0
+	normal_type	1
+	color	RED
+object
+
+#object 3ds bone blade 
+object none 3ds	normal	10
+	url	3ds/bone_blade/bone_blade.3DS
+	vertext_type	1
+	move	0	0	0
+	scale 100	100	100
+	normal_type	1
+object
+
+
+#object 3ds rose
+object none 3ds	normal	10
+	url	3ds/rose/rose.3DS
+	vertext_type	1
+	move	0	0	100
+	rotate	-90	-180	0
+	scale	5	5	5
+	normal_type	1
+	color	RED
 object
 
 #object 3ds sphere
@@ -90,6 +173,36 @@ object 3ds	reflection	10
 	normal_type	1
 	color	RED
 	texture	10	2
+object
+
+#object 3ds venus
+object none 3ds	transparent	10
+	url	3ds/venus.3DS
+	vertext_type	1
+	move	0	0	0
+	rotate	-90	-180	0
+	scale	0.05	0.05	0.05
+	normal_type	1
+	color	BLUE
+object
+
+#object 3ds lamp
+object 3ds	normal	10
+	url	3ds/lamp.3ds
+	vertext_type	1
+	rotate	-90	-180	0
+	scale	0.05	0.05	0.05
+	move	0	0	30
+	normal_type	1
+object
+
+#object 3ds spaceship
+object 3ds	normal	10
+	url	3ds/spaceship.3ds
+	vertext_type	1
+	rotate	-90	-180	0
+	move	-100	100	0
+	normal_type	1
 object
 
 #object sphere
@@ -113,7 +226,7 @@ object file	reflection	10
 	rotate	-90	-180	0
 	normal_type	1
 	color	RED
-	texture	7	2
+	texture	9	2
 	uv	30	30
 object
 
@@ -139,25 +252,3 @@ object normal reflection	0.05
 	texture	3
 object
 
-#object Concave box
-object	normal	normal	-1
-	verts	-10	10	10
-	verts	10	10	10	-1
-	verts	10	10	-10
-	verts	10	-10	10	-1
-	verts	10	-10	-10
-	verts	-10	-10	10	-1
-	verts	-10	-10	-10
-	verts	-10	10	10	-1
-	verts	-10	10	-10
-	verts	10	10	-10	-1
-	verts	-10	-10	-10
-	verts	10	-10	-10	-1
-	scale	30	30	30
-	move	15	0	-50
-	vertex_type	0
-	color	RED
-	line_color	BLUE
-	texture	11	4
-	backfaceculling	1
-object

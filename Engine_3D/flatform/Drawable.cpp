@@ -367,6 +367,10 @@ VOID Initialize()
 				}
 			}
 		}
+		else if (!strcmp(command, "break")) {
+			//break loading json for debug
+			break;
+		}
 		else if (!strcmp(command, "object"))
 		{
 			if (paramCount > 1) {
@@ -486,24 +490,29 @@ VOID Initialize()
 									}
 								}
 
-								if (loader.m_3DModel.pMaterials.size() > object.materialID) {
-									obj->setColor(loader.m_3DModel.pMaterials[object.materialID].color);
-									if (object.bHasTexture) {
-										int start = 0;
-										for (int j = 0; url[j] != '\0'; j++) {
-											if (url[j] == '/') {
-												start = j;
+								if (color) {
+									obj->setColor(color);
+								}
+								else {
+									if (loader.m_3DModel.pMaterials.size() > object.materialID) {
+										obj->setColor(loader.m_3DModel.pMaterials[object.materialID].color);
+										if (object.bHasTexture) {
+											int start = 0;
+											for (int j = 0; url[j] != '\0'; j++) {
+												if (url[j] == '/') {
+													start = j;
+												}
 											}
-										}
-										url[start] = '/';
-										for (int j = 0; j + start + 1< 100; j++) {
-											url[j + start + 1] = loader.m_3DModel.pMaterials[object.materialID].strFile[j];
-											if (url[j + start + 1] == '\0') {
-												break;
+											url[start] = '/';
+											for (int j = 0; j + start + 1< 100; j++) {
+												url[j + start + 1] = loader.m_3DModel.pMaterials[object.materialID].strFile[j];
+												if (url[j + start + 1] == '\0') {
+													break;
+												}
 											}
+											int tID = tman.addTexture(url);
+											obj->setTexture(tman, tID, 3);
 										}
-										int tID = tman.addTexture(url);
-										obj->setTexture(tman, tID, 3);
 									}
 								}
 
