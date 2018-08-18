@@ -22,6 +22,7 @@ INT isInputBlocked() {
 	//屏蔽所有按键，防止操作（如退出）造成资源泄漏
 	return device.thread_all_done;
 }
+
 INT isRenderRaytracing() {
 	return device.render_raytracing > 0 || device.render_raytracing == -2;
 }
@@ -1311,7 +1312,7 @@ VOID onKeyDown(WPARAM wParam)
 	case '5':
 		draw_oct = -draw_oct;
 		break;
-	case '6':
+	case '7':
 		if (raytracing_done) {
 			if (device.render_raytracing != -2) {
 				device.render_raytracing = -2;
@@ -1320,6 +1321,7 @@ VOID onKeyDown(WPARAM wParam)
 				device.render_raytracing = -1;
 			}
 		}
+		break;
 	case 'B':
 		DEBUG_MODE = DEBUG_MODE >> 1;
 		if (DEBUG_MODE == 0)
