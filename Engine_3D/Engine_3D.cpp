@@ -75,7 +75,12 @@ int main(int argc, char* argv[])
 		}
 		//delay_ms(100);
 		EP_RenderFlush();
-		sprintf_s(str, "%f", getfps());
+		if (isRenderRaytracing()) {
+			sprintf_s(str, "Raytracing %f", getfps());
+		}
+		else {
+			sprintf_s(str, "%f", getfps());
+		}
 		::SetWindowText(EP_GetWnd(), str);
 	} while (1);
 	onClose();

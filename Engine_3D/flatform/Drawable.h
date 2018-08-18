@@ -18,5 +18,6 @@ VOID onScroll(FLOAT delta);
 VOID onMenu(FLOAT x, FLOAT y, INT mode);
 VOID onDrag(FLOAT x, FLOAT y, INT mode);
 INT isInputBlocked();
+INT isRenderRaytracing();
 
 #include "Device.h"

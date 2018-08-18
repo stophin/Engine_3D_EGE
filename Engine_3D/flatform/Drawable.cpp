@@ -22,6 +22,9 @@ INT isInputBlocked() {
 	//屏蔽所有按键，防止操作（如退出）造成资源泄漏
 	return device.thread_all_done;
 }
+INT isRenderRaytracing() {
+	return device.render_raytracing > 0 || device.render_raytracing == -2;
+}
 
 VOID onResize(FLOAT width, FLOAT height)
 {
@@ -35,6 +38,7 @@ EPoint org;
 EFTYPE scalex, scaley;
 
 INT enter_once = 1;
+INT raytracing_done = 0;
 VOID onPaint(HWND hWnd)
 {
 	if (isresize)
@@ -104,8 +108,29 @@ VOID onPaint(HWND hWnd)
 				}
 			}
 		}
+		raytracing_done = 1;
 	}
 	else  {
+		if (device.render_raytracing == -2) {
+			isrefresh = 1;
+			//Blt buffer to window buffer
+			DWORD * _tango = EP_GetImageBuffer();
+			int i, j, index;
+			for (i = 0; i < device.width; i++) {
+				for (j = 0; j < device.height; j++) {
+					index = j *  device.width + i;
+					if (device.raytracing[index] != BLACK)
+					{
+						//::SetPixel(memHDC, i, j, device.tango[index]);
+						_tango[index] = device.raytracing[index];
+					}
+				}
+			}
+			if (draw_line > 0) {
+				device.drawThreadSplit();
+			}
+			return;
+		}
 		if (draw_oct > 0) {
 			device.drawAABB(man, &man.octTree);
 		}
@@ -1286,6 +1311,15 @@ VOID onKeyDown(WPARAM wParam)
 	case '5':
 		draw_oct = -draw_oct;
 		break;
+	case '6':
+		if (raytracing_done) {
+			if (device.render_raytracing != -2) {
+				device.render_raytracing = -2;
+			}
+			else {
+				device.render_raytracing = -1;
+			}
+		}
 	case 'B':
 		DEBUG_MODE = DEBUG_MODE >> 1;
 		if (DEBUG_MODE == 0)
