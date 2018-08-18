@@ -136,7 +136,8 @@ public:
 	}
 
 	Mat3D& operator * (const Mat3D& m) {
-		Mat mx = this->mx, my = this->my, mz = this->mz, mw = this->mw;
+		//Mat mx = this->mx, my = this->my, mz = this->mz, mw = this->mw;
+		Mat mx, my, mz, mw;
 		this->cross(mx, m.mx);
 		this->cross(my, m.my);
 		this->cross(mz, m.mz);
