@@ -5,6 +5,7 @@
 #define _RAY_H_
 
 #include "../math3d/Vert3D.h"
+#include "../common/MultiLinkList.h"
 
 class Verts {
 public:
@@ -114,6 +115,54 @@ public:
 		o = NULL;
 		return;
 	}
+};
+
+class VertsMan : public MultiLinkList<Verts> {
+public:
+	VertsMan(VertsPool* pool, INT index) :
+		MultiLinkList<Verts>(index),
+		pool(pool){
+	}
+	~VertsMan() {
+	}
+
+	Verts * free(Verts * _ptr) {
+		if (_ptr == NULL)
+		{
+			return NULL;
+		}
+		for (INT i = 0; i < MAX_VERTS_LINK; i++)
+		{
+			if (((Verts*)_ptr)->prev[i] != NULL || ((Verts*)_ptr)->next[i] != NULL)
+			{
+				return NULL;
+			}
+		}
+		return _ptr;
+	}
+
+	VOID clearLink() {
+		if (this->link)
+		{
+			Verts * temp = this->link;
+			do
+			{
+				if (removeLink(temp) == NULL)
+				{
+					break;
+				}
+
+				if (free(temp)) {
+					pool->back(temp);
+				}
+
+				temp = this->link;
+			} while (temp);
+		}
+	}
+
+	VertsPool * pool;
+
 };
 
 class Ray {

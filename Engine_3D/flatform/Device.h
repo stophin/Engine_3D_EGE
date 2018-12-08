@@ -791,6 +791,7 @@ struct Device {
 		INT ex;
 		INT ey;
 		INT id;
+		VertsPool * pool;
 	};
 	void SetRect(RenderParameters& p, INT sx, INT sy, INT ex, INT ey) {
 		p.sx = sx;
@@ -806,6 +807,7 @@ struct Device {
 	INT thread_ready;
 	INT thread_status[128];
 	INT thread_all_done;
+	VertsPool * pool;
 
 	void drawThreadSplit() {
 		DWORD * _tango = EP_GetImageBuffer();
@@ -830,6 +832,9 @@ struct Device {
 			//创建线程  
 			INT dx = width / thread_count;
 			INT dy = height / thread_count;
+			if (!pool) {
+				pool = new VertsPool[thread_count * thread_count];
+			}
 			for (int i = 0; i < thread_count; i++) {
 				for (int j = 0; j < thread_count; j++) {
 					INT index = i * thread_count + j;
@@ -839,6 +844,8 @@ struct Device {
 					param[index].id = index;
 					param[index].hMutex = hMutex;
 					SetRect(param[index], dx * i, dy * j, dx * i + dx, dy * j + dy);
+
+					param[index].pool = &pool[index];
 
 					thread_pool[index] = CreateThread(NULL, 0, RenderThreadProc, &param[index], 0, NULL);
 					param[index].hThread = thread_pool[index];
@@ -891,6 +898,10 @@ struct Device {
 		}
 		//释放互斥资源
 		CloseHandle(hMutex);
+		//清除资源
+		if (pool) {
+			delete[] pool;
+		}
 	}
 	static DWORD WINAPI RenderThreadMain(LPVOID lpThreadParameter) {
 		Device * device = (Device*)lpThreadParameter;
@@ -931,7 +942,7 @@ struct Device {
 			if (NULL == pthread->man) {
 				break;
 			}
-			RenderRayTracingSub(*pthread->man, pthread->sx, pthread->sy, pthread->ex, pthread->ey, pthread->id, pthread->hMutex, pthread->device);
+			RenderRayTracingSub(*pthread->man, pthread->sx, pthread->sy, pthread->ex, pthread->ey, pthread->id, pthread->hMutex, pthread->device, pthread->pool);
 			pthread->device->thread_status[pthread->id] = 0;
 			SuspendThread(pthread->hThread);
 			Sleep(100);
@@ -945,7 +956,7 @@ struct Device {
 	if (hMutex) { ReleaseMutex(hMutex); }
 	
 	//ray tracing
-	static void RenderRayTracingSub(Manager3D & man, INT sx, INT sy, INT ex, INT ey, INT id, HANDLE hMutex, Device* device = NULL) {
+	static void RenderRayTracingSub(Manager3D & man, INT sx, INT sy, INT ex, INT ey, INT id, HANDLE hMutex, Device* device = NULL, VertsPool * pool = NULL) {
 		if (NULL == device) {
 			return;
 		}
@@ -968,8 +979,8 @@ struct Device {
 		INT _index;
 		DWORD * _raytracing;
 		EFTYPE trans;
-		MultiLinkList<Verts> raytracing_verts(0);
-		MultiLinkList<Verts> raytracing_verts_accumulated(1);
+		VertsMan raytracing_verts(pool, 0);
+		VertsMan raytracing_verts_accumulated(pool, 1);
 		MultiLinkList<VObj> * link = NULL;
 		MultiLinkList<Obj3D> * olink;
 		MultiLinkList<Obj3D> octs(MAX_OBJ3D_LINK + 1 + id);
@@ -1071,9 +1082,10 @@ struct Device {
 												//NOTE: ray tracing is in camera coordinate
 												//get intersect point
 												trans = Vert3D::GetLineIntersectPointWithTriangle(v->v_c, v0->v_c, v1->v_c, ray.original, ray.direction, trans_last, p);
-												//trans is greate than zero, and litte than last trans
+												//trans is greater than zero, and less than last trans
 												if (EP_GTZERO(trans)) {
-													RAYTRACING_MUTEX(Verts * verts = new Verts(););
+													//RAYTRACING_MUTEX(Verts * verts = new Verts(););
+													Verts * verts = pool->get();
 													if (!verts) {
 														verts = verts;
 													}
@@ -1139,7 +1151,7 @@ struct Device {
 																	line_l = min(min(_line_l, _line_l0), min(_line_l1, _line_l0));
 																	line_r = max(max(_line_l, _line_l0), max(_line_l1, _line_l0));
 																}
-																//get interpolation normal vector from 3 point of a triangle
+																//get interpolation normal vector from 3 points of a triangle
 																Object3D::GetInterpolationNormalVector(v0, v1, v, __x, __y,
 																	line_r, line_l, _line_l1, _line_l, _line_l0,
 																	5, _n0, _n1, _n2, _n3);
@@ -1280,7 +1292,8 @@ struct Device {
 					}
 					if (nearest_vert) {
 						raytracing_verts_accumulated.insertLink(nearest_vert);
-						RAYTRACING_MUTEX(raytracing_verts.~MultiLinkList(););
+						//RAYTRACING_MUTEX(raytracing_verts.~MultiLinkList(););
+						raytracing_verts.clearLink();
 
 						//normal verts
 						if (0 == nearest_vert->type) {
@@ -1373,7 +1386,8 @@ struct Device {
 					}
 
 				} while (--count > 0);
-				RAYTRACING_MUTEX(raytracing_verts.~MultiLinkList(););
+				//RAYTRACING_MUTEX(raytracing_verts.~MultiLinkList(););
+				raytracing_verts.clearLink();
 
 				//accumulate all the ray traced verts' color
 				Verts * verts = raytracing_verts_accumulated.link;
@@ -1388,7 +1402,8 @@ struct Device {
 						verts = raytracing_verts_accumulated.next(verts);
 					} while (verts && verts != raytracing_verts_accumulated.link);
 				}
-				RAYTRACING_MUTEX(raytracing_verts_accumulated.~MultiLinkList(););
+				//RAYTRACING_MUTEX(raytracing_verts_accumulated.~MultiLinkList(););
+				raytracing_verts_accumulated.clearLink();
 
 				*_raytracing = color;
 			}
