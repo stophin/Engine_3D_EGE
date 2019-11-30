@@ -399,6 +399,8 @@ public:
 	EFTYPE backface;
 	INT cut;
 
+	void * obj;
+
 	Vert3D aabb[2];
 
 	// for multilinklist
@@ -426,6 +428,7 @@ public:
 			}
 		}
 		delete(_ptr);
+		_ptr = NULL;
 	}
 };
 

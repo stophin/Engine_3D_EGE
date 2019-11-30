@@ -99,6 +99,9 @@
     <ClInclude Include="reader\3DS.h">
       <Filter>头文件\reader</Filter>
     </ClInclude>
+    <ClInclude Include="reader\OBJ.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -124,6 +127,9 @@
     </ClCompile>
     <ClCompile Include="reader\3DS.cpp">
       <Filter>头文件\reader</Filter>
+    </ClCompile>
+    <ClCompile Include="reader\OBJ.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

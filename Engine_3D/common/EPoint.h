@@ -36,6 +36,7 @@
 
 typedef double	EPTYPE;
 typedef double	EFTYPE;
+typedef float	EETYPE;
 typedef void	EPVOID;
 typedef bool	EBTYPE;
 
@@ -120,7 +121,7 @@ public:
 	}
 }EPoint,* PEPoint;
 
-float Q_rsqrt(float number);
+EETYPE Q_rsqrt(EETYPE number);
 
 #endif //end of _EPOINT_H_
 //end of file

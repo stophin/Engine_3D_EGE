@@ -12,10 +12,6 @@ INT isresize = -1;
 INT isrefresh = -1;
 INT width;
 INT height;
-INT draw_line = -1;
-INT draw_oct = -1;
-INT move_light = -1;
-INT move_trans = -1;
 
 INT isInputBlocked() {
 	//光线追踪线程运行时
@@ -86,7 +82,7 @@ VOID onPaint(HWND hWnd)
 					}
 				}
 			}
-			if (draw_line > 0) {
+			if (device.draw_line > 0) {
 				device.drawThreadSplit();
 			}
 			return;
@@ -94,8 +90,12 @@ VOID onPaint(HWND hWnd)
 		enter_once = -1;
 		isrefresh = 1;
 		device.ClearBeforeRayTracing();
-		//device.RenderRayTracing_SingleThread(man);
-		device.RenderRayTracing(man);
+		if (device.thread_count > 0) {
+			device.RenderRayTracing(man);
+		}
+		else {
+			device.RenderRayTracing_SingleThread(man);
+		}
 		//Blt buffer to window buffer
 		DWORD * _tango = EP_GetImageBuffer();
 		int i, j, index;
@@ -127,21 +127,33 @@ VOID onPaint(HWND hWnd)
 					}
 				}
 			}
-			if (draw_line > 0) {
+			if (device.draw_line > 0) {
 				device.drawThreadSplit();
 			}
 			return;
 		}
-		if (draw_oct > 0) {
+		if (device.draw_oct > 0) {
 			device.drawAABB(man, &man.octTree);
 		}
 		enter_once = 1;
-		if (move_light > 0) {
+		if (device.move_light > 0) {
 			device.RenderShade(man);
 		}
 		device.ClearBeforeRender();
-		device.Render(man, NULL, NULL, NULL);
-		//device.RenderMirror(man);
+		if (device.render_thread > 0) {
+			device.RenderThread(man);
+			if (man.changed > 0) {
+				man.changed--;
+				device.RenderThreadReady(man, NULL, NULL, NULL);
+			}
+			while (!device.IsThreadDone());
+		}
+		else {
+			device.Render(man, NULL, NULL, NULL);
+		}
+		if (device.render_mirror > 0) {
+			device.RenderMirror(man);
+		}
 		//Blt buffer to window buffer
 		DWORD * _tango = EP_GetImageBuffer();
 		int i, j, index;
@@ -161,6 +173,7 @@ VOID onPaint(HWND hWnd)
 }
 
 #include "../reader/3DS.h"
+#include "../reader/OBJ.h"
 
 extern t3DModel g_3DModel[10];
 
@@ -171,7 +184,7 @@ Object3D * cur_op = NULL;
 
 #define MAX_STR 100
 #define MAX_PAR	10
-INT parseParameter(CHAR buffer[], CHAR command[], CHAR parameters[][MAX_STR], INT maxP = 0)
+INT parseParameter(CHAR buffer[], CHAR command[], CHAR parameters[][MAX_STR], INT maxP = MAX_PAR)
 {
 	int i, j;
 	int cp = 0;
@@ -198,7 +211,7 @@ INT parseParameter(CHAR buffer[], CHAR command[], CHAR parameters[][MAX_STR], IN
 				{
 					parameters[pc][pp] = '\0';
 					pc++;
-					if (maxP && pc > maxP) {
+					if (maxP && pc >= maxP - 1) {
 						break;
 					}
 					pp = 0;
@@ -263,57 +276,149 @@ VOID Initialize()
 
 		paramCount = parseParameter(buffer, command, parameters);
 
-		if (!strcmp(command, "camera"))
-		{
-			if (paramCount > 0) {
-				Camera3D * cam = NULL;
-				while (!feof(fp)) {
-					fgets(buffer, MAX_STR, fp);
+	if (!strcmp(command, "env"))
+	{
+		if (paramCount >= 0) {
+			while (!feof(fp)) {
+				fgets(buffer, MAX_STR, fp);
 
-					attrCount = parseParameter(buffer, command, attrs);
+				attrCount = parseParameter(buffer, command, attrs);
 
-					if (!cam) {
-						if (!strcmp(parameters[0], "shadow")) {
-							cam = &man.addShadowCamera();
+				if (!strcmp(command, "env")) {
+					break;
+				}
+				else if (!strcmp(command, "split")) {
+					device.draw_line = 1;
+				}
+				else if (!strcmp(command, "mirror")) {
+					device.render_mirror = 1;
+				}
+				else if (!strcmp(command, "count")) {
+					if (attrCount > 0) {
+						device.raytracing_count = atoi(attrs[0]);
+					}
+				}
+				else if (!strcmp(command, "light")) {
+					if (attrCount > 0) {
+						device.light_count = atoi(attrs[0]);
+						if (device.light_count < 0) {
+							device.light_count = 0;
 						}
-						else if (!strcmp(parameters[0], "reflection")) {
-							cam = &man.addReflectionCamera();
+						else if (device.light_count >= MAX_LIGHT) {
+							device.light_count = MAX_LIGHT;
 						}
 					}
-					if (!strcmp(command, "camera")) {
-						break;
+				}
+				else if (!strcmp(command, "raster")) {
+					if (attrCount > 1) {
+						device.thread_w = atoi(attrs[0]);
+						device.thread_h = atoi(attrs[1]);
+						//maxium thread exceeded
+						if (device.thread_w < 0) {
+							device.thread_w = 0;
+						}
+						if (device.thread_h < 0) {
+							device.thread_h = 0;
+						}
+						else if (device.thread_w * device.thread_h > MAX_OBJ3D_THREAD) {
+							device.thread_w = MAX_OBJECT;
+							device.thread_h = MAX_OBJECT;
+						}
 					}
-					else if (!strcmp(command, "param")) {
-						EFTYPE param[6];
-						for (int i = 0; i < 6; i++) {
-							if (i < attrCount) {
-								param[i] = atof(attrs[i]);
-							}
-							else {
-								param[i] = 0;
-							}
+					else if (attrCount > 0) {
+						device.thread_w = atoi(attrs[0]);
+						//maxium thread exceeded
+						if (device.thread_w < 0) {
+							device.thread_w = 0;
 						}
-						if (!cam) {
-							cam = &man.addCamera(param[0], param[1], param[2], param[3], param[4], param[5]);
+						else if (device.thread_w * device.thread_w > MAX_OBJ3D_THREAD) {
+							device.thread_w = MAX_OBJECT;
+						}
+						device.thread_h = device.thread_w;
+					}
+				}
+				else if (!strcmp(command, "thread")) {
+					if (attrCount > 1) {
+						device.thread_count = atoi(attrs[0]);
+						device.thread_count_h = atoi(attrs[1]);
+						//maxium thread exceeded
+						if (device.thread_count < 0) {
+							device.thread_count = 0;
+						}
+						if (device.thread_count_h < 0) {
+							device.thread_count_h = 0;
+						}
+						else if (device.thread_count * device.thread_count_h > MAX_OBJ3D_THREAD) {
+							device.thread_count = 1;
+							device.thread_count_h = device.thread_count;
 						}
 					}
-					else if (!strcmp(command, "move")) {
-						EFTYPE param[3];
-						for (int i = 0; i < 3; i++) {
-							if (i < attrCount) {
-								param[i] = atof(attrs[i]);
-							}
-							else {
-								param[i] = 0;
-							}
+					else if (attrCount > 0) {
+						device.thread_count = atoi(attrs[0]);
+						//maxium thread exceeded
+						if (device.thread_count < 0) {
+							device.thread_count = 0;
 						}
-						if (cam) {
-							cam->move(param[0], param[1], param[2]);
+						else if (device.thread_count * device.thread_count > MAX_OBJ3D_THREAD) {
+							device.thread_count = 1;
 						}
+						device.thread_count_h = device.thread_count;
 					}
 				}
 			}
 		}
+	}
+	else if (!strcmp(command, "camera"))
+	{
+		if (paramCount > 0) {
+			Camera3D * cam = NULL;
+			while (!feof(fp)) {
+				fgets(buffer, MAX_STR, fp);
+
+				attrCount = parseParameter(buffer, command, attrs);
+
+				if (!cam) {
+					if (!strcmp(parameters[0], "shadow")) {
+						cam = &man.addShadowCamera();
+					}
+					else if (!strcmp(parameters[0], "reflection")) {
+						cam = &man.addReflectionCamera();
+					}
+				}
+				if (!strcmp(command, "camera")) {
+					break;
+				}
+				else if (!strcmp(command, "param")) {
+					EFTYPE param[6];
+					for (int i = 0; i < 6; i++) {
+						if (i < attrCount) {
+							param[i] = atof(attrs[i]);
+						}
+						else {
+							param[i] = 0;
+						}
+					}
+					if (!cam) {
+						cam = &man.addCamera(param[0], param[1], param[2], param[3], param[4], param[5]);
+					}
+				}
+				else if (!strcmp(command, "move")) {
+					EFTYPE param[3];
+					for (int i = 0; i < 3; i++) {
+						if (i < attrCount) {
+							param[i] = atof(attrs[i]);
+						}
+						else {
+							param[i] = 0;
+						}
+					}
+					if (cam) {
+						cam->move(param[0], param[1], param[2]);
+					}
+				}
+			}
+		}
+	}
 		else if (!strcmp(command, "light"))
 		{
 			if (paramCount > 0) {
@@ -473,6 +578,9 @@ VOID Initialize()
 							} else {
 								obj = &man.addObject((INT)parameter);
 							}
+							if (vertextType) {
+								obj->setVertexType(vertextType);
+							}
 
 							for (int i = 0; i < vertsIndex; i++) {
 								obj->addVert(verts[i].x, verts[i].y, verts[i].z, verts[i].anti);
@@ -546,6 +654,77 @@ VOID Initialize()
 								if (index > MAX_OBJS) {
 									index = MAX_OBJS - 1;
 								}
+							}
+						}
+						else if (!strcmp(parameters[0], "obj")) {
+							ObjParser objParser;
+							int result = objParser.ParseEx(url, buffer, command, parameters, attrs, MAX_STR, parseParameter);
+
+							if (result > 0) {
+
+								if (type == 2) {
+									obj = &man.addReflectionObject(parameter);
+								}
+								else if (type == 3) {
+									obj = &man.addTransparentObject(parameter);
+								}
+								else {
+									obj = &man.addObject((INT)parameter);
+								}
+								if (vertextType) {
+									obj->setVertexType(vertextType);
+								}
+
+
+								int vIndex, tIndex, nIndex;
+								int _vIndex, _tIndex, _nIndex;
+								for (int i = 0; i < objParser.mFaceCount; i++)
+								{
+									int anti = 1;
+									for (int j = 0; j < 4; j++) {
+										vIndex = objParser.faces[i].vIndex[j] - 1;
+										tIndex = objParser.faces[i].tIndex[j] - 1;
+										nIndex = objParser.faces[i].nIndex[j] - 1;
+
+										if (vIndex >= 0) {
+											if (j == 3) {
+												//it's very strange that when the polygon has 4 verts
+												//the verts are in order as the following:
+												//1 -> 2 -> 3 ( -> 1 -> 3 -> ) -> 4
+												//there must be verts 1 and 3 (in the brace) 
+												//when operating the 4th vert
+												//and the verts_type must be triangle insted of triangle strip
+												for (int k = 0; k < 4; k++) {
+													if (k == 0 || k == 2) {
+														_vIndex = objParser.faces[i].vIndex[k] - 1;
+														_tIndex = objParser.faces[i].tIndex[k] - 1;
+														_nIndex = objParser.faces[i].nIndex[k] - 1;
+
+														if (_vIndex >= 0) {
+															if (_nIndex >= 0) {
+																obj->addVert(objParser.vertices[_vIndex].x, objParser.vertices[_vIndex].y, objParser.vertices[_vIndex].z,
+																	anti * objParser.normals[_nIndex].x, anti * objParser.normals[_nIndex].y, anti * objParser.normals[_nIndex].z);
+															}
+															else {
+																obj->addVert(objParser.vertices[_vIndex].x, objParser.vertices[_vIndex].y, objParser.vertices[_vIndex].z, anti);
+															}
+														}
+														//anti = -anti;
+													}
+												}
+											}
+											if (nIndex >= 0) {
+												obj->addVert(objParser.vertices[vIndex].x, objParser.vertices[vIndex].y, objParser.vertices[vIndex].z,
+													anti * objParser.normals[nIndex].x, anti * objParser.normals[nIndex].y, anti * objParser.normals[nIndex].z);
+											}
+											else {
+												obj->addVert(objParser.vertices[vIndex].x, objParser.vertices[vIndex].y, objParser.vertices[vIndex].z, anti);
+											}
+										}
+										//anti = -anti;
+									}
+								}
+								objs[index++] = obj;
 							}
 						}
 						else if (!strcmp(parameters[0], "group")) {
@@ -925,7 +1104,7 @@ VOID onScroll(FLOAT delta) {
 		}
 	}
 	else {
-		if (move_light > 0) {
+		if (device.move_light > 0) {
 			if (delta > 0) {
 				man.moveLight(0, 0, scale);
 			}
@@ -933,7 +1112,7 @@ VOID onScroll(FLOAT delta) {
 				man.moveLight(0, 0, -scale);
 			}
 		}
-		else if (move_trans > 0) {
+		else if (device.move_trans > 0) {
 
 			if (delta > 0) {
 				Obj3D * obj = man.objs.link;
@@ -983,9 +1162,9 @@ VOID onMenu(FLOAT x, FLOAT y, INT mode)
 	}
 	else if (mode == 2) // mouse move
 	{
-		if (menu.X != 0 && menu.Y != 0)
+		if (EP_NTZERO(menu.X) && EP_NTZERO(menu.Y))
 		{
-			if (move_light > 0) {
+			if (device.move_light > 0) {
 				man.moveLight(-(x - menu.X) / scale, -(y - menu.Y) / scale, 0);
 			}
 			else {
@@ -1014,9 +1193,9 @@ VOID onDrag(FLOAT x, FLOAT y, INT mode)
 	}
 	else if (mode == 2) // mouse move
 	{
-		if (drag.X != 0 && drag.Y != 0)
+		if (EP_NTZERO(drag.X) && EP_NTZERO(drag.Y))
 		{
-			if (move_light > 0) {
+			if (device.move_light > 0) {
 				man.rotateLight(-(y - drag.Y) / scale, (x - drag.X) / scale, 0);
 			}
 			else {
@@ -1206,13 +1385,13 @@ VOID onKeyDown(WPARAM wParam)
 		man.setCameraRange(org.x, org.y, scalex, scaley);
 		break;
 	case 'X':
-		draw_line = -draw_line;
+		device.draw_line = -device.draw_line;
 		break;
 	case 'T':
-		move_light = -move_light;
+		device.move_light = -device.move_light;
 		break;
 	case 'R':
-		move_trans = -move_trans;
+		device.move_trans = -device.move_trans;
 		break;
 	case 'L':
 		man.nextLight();
@@ -1310,7 +1489,10 @@ VOID onKeyDown(WPARAM wParam)
 		cur_op->texture_type = 4;
 		break;
 	case '5':
-		draw_oct = -draw_oct;
+		device.draw_oct = - device.draw_oct;
+		break;
+	case '6':
+		device.render_thread = -device.render_thread;
 		break;
 	case '7':
 		if (raytracing_done) {

@@ -271,11 +271,12 @@ void EPoint::Rotate(EFTYPE angle)
 	y=EPTYPE(ty*cos(angle)+tx*sin(angle));
 }
 
-float Q_rsqrt(float number)
+EETYPE Q_rsqrt(EETYPE number)
 {
+	//return sqrt(number);
 	long i;
-	float x2, y;
-	const float threehalfs = 1.5F;
+	EETYPE x2, y;
+	const EETYPE threehalfs = 1.5F;
 
 	x2 = number * 0.5F;
 	y = number;

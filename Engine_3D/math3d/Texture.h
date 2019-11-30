@@ -96,6 +96,7 @@ public:
 			}
 		}
 		delete(_ptr);
+		_ptr = NULL;
 	}
 };
 

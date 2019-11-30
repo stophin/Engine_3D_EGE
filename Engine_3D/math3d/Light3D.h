@@ -71,10 +71,9 @@ public:
 			// specular : Ks * LightColor * (dot(V, R))^ shininess
 			// reflect R: 2 * (dot(L, N))N - L
 			r.set(n);
-			r * (2 * _f) + n1;
-			__f = (r.negative() & n0);
+			r * (2 * (r ^ n1)) - n1;
+			__f = (r & n);
 			__f *= __f;
-			__f = pow(__f, (FLOAT)5);
 		}
 		//if (_f < 0) _f = -_f;
 		f += _f + __f;
@@ -142,6 +141,7 @@ public:
 			}
 		}
 		delete(_ptr);
+		_ptr = NULL;
 	}
 };
 

@@ -1,3 +1,10 @@
+env
+	thread	10
+	raster	50
+	count	2
+	light	2
+	mirror
+env
 camera	1001
 	param 	50	50	50	1000	90	90
 	move	0	0	-200
@@ -12,6 +19,9 @@ camera	reflection
 camera
 light	2001
 	param	9	100	300
+light
+light	2002
+	param	-100	100	300
 light
 texture	0
 	param	480	480	10
@@ -56,6 +66,58 @@ texture	13
 	url	image/grass.jpg
 texture
 
+#object floor
+object	group	normal	10
+	maxx	5	5
+	verts	-10	0	-10
+	verts	10	0	-10
+	verts	-10	0	10
+	verts	10	0	10	-1
+	rotate	0	0	180
+	scale	5	5	5
+	move	250	-40	250
+	movex	-100	0	-100
+	color	LIGHTGRAY
+	line_color	RED
+	texture	5
+object
+
+
+#object teapot from file
+object file	reflection	0
+	url	teapot.txt
+	vertext_type	1
+	move	100	0	0
+	rotate	-90	-180	0
+	normal_type	1
+	color	RED
+	texture	9	2
+	uv	30	30
+object
+
+
+#object 3ds sphere
+object 3ds	transparent	-1
+	url	3ds/GeoSphere.3DS
+	vertext_type	1
+	move	-100	0	0
+	rotate	-90	-180	0
+	normal_type	1
+	color	RED
+	texture	10	2
+object
+
+#object 3ds sphere
+object 3ds	normal
+	url	3ds/GeoSphere.3DS
+	vertext_type	1
+	move	0	0	0
+	rotate	-90	-180	0
+	normal_type	1
+	color	RED
+	texture	10	2
+object
+
 #object back vertical wall
 object	normal	normal
 	id	11
@@ -63,13 +125,89 @@ object	normal	normal
 	verts	10	-10	10
 	verts	-10	10	10
 	verts	10	10	10	-1
-	verts	10	10	10
 	scale	10	10	10
 	move	0	100	-200
 	color	GREEN
 	texture	1
 	uv	30	30
 object
+
+#object back vertical mirror
+object	normal	reflection	1
+	verts	-10	-10	10
+	verts	10	-10	10
+	verts	-10	10	10
+	verts	10	10	10	-1
+	rotate	0	-90	0
+	move	300	100	0
+	scale	10	10	10
+	color	GREEN
+object
+
+
+object	obj	normal	1
+	url	obj/chess1.obj
+	vertext_type	1
+	scale	0.05	0.05	0.05
+	move	50	0	0
+	color	RED
+object
+
+object	obj	normal	1
+	url	obj/test.obj
+	vertext_type	1
+	scale	10	10	10
+	move	50	5	30
+	color	RED
+object
+
+#object 3ds venus
+object none 3ds	transparent	10
+	url	3ds/venus.3DS
+	vertext_type	1
+	move	0	0	0
+	rotate	-90	-180	0
+	scale	0.05	0.05	0.05
+	normal_type	1
+	color	BLUE
+object
+
+
+#object box
+object normal reflection	0
+	verts	-10	-10	10
+	verts	10	-10	10
+	verts	-10	10	10
+	verts	10	10	10	-1
+	verts	10	10	-10
+	verts	10	-10	10	-1
+	verts	10	-10	-10
+	verts	-10	-10	10	-1
+	verts	-10	-10	-10
+	verts	-10	10	10	-1
+	verts	-10	10	-10
+	verts	10	10	-10	-1
+	verts	-10	-10	-10
+	verts	10	-10	-10	-1
+	scale	2	2	2
+	move	20	0	-50
+	color	RED
+	texture	3
+object
+
+
+
+break
+
+object	obj	normal	1
+	url	obj/tree.obj
+	vertext_type	1
+	scale	0.1	0.1	0.1
+	move	0	0	100
+	color	GREEN
+object
+
+
 #object  box
 object	normal	normal	1
 	verts	-10	-10	10
@@ -110,28 +248,13 @@ object	normal	normal	-1
 	scale	35	35	35
 	move	15	0	0
 	normal_type	1
-	vertex_type	0
+	vertext_type	0
 	color	RED
 	line_color	BLUE
 	texture	11	4
 	backfaceculling	1
 object
 
-#object floor
-object	group	normal	10
-	maxx	5	5
-	verts	-10	0	-10
-	verts	10	0	-10
-	verts	-10	0	10
-	verts	10	0	10	-1
-	rotate	0	0	180
-	scale	5	5	5
-	move	250	-40	250
-	movex	-100	0	-100
-	color	LIGHTGRAY
-	line_color	RED
-	texture	13
-object
 
 #object 3ds
 object 3ds	normal	10
@@ -164,27 +287,6 @@ object none 3ds	normal	10
 	color	RED
 object
 
-#object 3ds sphere
-object 3ds	reflection	10
-	url	3ds/GeoSphere.3DS
-	vertext_type	1
-	move	0	0	0
-	rotate	-90	-180	0
-	normal_type	1
-	color	RED
-	texture	10	2
-object
-
-#object 3ds venus
-object none 3ds	transparent	10
-	url	3ds/venus.3DS
-	vertext_type	1
-	move	0	0	0
-	rotate	-90	-180	0
-	scale	0.05	0.05	0.05
-	normal_type	1
-	color	BLUE
-object
 
 #object 3ds lamp
 object 3ds	normal	10
@@ -217,38 +319,67 @@ object sphere	normal
 	texture	6	3
 object
 
+break
 
-#object teapot from file
-object file	reflection	10
-	url	teapot.txt
+
+object	obj	normal	1
+	url	obj/minnion.obj
 	vertext_type	1
-	move	100	0	0
-	rotate	-90	-180	0
-	normal_type	1
+	move	0	0	100
+	scale 10	10	10
 	color	RED
-	texture	9	2
-	uv	30	30
 object
 
-#object box
-object normal reflection	0.05
-	verts	-10	-10	10
-	verts	10	-10	10
-	verts	-10	10	10
-	verts	10	10	10	-1
-	verts	10	10	-10
-	verts	10	-10	10	-1
-	verts	10	-10	-10
-	verts	-10	-10	10	-1
-	verts	-10	-10	-10
-	verts	-10	10	10	-1
-	verts	-10	10	-10
-	verts	10	10	-10	-1
-	verts	-10	-10	-10
-	verts	10	-10	-10	-1
-	scale	2	2	2
-	move	20	0	-50
-	color	RED
-	texture	3
+
+object	obj	normal	1
+	url	obj/venus.obj
+	vertext_type	1
+	scale	0.1	0.1	0.1
+	rotate	-90	0	0
+	move	0	10	100
+	color	GREEN
 object
 
+object	obj	normal	1
+	url	obj/girl.obj
+	vertext_type	1
+	move	0	0	100
+	scale 10	10	10
+	color	RED
+object
+object	obj	normal	1
+	url	obj/xunlu_01.obj
+	scale	0.005	0.005	0.005
+	vertext_type	1
+	move	0	0	0
+	color	RED
+object
+
+object	obj	normal	1
+	url	obj/inkut.obj
+	vertext_type	1
+	move	0	0	0
+	color	RED
+object
+
+object	obj	normal	1
+	url	obj/peanut.obj
+	vertext_type	1
+	move	0	0	0
+	color	RED
+object
+
+object	obj	normal	1
+	url	obj/castle.obj
+	vertext_type	1
+	scale	0.05	0.05	0.05
+	move	0	0	0
+	color	RED
+object
+object	obj	normal	1
+	url	obj/roma.obj
+	vertext_type	1
+	scale	10	10	10
+	move	50	0	0
+	color	RED
+object

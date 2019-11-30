@@ -465,8 +465,9 @@ public:
 	}
 
 	//vertext type :
-	//0: triangle strip
+	//0: triangle loop
 	//1: triangle
+	//2: triangle strip
 	int vertex_type;
 
 	int anti;
@@ -517,7 +518,7 @@ public:
 				if (v->aabb[1].z > _v->v.z) v->aabb[1].z = _v->v.z;
 
 				//set other 2 vertexes' normal vector
-				if (vertex_type == 1) {
+				if (vertex_type == 1 || vertex_type == 2) {
 					if (EP_ISZERO(_v->n.x + _v->n.y + _v->n.z)) {
 						_v->n.set(v->n);
 					}
@@ -526,6 +527,16 @@ public:
 			if (vertex_type == 1) {
 				this->v0 = NULL;
 				this->v1 = NULL;
+			}
+			else if (vertex_type == 2) {
+				if ((this->verts.linkcount + 2)% 2 == 0) {
+					this->v0 = v;
+					//this->v1 = this->v1;
+				}
+				else {
+					this->v0 = this->v1;
+					this->v1 = v;
+				}
 			}
 			else {
 				this->v0 = this->v1;
@@ -743,7 +754,9 @@ public:
 			}
 			this->v0 = NULL;
 			this->v1 = NULL;
+			int traverseCount = 0;
 			do {
+				traverseCount++;
 				if (this->reflection> 0) {
 					/*this->reflection --;
 					if (this->reflection == 0) {
@@ -834,6 +847,16 @@ public:
 							if (vertex_type == 1) {
 								this->v0 = NULL;
 								this->v1 = NULL;
+							}
+							else if (vertex_type == 2) {
+								if ((traverseCount + 1) % 2 == 0) {
+									this->v0 = v;
+									//this->v1 = this->v1;
+								}
+								else {
+									this->v0 = this->v1;
+									this->v1 = v;
+								}
 							}
 							else {
 								this->v0 = this->v1;
@@ -1012,9 +1035,10 @@ public:
 		initialize();
 	}
 
-#define MAX_OBJ3D_MAX	300 //used for thread
+#define MAX_OBJ3D_MAX	500 //used for all object
 #define MAX_OBJ3D_LINK	60
 #define MAX_OBJ3D_END	6 //reserved for normal linklist use
+#define MAX_OBJ3D_THREAD	MAX_OBJ3D_MAX - MAX_OBJ3D_LINK - MAX_OBJ3D_END // the left are for thread
 	void initialize() {
 		for (INT i = 0; i < MAX_OBJ3D_MAX; i++)
 		{
@@ -1038,6 +1062,7 @@ public:
 			}
 		}
 		delete(_ptr);
+		_ptr = NULL;
 	}
 };
 
@@ -1079,6 +1104,7 @@ public:
 			}
 		}
 		delete(_ptr);
+		_ptr = NULL;
 	}
 };
 

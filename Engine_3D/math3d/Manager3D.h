@@ -13,7 +13,7 @@
 typedef class Manager3D Manager3D;
 class Manager3D {
 public:
-	Manager3D() : cams(0), objs(0), lgts(0), tras(0), refl(0), grps(0), octs(2),
+	Manager3D() : cams(0), objs(0), lgts(0), tras(0), refl(0), grps(0), octs(2), changed(0),
 		group(NULL){
 
 	}
@@ -294,6 +294,7 @@ public:
 		this->refresh(NULL);
 	}
 
+	INT changed;
 	void refresh(Camera3D * cam) {
 		Obj3D * obj = this->objs.link;
 		if (obj) {
@@ -351,6 +352,8 @@ public:
 				lgt = this->lgts.next(lgt);
 			} while (lgt && lgt != this->lgts.link);
 		}
+
+		changed++;
 	}
 
 	void moveLight(EFTYPE x, EFTYPE y, EFTYPE z) {
