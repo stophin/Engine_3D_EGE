@@ -742,6 +742,12 @@ struct Device {
 
 		Obj3D * obj = man.objs.link;
 		threadRenderCount = 0;
+		INT dx = thread_w / thread_count_h;
+		INT dy = thread_h / thread_count;
+		INT thi = 0;
+		INT thj = 0;
+		INT othi = 0;
+		INT othj = 0;
 		if (obj) {
 			int render_state = 0;
 			int trans_w0 = EP_MAX, trans_h0 = EP_MAX;
@@ -795,9 +801,27 @@ struct Device {
 									if (threadRenderCount >= thread_w * thread_h) {
 										break;
 									}
-									threadRender[threadRenderCount][0] = v0;
-									threadRender[threadRenderCount][1] = v1;
-									threadRender[threadRenderCount][2] = v;
+									INT threadIndex = (othi * dx + thi) + thread_w * (othj * dy + thj);
+									thi++;
+									if (thi >= dx) {
+										thi = 0;
+										thj++;
+										if (thj >= dy) {
+											thi = 0;
+											thj = 0;
+											othi++;
+											if (othi >= thread_count_h) {
+												othi = 0;
+												othj++;
+												if (othj >= thread_count) {
+													break;
+												}
+											}
+										}
+									}
+									threadRender[threadIndex][0] = v0;
+									threadRender[threadIndex][1] = v1;
+									threadRender[threadIndex][2] = v;
 									threadRenderCount++;
 									v->obj = (void*)obj;
 								}
@@ -1540,7 +1564,9 @@ struct Device {
 		memset(raytracing, 0, width * height * sizeof(DWORD));
 	}
 	void RenderRayTracing_SingleThread(Manager3D& man) {
-		RenderRayTracingSub(man, 0, 0, width, height, 0, NULL, this);
+		extern VertsPool vertsPoolImp;
+		VertsPool * pools = &vertsPoolImp;
+		RenderRayTracingSub(man, 0, 0, width, height, 0, NULL, this, pools);
 	}
 
 	void SetRect(RenderParameters& p, INT sx, INT sy, INT ex, INT ey) {
