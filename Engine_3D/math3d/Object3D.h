@@ -94,7 +94,7 @@ public:
 		if (NULL == texture) {
 			return this->color;
 		}
-		if (t_w == 0 || t_w == 0) {
+		if (t_w == 0 || t_h == 0) {
 			return this->color;
 		}
 		INT _u = x, _v = y;
@@ -115,7 +115,7 @@ public:
 		if (NULL == texture) {
 			return this->color;
 		}
-		if (t_w == 0 || t_w == 0) {
+		if (t_w == 0 || t_h == 0) {
 			return this->color;
 		}
 		INT _u = x *t_w, _v = y * t_h;
