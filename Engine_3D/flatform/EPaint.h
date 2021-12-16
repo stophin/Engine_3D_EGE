@@ -11,6 +11,8 @@
 #include "../common/EPoint.h"
 #include "ELibrary.h"
 
+#define EP_BLACK	0
+
 #define DEF_FTCOLOR	BLACK
 #define DEF_FFCOLOR	WHITE
 #define DEF_FLCOLOR	LIGHTGRAY
@@ -46,9 +48,9 @@ DWORD* EP_GetImageBuffer(EIMAGE image=NULL);
 ECOLOR EP_GetPixel(EPTYPE x,EPTYPE y,EIMAGE image=NULL);
 void EP_SetPixel(EPTYPE x,EPTYPE y,ECOLOR c);
 
-void EP_TruncateImage(EPTYPE x, EPTYPE y, EPTYPE w, EPTYPE h, EIMAGE image, EPTYPE tx, EPTYPE ty, EPTYPE tw, EPTYPE th, EIMAGE image_bk = NULL, INT bk = 0, ECOLOR c = BLACK);
+void EP_TruncateImage(EPTYPE x, EPTYPE y, EPTYPE w, EPTYPE h, EIMAGE image, EPTYPE tx, EPTYPE ty, EPTYPE tw, EPTYPE th, EIMAGE image_bk = NULL, INT bk = 0, ECOLOR c = EP_BLACK);
 void EP_PutImage(EPTYPE x,EPTYPE y,EIMAGE image);
-EPBOOL EP_TruncImage(EPTYPE x, EPTYPE y, EIMAGE image, EIMAGE image_bk, ECOLOR c = BLACK, EPBOOL bk = false, const PEPoint cur = NULL, int imgtype = 0, EFTYPE rotation = EP_ZERO, EPTYPE vx = 0, EPTYPE vy = 0, EPTYPE sx = 0, EPTYPE sy = 0, EPTYPE ex = 0, EPTYPE ey = 0);
+EPBOOL EP_TruncImage(EPTYPE x, EPTYPE y, EIMAGE image, EIMAGE image_bk, ECOLOR c = EP_BLACK, EPBOOL bk = false, const PEPoint cur = NULL, int imgtype = 0, EFTYPE rotation = EP_ZERO, EPTYPE vx = 0, EPTYPE vy = 0, EPTYPE sx = 0, EPTYPE sy = 0, EPTYPE ex = 0, EPTYPE ey = 0);
 void EP_TruncImage(EPTYPE x,EPTYPE y,EIMAGE image,ECOLOR c=WHITE,int mode=0);
 void EP_Line(const EPoint& s,const EPoint& e);
 void EP_Line(EPTYPE sx,EPTYPE sy,EPTYPE ex,EPTYPE ey);

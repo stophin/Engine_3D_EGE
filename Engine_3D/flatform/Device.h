@@ -210,9 +210,9 @@ struct Device {
 								for (int i = v->ys; i <= v->ye && i < height; i++) {
 									for (int j = v->xs; j <= v->xe && j < width; j++) {
 										index = i * width + j;
-										_depth[index] = BLACK;
-										_image[index] = BLACK;
-										_mirror[index] = BLACK;
+										_depth[index] = EP_BLACK;
+										_image[index] = EP_BLACK;
+										_mirror[index] = EP_BLACK;
 									}
 								}
 								Render(man, v, v0, v1);
@@ -230,11 +230,11 @@ struct Device {
 									line_l = 0; 
 									line_r = 0;
 									//trick: pre-judge
-									___image = BLACK;
+									___image = EP_BLACK;
 									for (int j = v->xs; j <= v->xe && j < width; j += 1) {
 										__image = &_image[i * width + j];
 										//up pulse
-										if (*__image != BLACK && ___image == BLACK) {
+										if (*__image != EP_BLACK && ___image == EP_BLACK) {
 											line_state++;
 											if (line_state == 1) {
 												line_l = j;
@@ -254,7 +254,7 @@ struct Device {
 										if (j >= line_l && j <= line_r) {
 											*__image = obj->color;
 										}
-										if (*__image != BLACK) {
+										if (*__image != EP_BLACK) {
 											__depth = &_depth[index];
 
 											// get depth
@@ -274,10 +274,10 @@ struct Device {
 											}
 										}
 										//clear reflection depth at the same time
-										deptr[index] = BLACK;
+										deptr[index] = EP_BLACK;
 										//clear drawing
-										*__mirror = BLACK;
-										*__image = BLACK;
+										*__mirror = EP_BLACK;
+										*__image = EP_BLACK;
 									}
 								}
 							}
@@ -402,11 +402,11 @@ struct Device {
 												line_state = 0;
 												line_l = 0, line_r = 0;
 												//trick: pre-judge
-												___image = BLACK;
+												___image = EP_BLACK;
 												for (int j = xs; j <= xe && j < width; j += 1) {
 													__image = &_image[i * width + j];
 													//up pulse
-													if (*__image != BLACK && ___image == BLACK) {
+													if (*__image != EP_BLACK && ___image == EP_BLACK) {
 														line_state++;
 														if (line_state == 1) {
 															line_l = j;
@@ -426,7 +426,7 @@ struct Device {
 														*__image = obj->color;
 													}
 
-													if (*__image != BLACK) {
+													if (*__image != EP_BLACK) {
 														__shade = &_shade[index];
 														// get shade
 														//(-n.x * ((EFTYPE)j - v.x) - n.y * ((EFTYPE)i - v.y)) / n.z + v->z
@@ -440,7 +440,7 @@ struct Device {
 															*__shade = z;
 														}
 													}
-													*__image = BLACK;
+													*__image = EP_BLACK;
 												}
 											}
 										}
@@ -990,11 +990,11 @@ struct Device {
 						}
 						else {
 							//trick: pre-judge
-							___image = BLACK;
+							___image = EP_BLACK;
 							for (j = xs; j <= xe && j < device->width; j += 1) {
 								__image = &_image[i * device->width + j];
 								//up pulse
-								if (*__image != BLACK && ___image == BLACK) {
+								if (*__image != EP_BLACK && ___image == EP_BLACK) {
 									line_state++;
 									if (line_state == 1) {
 										line_l = j;
@@ -1025,7 +1025,7 @@ struct Device {
 								}
 							}
 							//step2: depth test
-							if (*__image != BLACK) {
+							if (*__image != EP_BLACK) {
 								// get depth
 								//(-n.x * ((EFTYPE)j - v.x) - n.y * ((EFTYPE)i - v.y)) / n.z + v->z
 								n0.set((j - cam->offset_w) / cam->scale_w, view_h, 0, 1);
@@ -1105,7 +1105,7 @@ struct Device {
 											//*__trans = Light3D::multi(*__image, f);
 											*__trans = Light3D::add(*__image, device->_tango[_index], f);
 
-											if (*__trans == BLACK) {
+											if (*__trans == EP_BLACK) {
 												//*__trans++;
 												*__trans = *__image;
 											}
@@ -1173,10 +1173,10 @@ struct Device {
 								THREAD_MUTEX_RELEASE();
 
 								if (device->render_linear < 0) {
-									_image[index] = BLACK;
+									_image[index] = EP_BLACK;
 								}
 								else {
-									_image[index] = BLACK;
+									_image[index] = EP_BLACK;
 								}
 							}
 						}
@@ -1188,10 +1188,10 @@ struct Device {
 					for (j = trans_w0; j <= trans_w1 && j < device->width; j++) {
 						index = i * device->width + j;
 						__trans = &device->_trans[index];
-						if (*__trans != BLACK) {
+						if (*__trans != EP_BLACK) {
 							__tango = &device->_tango[index];
 							*__tango = *__trans;
-							*__trans = BLACK;
+							*__trans = EP_BLACK;
 						}
 					}
 				}
@@ -1287,11 +1287,11 @@ struct Device {
 										}
 										else {
 											//trick: pre-judge
-											___image = BLACK;
+											___image = EP_BLACK;
 											for (j = xs; j <= xe && j < width; j += 1) {
 												__image = &_image[i * width + j];
 												//up pulse
-												if (*__image != BLACK && ___image == BLACK) {
+												if (*__image != EP_BLACK && ___image == EP_BLACK) {
 													line_state++;
 													if (line_state == 1) {
 														line_l = j;
@@ -1322,7 +1322,7 @@ struct Device {
 												}
 											}
 											//step2: depth test
-											if (*__image != BLACK) {
+											if (*__image != EP_BLACK) {
 												__depth = &_depth[index];
 
 												// get depth
@@ -1403,7 +1403,7 @@ struct Device {
 															//*__trans = Light3D::multi(*__image, f);
 															*__trans = Light3D::add(*__image, _tango[_index], f);
 
-															if (*__trans == BLACK) {
+															if (*__trans == EP_BLACK) {
 																//*__trans++;
 																*__trans = *__image;
 															}
@@ -1470,10 +1470,10 @@ struct Device {
 												}
 
 												if (render_linear < 0) {
-													_image[index] = BLACK;
+													_image[index] = EP_BLACK;
 												}
 												else {
-													_image[index] = BLACK;
+													_image[index] = EP_BLACK;
 												}
 											}
 										}
@@ -1544,10 +1544,10 @@ struct Device {
 							for (j = trans_w0; j <= trans_w1 && j < width; j++) {
 								index = i * width + j;
 								__trans = &_trans[index];
-								if (*__trans != BLACK) {
+								if (*__trans != EP_BLACK) {
 									__tango = &_tango[index];
 									*__tango = *__trans;
-									*__trans = BLACK;
+									*__trans = EP_BLACK;
 								}
 							}
 						}
@@ -1899,7 +1899,7 @@ struct Device {
 														raytracing_verts.insertLink(verts);
 														__image = &verts->color;
 
-														//shadow test set color to black or white
+														//shadow test set color to EP_BLACK or white
 														//then stop ray tracing
 														if (3 == ray.type) {
 															*__image = Light3D::multi(ray.color, ray.f / 5);
@@ -1987,14 +1987,14 @@ struct Device {
 															}
 															//reflection verts
 															else if (1 == render_state) {
-																*__image = Light3D::add(*__image, BLACK, f / 2);
+																*__image = Light3D::add(*__image, EP_BLACK, f / 2);
 																//*__image = Light3D::multi(*__image, f);
 																//set type reflection
 																verts->type = 1;
 															}
 															//transparent verts
 															else if (2 == render_state) {
-																*__image = Light3D::add(*__image, BLACK, f / 2);
+																*__image = Light3D::add(*__image, EP_BLACK, f / 2);
 																//*__image = Light3D::multi(*__image, f);
 																//set type transparent
 																verts->type = 2;
@@ -2431,7 +2431,7 @@ struct Device {
 
 				//accumulate all the ray traced verts' color
 				Verts * verts = raytracing_verts_accumulated.link;
-				DWORD color = BLACK;
+				DWORD color = EP_BLACK;
 				if (verts) {
 					do {
 						//if (0 == verts->type) 

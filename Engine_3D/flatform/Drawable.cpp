@@ -64,7 +64,7 @@ VOID onPaint(HWND hWnd)
 	}
 	isrefresh = -1;
 	// Place draw code here
-	EP_SetColor(BLACK);
+	EP_SetColor(EP_BLACK);
 	EP_ClearDevice();
 	//Render in device buffer
 	if (device.render_raytracing > 0) {
@@ -76,7 +76,7 @@ VOID onPaint(HWND hWnd)
 			for (i = 0; i < device.width; i++) {
 				for (j = 0; j < device.height; j++){
 					index = j *  device.width + i;
-					if (device.raytracing[index] != BLACK)
+					if (device.raytracing[index] != EP_BLACK)
 					{
 						//::SetPixel(memHDC, i, j, device.tango[index]);
 						_tango[index] = device.raytracing[index];
@@ -103,7 +103,7 @@ VOID onPaint(HWND hWnd)
 		for (i = 0; i < device.width; i++) {
 			for (j = 0; j < device.height; j++){
 				index = j *  device.width + i;
-				if (device.raytracing[index] != BLACK)
+				if (device.raytracing[index] != EP_BLACK)
 				{
 					//::SetPixel(memHDC, i, j, device.tango[index]);
 					_tango[index] = device.raytracing[index];
@@ -121,7 +121,7 @@ VOID onPaint(HWND hWnd)
 			for (i = 0; i < device.width; i++) {
 				for (j = 0; j < device.height; j++) {
 					index = j *  device.width + i;
-					if (device.raytracing[index] != BLACK)
+					if (device.raytracing[index] != EP_BLACK)
 					{
 						//::SetPixel(memHDC, i, j, device.tango[index]);
 						_tango[index] = device.raytracing[index];
@@ -161,7 +161,7 @@ VOID onPaint(HWND hWnd)
 		for (i = 0; i < device.width; i++) {
 			for (j = 0; j < device.height; j++){
 				index = j *  device.width + i;
-				if (device.tango[index] != BLACK)
+				if (device.tango[index] != EP_BLACK)
 				{
 					//::SetPixel(memHDC, i, j, device.tango[index]);
 					_tango[index] = device.tango[index];
@@ -535,8 +535,8 @@ VOID Initialize()
 					INT isScale = 0;
 					EFTYPE scale[3];
 					INT normalType = 0;
-					ECOLOR color = BLACK;
-					ECOLOR lineColor = BLACK;
+					ECOLOR color = EP_BLACK;
+					ECOLOR lineColor = EP_BLACK;
 					INT textureID = 0;
 					INT textureType = 0;
 

@@ -135,7 +135,7 @@ void EP_SetBKColor(ECOLOR c)
 }
 
 ECOLOR EP_ColorConvert(const EPCHAR * c) {
-	ECOLOR col = BLACK;
+	ECOLOR col = EP_BLACK;
 	if (!strcmp(c, "CYAN")) {
 		col = CYAN;
 	}
@@ -490,7 +490,7 @@ EPBOOL EP_TruncImage(EPTYPE x, EPTYPE y, EIMAGE image, EIMAGE image_bk, ECOLOR c
 			if (src_bk[src_idx] == c)
 			{
 				//Image types
-				if (imgtype&&src[src_idx] == BLACK)
+				if (imgtype&&src[src_idx] == EP_BLACK)
 					continue;
 				//	putpixel(x+mvx+vx,y+mvy+vy,bk?c:src[dst_idx]);
 				dst[pxl_idx] = bk ? c : src[dst_idx];
