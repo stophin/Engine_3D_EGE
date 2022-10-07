@@ -183,6 +183,9 @@ T * MultiLinkList<T>::removeLink(T * link)
 	T * before = link->prev[this->linkindex];
 	T * after = link->next[this->linkindex];
 
+	if (!before || !after) {
+		return NULL;
+	}
 	before->next[this->linkindex] = after;
 	after->prev[this->linkindex] = before;
 	link->prev[this->linkindex] = NULL;

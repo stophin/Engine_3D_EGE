@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
 			onTimer();
 		}
 		//delay_ms(100);
-		EP_RenderFlush();
+		EP_RenderFlush(10000);
 		if (isRenderRaytracing()) {
 			sprintf_s(str, "Raytracing %f", getfps());
 		}

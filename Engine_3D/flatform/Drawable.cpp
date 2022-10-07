@@ -142,14 +142,19 @@ VOID onPaint(HWND hWnd)
 		}
 		device.ClearBeforeRender();
 		if (device.render_thread > 0) {
-			device.RenderThread(man);
 			if (man.changed > 0) {
 				man.changed--;
-				device.RenderThreadReady(man, NULL, NULL, NULL);
+				if (device.thread_ready_r) {
+					device.ClearBeforeRenderDepth();
+					device.RenderThreadReady(man, NULL, NULL, NULL, &device);
+				}
 			}
+			//device.ClearBeforeRenderDepth();
+			device.RenderThread(man);
 			while (!device.IsThreadDone());
 		}
 		else {
+			device.ClearBeforeRenderDepth();
 			device.Render(man, NULL, NULL, NULL);
 		}
 		if (device.render_mirror > 0) {

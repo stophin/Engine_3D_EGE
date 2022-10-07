@@ -175,13 +175,13 @@ struct Vert3D {
 		return (INT)(p1.x > p2.x ? (p2.x > p3.x ? p3.x : p2.x) : (p1.x > p3.x ? p3.x : p1.x));
 	}
 	static INT get_maxx(const Vert3D& p1, const Vert3D& p2, const Vert3D& p3) {
-		return (INT)(p1.x < p2.x ? (p2.x < p3.x ? p3.x : p2.x) : (p1.x < p3.x ? p3.x : p1.x));
+		return (INT)ceil((p1.x < p2.x ? (p2.x < p3.x ? p3.x : p2.x) : (p1.x < p3.x ? p3.x : p1.x)));
 	}
 	static INT get_miny(const Vert3D& p1, const Vert3D& p2, const Vert3D& p3) {
 		return (INT)(p1.y > p2.y ? (p2.y > p3.y ? p3.y : p2.y) : (p1.y > p3.y ? p3.y : p1.y));
 	}
 	static INT get_maxy(const Vert3D& p1, const Vert3D& p2, const Vert3D& p3) {
-		return (INT)(p1.y < p2.y ? (p2.y < p3.y ? p3.y : p2.y) : (p1.y < p3.y ? p3.y : p1.y));
+		return (INT)ceil((p1.y < p2.y ? (p2.y < p3.y ? p3.y : p2.y) : (p1.y < p3.y ? p3.y : p1.y)));
 	}
 	static EFTYPE getZ(const Vert3D& n, EFTYPE x0, EFTYPE y0, EFTYPE z0, EFTYPE x, EFTYPE y) {
 		EFTYPE z_1 = 1;
@@ -297,6 +297,9 @@ struct Vert3D {
 			return 0;
 		}
 		M = a * (temp1)+ b * (temp3)+ c * (temp5);
+		if (EP_ISZERO(M)) {
+			return 0;
+		}
 		M_1 = 1.0 / M;
 
 		EFTYPE j = va.x - vo.x, k = va.y - vo.y, l = va.z - vo.z;

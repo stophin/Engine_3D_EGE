@@ -10,6 +10,7 @@
 
 #define MAX_LIGHT	10
 #define MAX_OBJECT	100
+#define MAX_PRECISE 100000000.0
 
 struct Device {
 	INT width;
@@ -34,8 +35,8 @@ struct Device {
 	INT light_count = 0;//light shader count
 	INT render_mirror = -1;//render mirror in rasteration mode
 	INT render_raytracing = -1;//render raytracing
-	INT thread_count = -1;//render raytracing thread count, single thread is minus 0
-	INT thread_count_h = 0;//specify horizonal thread count, then vertical thread count is thread_count - thread_count_h
+	INT thread_count = 10;//render raytracing thread count, single thread is minus 0
+	INT thread_count_h = 1;//specify horizonal thread count, then vertical thread count is thread_count - thread_count_h
 	INT raytracing_count = 2;//reflection/refraction times between reflection\refraction objects when raytracing
 	INT thread_w = MAX_OBJECT;
 	INT thread_h = MAX_OBJECT;
@@ -230,24 +231,22 @@ struct Device {
 									line_l = 0; 
 									line_r = 0;
 									//trick: pre-judge
-									___image = EP_BLACK;
 									for (int j = v->xs; j <= v->xe && j < width; j += 1) {
 										__image = &_image[i * width + j];
 										//up pulse
-										if (*__image != EP_BLACK && ___image == EP_BLACK) {
+										if (*__image != EP_BLACK) {
 											line_state++;
 											if (line_state == 1) {
 												line_l = j;
 											}
-											else {
+											else {//if (line_state == 2) {
 												line_r = j;
-												break;
 											}
+											*__image = EP_BLACK;
 										}
-										___image = *__image;
 									}
 									EFTYPE view_h = (i - cam->offset_h) / cam->scale_h;
-									for (int j = v->xs; j <= v->xe && j < width; j++) {
+									for (int j = line_l; j <= line_r && j < width; j++) {
 										index = i * width + j;
 										__mirror = &_mirror[index];
 										__image = &_image[index];
@@ -402,24 +401,22 @@ struct Device {
 												line_state = 0;
 												line_l = 0, line_r = 0;
 												//trick: pre-judge
-												___image = EP_BLACK;
 												for (int j = xs; j <= xe && j < width; j += 1) {
 													__image = &_image[i * width + j];
 													//up pulse
-													if (*__image != EP_BLACK && ___image == EP_BLACK) {
+													if (*__image != EP_BLACK) {
 														line_state++;
 														if (line_state == 1) {
 															line_l = j;
 														}
-														else {
+														else {//if (line_state == 2) {
 															line_r = j;
-															break;
 														}
+														*__image = EP_BLACK;
 													}
-													___image = *__image;
 												}
 												EFTYPE view_h = (i - cam->offset_h) / cam->scale_h;
-												for (int j = xs; j <= xe && j < width; j++) {
+												for (int j = line_l; j <= line_r && j < width; j++) {
 													index = i * width + j;
 													__image = &_image[index];
 													if (j >= line_l && j <= line_r) {
@@ -520,10 +517,13 @@ struct Device {
 	}
 
 	void ClearBeforeRender() {
-		memset(depth, 0, width * height * sizeof(EFTYPE));
+		//memset(depth, 0, width * height * sizeof(EFTYPE));
 		memset(tango, 0, width * height * sizeof(DWORD));
 		memset(image, 0, width * height * sizeof(DWORD));
 		memset(trans, 0, width * height * sizeof(DWORD));
+	}
+	void ClearBeforeRenderDepth() {
+		memset(depth, 0, width * height * sizeof(EFTYPE));
 	}
 
 	HANDLE thread_main_r;
@@ -735,7 +735,7 @@ struct Device {
 		}
 		return 0;
 	}
-	void RenderThreadReady(Manager3D& man,VObj* range, VObj* range0, VObj* range1) {
+	void RenderThreadReady(Manager3D& man,VObj* range, VObj* range0, VObj* range1, Device* device) {
 		VObj * _range;
 
 		Mat3D mm;
@@ -767,6 +767,19 @@ struct Device {
 			INT line_state = 0;
 			INT line_l = 0, line_r = 0;
 			int inrange;
+
+			DWORD* _image = device->threadImage[0];
+			memset(_image, EP_BLACK, sizeof(DWORD) * device->width * device->height);
+			//DWORD *_image = device->_image;
+			EFTYPE* _depth = device->_depth;
+			DWORD  ___image;
+			EFTYPE depth;
+			EFTYPE* __depth;
+			EFTYPE* __shade;
+			DWORD* __image;
+			DWORD* __tango, * __trans;
+			Vert3D n0, n1, n2, n3, r;
+			Vert3D _n0, _n1, _n2, _n3;
 			do {
 				if (threadRenderCount >= thread_w * thread_h) {
 					break;
@@ -814,16 +827,110 @@ struct Device {
 												othi = 0;
 												othj++;
 												if (othj >= thread_count) {
-													break;
+													//break;
 												}
 											}
 										}
 									}
-									threadRender[threadIndex][0] = v0;
-									threadRender[threadIndex][1] = v1;
-									threadRender[threadIndex][2] = v;
+									threadRender[threadRenderCount][0] = v0;
+									threadRender[threadRenderCount][1] = v1;
+									threadRender[threadRenderCount][2] = v;
 									threadRenderCount++;
 									v->obj = (void*)obj;
+
+									//step1: render the triangle
+									index = 0;
+									xs = v->xs; xe = v->xe; ys = v->ys; ye = v->ye;
+									//xs = _range == v ? v->xs : max(_range->xs, v->xs); ys = _range == v ? v->ys : max(_range->ys, v->ys);
+									//xe = _range == v ? v->xe : min(_range->xe, v->xe); ye = _range == v ? v->ye : min(_range->ye, v->ye);
+									//draw triangle contour
+									device->Draw_Line(_image, device->width, device->height, v0->x0, v0->y0, v1->x0, v1->y0, WHITE);
+									device->Draw_Line(_image, device->width, device->height, v1->x0, v1->y0, v->x0, v->y0, WHITE);
+									device->Draw_Line(_image, device->width, device->height, v->x0, v->y0, v0->x0, v0->y0, WHITE);
+
+									//get line formula
+									//v0-v1
+									Vert3D::GetLine(v1->v_s, v0->v_s, l1);
+									//v1-v
+									Vert3D::GetLine(v->v_s, v1->v_s, l);
+									//v-v0
+									Vert3D::GetLine(v0->v_s, v->v_s, l0);
+
+									EFTYPE zz_f = (v->n_r.x * v->v_c.x + v->n_r.y * v->v_c.y + v->n_r.z * v->v_c.z);
+									for (i = ys; i <= ye && i < device->height; i += 1) {
+										cam = obj->cam;
+										if (cam == NULL) {
+											break;
+										}
+										//little trick^_^
+										line_state = 0;
+										line_l = 0, line_r = 0;
+										if (false && device->render_linear < 0) {
+											line_l = xs;
+											line_r = xe;
+										}
+										else {
+											//trick: pre-judge
+											for (j = xs; j <= xe && j < device->width; j += 1) {
+												__image = &_image[i * device->width + j];
+												//up pulse
+												if (*__image != EP_BLACK) {
+													line_state++;
+													if (line_state == 1) {
+														line_l = j;
+													}
+													else {//if (line_state == 2) {
+														line_r = j;
+													}
+													*__image = EP_BLACK;
+												}
+											}
+										}
+										//get range x
+										EFTYPE __y = i;
+										EFTYPE __x;
+										INT _line_l1 = (INT)(l1.x * __y + l1.y);
+										INT _line_l = (INT)(l.x * __y + l.y);
+										INT _line_l0 = (INT)(l0.x * __y + l0.y);
+										EFTYPE view_h = (i - cam->offset_h) / cam->scale_h;
+										for (j = line_l; j <= line_r && j < device->width; j += 1) {
+											index = i * device->width + j;
+											__image = &_image[index];
+											if (device->render_linear < 0) {
+												if (j == line_l || j == line_r) {
+													*__image = obj->color;
+												}
+											}
+											else {
+												if (j >= line_l && j <= line_r) {
+													*__image = obj->color;
+												}
+											}
+											//step2: depth test
+											if (*__image != EP_BLACK) {
+												// get depth
+												//(-n.x * ((EFTYPE)j - v.x) - n.y * ((EFTYPE)i - v.y)) / n.z + v->z
+												n0.set((j - cam->offset_w) / cam->scale_w, view_h, 0, 1);
+												//z = Vert3D::getZ(v->n_d, v->x0, v->y0, v->z0, (EFTYPE)j, (EFTYPE)i);
+												z = Vert3D::getZ(v->n_1_z, v->x, v->y, v->z, n0.x, n0.y);
+												__depth = &_depth[index];
+												z *= MAX_PRECISE;
+												if (EP_ISZERO(*__depth)) {
+													*__depth = z;
+												}
+												if (*__depth <= z) {
+													*__depth = z;
+												}
+
+												if (device->render_linear < 0) {
+													_image[index] = EP_BLACK;
+												}
+												else {
+													_image[index] = EP_BLACK;
+												}
+											}
+										}
+									}
 								}
 							}
 
@@ -893,9 +1000,9 @@ struct Device {
 		}
 	}
 	//保证操作的原子性
-#define THREAD_MUTEX_GET() \
+#define THREAD_MUTEX_GET() //\
 	if (hMutex) { WaitForSingleObject(hMutex, 1000); }
-#define THREAD_MUTEX_RELEASE()\
+#define THREAD_MUTEX_RELEASE()//\
 	if (hMutex) { ReleaseMutex(hMutex); }
 
 	static void RenderThreadSub(Manager3D& man, INT sx, INT sy, INT ex, INT ey, INT id, HANDLE hMutex, Device* device = NULL) {
@@ -931,7 +1038,7 @@ struct Device {
 				return;
 			}
 			DWORD *_image = device->threadImage[id];
-			memset(_image, 0, sizeof(DWORD)* device->width * device->height);
+			memset(_image, EP_BLACK, sizeof(DWORD)* device->width * device->height);
 			//DWORD *_image = device->_image;
 			EFTYPE *_depth = device->_depth;
 			DWORD  ___image;
@@ -984,27 +1091,25 @@ struct Device {
 						//little trick^_^
 						line_state = 0;
 						line_l = 0, line_r = 0;
-						if (device->render_linear < 0) {
+						if (false && device->render_linear < 0) {
 							line_l = xs;
 							line_r = xe;
 						}
 						else {
 							//trick: pre-judge
-							___image = EP_BLACK;
 							for (j = xs; j <= xe && j < device->width; j += 1) {
 								__image = &_image[i * device->width + j];
 								//up pulse
-								if (*__image != EP_BLACK && ___image == EP_BLACK) {
+								if (*__image != EP_BLACK) {
 									line_state++;
 									if (line_state == 1) {
 										line_l = j;
 									}
-									else {
+									else {//if (line_state == 2) {
 										line_r = j;
-										break;
 									}
+									*__image = EP_BLACK;
 								}
-								___image = *__image;
 							}
 						}
 						//get range x
@@ -1014,10 +1119,13 @@ struct Device {
 						INT _line_l = (INT)(l.x * __y + l.y);
 						INT _line_l0 = (INT)(l0.x * __y + l0.y);
 						EFTYPE view_h = (i - cam->offset_h) / cam->scale_h;
-						for (j = xs; j <= xe && j < device->width; j += 1) {
+						for (j = line_l; j <= line_r && j < device->width; j += 1) {
 							index = i * device->width + j;
 							__image = &_image[index];
 							if (device->render_linear < 0) {
+								if (j == line_l || j == line_r) {
+									*__image = obj->color;
+								}
 							}
 							else {
 								if (j >= line_l && j <= line_r) {
@@ -1031,13 +1139,15 @@ struct Device {
 								n0.set((j - cam->offset_w) / cam->scale_w, view_h, 0, 1);
 								//z = Vert3D::getZ(v->n_d, v->x0, v->y0, v->z0, (EFTYPE)j, (EFTYPE)i);
 								z = Vert3D::getZ(v->n_1_z, v->x, v->y, v->z, n0.x, n0.y);
+								zz =z *  MAX_PRECISE;
 								THREAD_MUTEX_GET();
 								__depth = &_depth[index];
 								if (EP_ISZERO(*__depth)) {
-									*__depth = z;
+									//*__depth = z;
 								}
-								if (*__depth <= z) {
-									*__depth = z;
+								//else if ((int)*__depth == (int)zz) {
+								else if (EP_GEZERO(zz - *__depth)) {
+									//*__depth = z;
 									__tango = &device->_tango[index];
 									__trans = &device->_trans[index];
 
@@ -1281,27 +1391,25 @@ struct Device {
 										//little trick^_^
 										line_state = 0;
 										line_l = 0, line_r = 0;
-										if (render_linear < 0) {
+										if (false && render_linear < 0) {
 											line_l = xs;
 											line_r = xe;
 										}
 										else {
 											//trick: pre-judge
-											___image = EP_BLACK;
 											for (j = xs; j <= xe && j < width; j += 1) {
 												__image = &_image[i * width + j];
 												//up pulse
-												if (*__image != EP_BLACK && ___image == EP_BLACK) {
+												if (*__image != EP_BLACK) {
 													line_state++;
 													if (line_state == 1) {
 														line_l = j;
 													}
-													else {
+													else {//if (line_state == 2) {
 														line_r = j;
-														break;
 													}
+													*__image = EP_BLACK;
 												}
-												___image = *__image;
 											}
 										}
 										//get range x
@@ -1311,10 +1419,13 @@ struct Device {
 										INT _line_l = (INT)(l.x * __y + l.y);
 										INT _line_l0 = (INT)(l0.x * __y + l0.y);
 										EFTYPE view_h = (i - cam->offset_h) / cam->scale_h;
-										for (j = xs; j <= xe  && j < width; j += 1) {
+										for (j = line_l; j <= line_r  && j < width; j += 1) {
 											index = i * width + j;
 											__image = &_image[index];
 											if (render_linear < 0) {
+												if (j == line_l || j == line_r) {
+													*__image = obj->color;
+												}
 											}
 											else {
 												if (j >= line_l && j <= line_r) {
@@ -1331,9 +1442,9 @@ struct Device {
 												//z = Vert3D::getZ(v->n_d, v->x0, v->y0, v->z0, (EFTYPE)j, (EFTYPE)i);
 												z = Vert3D::getZ(v->n_1_z, v->x, v->y, v->z, n0.x, n0.y);
 												if (EP_ISZERO(*__depth)) {
-													*__depth = z;
+													//*__depth = z;
 												}
-												if (*__depth <= z) {
+												if (*__depth < z) {
 													*__depth = z;
 
 													__tango = &_tango[index];
