@@ -110,7 +110,7 @@ public:
 			return -1;
 		}
 		else if (!EP_ISZERO(v.w - EP_MAX)){
-			project(v.v_r);
+			//project(v.v_r);
 		}
 		return 0;
 	}

@@ -723,7 +723,31 @@ public:
 					this->refreshAABBW();
 					this->refreshAABBC();
 				}
-				int i;
+			}
+		}
+	}
+
+	void shaderVertex() {
+		
+		if (this->cam == NULL) {
+			return;
+		}
+
+		VObj * v = this->verts.link;
+		if (v) {
+
+			int i = 0;
+			// clear render link
+			if (this->verts_r.linkcount > 0) {
+				//this->verts_r.clearLink();
+				this->verts_r.linkcount = -this->verts_r.linkcount;
+			}
+			// clear reflection link
+			if (this->verts_f.linkcount > 0) {
+				//this->verts_f.clearLink();
+				this->verts_f.linkcount = -this->verts_f.linkcount;
+			}
+			if (this->render_aabb > 0) {
 				for (i = 0; i < 8; i++) {
 					// object coordinate -> world coordinate -> camera coordinate
 					v->v_r.set(this->aabb_r[i]);
@@ -735,22 +759,10 @@ public:
 				}
 				if (i == 8) {
 					//not in camera
-					this->verts_r.clearLink();
-					this->verts_f.clearLink();
+					//this->verts_r.clearLink();
+					//this->verts_f.clearLink();
 					return;
 				}
-			}
-
-			int i = 0;
-			// clear render link
-			if (this->verts_r.linkcount > 0){
-				//this->verts_r.clearLink();
-				this->verts_r.linkcount = -this->verts_r.linkcount;
-			}
-			// clear reflection link
-			if (this->verts_f.linkcount > 0){
-				//this->verts_f.clearLink();
-				this->verts_f.linkcount = -this->verts_f.linkcount;
 			}
 			this->v0 = NULL;
 			this->v1 = NULL;
@@ -802,6 +814,7 @@ public:
 				// camera coordinate -> view region
 				//v->cut = !this->cam->normalize(v->v_r);
 				v->cut = !this->cam->normalize_cut(*v, *v0, *v1);
+				//v->cut = !this->cam->normalize(v->v_r);
 				if (v->cut) {
 
 					if (1){

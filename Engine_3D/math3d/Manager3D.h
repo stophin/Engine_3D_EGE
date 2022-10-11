@@ -356,6 +356,53 @@ public:
 		changed++;
 	}
 
+	void shaderVertex(Camera3D* cam) {
+		Obj3D* obj = this->objs.link;
+		if (obj) {
+			do {
+				if (cam) {
+					obj->cam = cam;
+				}
+				else {
+					obj->cam = this->cams.link;
+				}
+				obj->shaderVertex();
+
+				obj = this->objs.next(obj);
+			} while (obj && obj != this->objs.link);
+		}
+		obj = this->tras.link;
+		if (obj) {
+			do {
+				if (cam) {
+					obj->cam = cam;
+				}
+				else {
+					obj->cam = this->cams.link;
+				}
+				obj->shaderVertex();
+
+				obj = this->tras.next(obj);
+			} while (obj && obj != this->tras.link);
+		}
+		obj = this->refl.link;
+		if (obj) {
+			do {
+				if (cam) {
+					obj->cam = cam;
+				}
+				else {
+					obj->cam = this->cams.link;
+				}
+				obj->shaderVertex();
+
+				obj = this->refl.next(obj);
+			} while (obj && obj != this->refl.link);
+		}
+
+		changed++;
+	}
+
 	void moveLight(EFTYPE x, EFTYPE y, EFTYPE z) {
 		if (this->lgts.link) {
 			this->lgts.link->move(x, y, z);
