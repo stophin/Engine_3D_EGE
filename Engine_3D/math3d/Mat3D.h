@@ -105,6 +105,7 @@ public:
 
 	}
 
+#ifdef USING_SIMD_INTRINSIC
 	union {
 		struct {
 			Mat mx;
@@ -114,6 +115,12 @@ public:
 		};
 		EFTYPE _mm[16];
 	};
+#else
+	Mat mx;
+	Mat my;
+	Mat mz;
+	Mat mw;
+#endif
 
 	Mat3D& set(const Mat3D& m) {
 		this->mx.set(m.mx);
