@@ -37,6 +37,7 @@
 typedef float	EPTYPE;
 typedef float	EFTYPE;
 typedef float	EETYPE;
+typedef double	EMTYPE;
 typedef void	EPVOID;
 typedef bool	EBTYPE;
 

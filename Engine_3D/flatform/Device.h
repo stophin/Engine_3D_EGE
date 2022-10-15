@@ -1898,7 +1898,7 @@ struct Device {
 		for (int y = sy; y < ey; y++) {
 			for (int x = sx; x < ex; x++) {
 				//Orthographic
-				if (cam->type == 1) {
+				if (cam->cam_type == 1) {
 					//get original vert from this pixel
 					n0.set((x - cam->offset_w) / cam->scale_w, (y - cam->offset_h) / cam->scale_h, 0, 1);
 					//get direction vert
@@ -1910,7 +1910,7 @@ struct Device {
 					ray.type = 0;
 				}
 				//Oblique
-				else if (cam->type == 2) {
+				else if (cam->cam_type == 2) {
 					//get original vert from this pixel
 					n0.set(0, 0, 0, 1);
 					//get direction vert

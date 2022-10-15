@@ -305,8 +305,8 @@ struct Vert3D {
 	}
 
 	static EFTYPE GetLineIntersectPointWithTriangle(const Vert3D& va, const Vert3D& vb, const Vert3D& vc, const Vert3D& vo, const Vert3D& vd, EFTYPE max, Vert3D& p) {
-		EFTYPE beta, rama, tran;
-		EFTYPE M, M_1;
+		EMTYPE beta, rama, tran;
+		EMTYPE M, M_1;
 		//vo + t * vd = va + beta * (vb - va) + rama * (vc - va)
 		//intersect point is in triangle va-vb-vc when beta > 0 and rama > 0 and beta + rama < 1
 		//AB = C
@@ -332,16 +332,16 @@ struct Vert3D {
 		//     |ya - yb, ya - yc, ya - ye|
 		//     |za - zb, za - zc, za - ze| / |A|
 		//==>-(f(ak - jb) + e(jc - al) + d(bl - kc)) / M
-		EFTYPE a = va.x - vb.x, b = va.y - vb.y, c = va.z - vb.z;
+		EMTYPE a = va.x - vb.x, b = va.y - vb.y, c = va.z - vb.z;
 		//make sure M is not zero
 		if (EP_ISZERO(a) && EP_ISZERO(b) && EP_ISZERO(c)) {
 			return 0;
 		}
-		EFTYPE d = va.x - vc.x, e = va.y - vc.y, f = va.z - vc.z;
-		EFTYPE g = vd.x, h = vd.y, i = vd.z;
-		EFTYPE temp1 = e * i - h * f;
-		EFTYPE temp3 = g * f - d * i;
-		EFTYPE temp5 = d * h - e * g;
+		EMTYPE d = va.x - vc.x, e = va.y - vc.y, f = va.z - vc.z;
+		EMTYPE g = vd.x, h = vd.y, i = vd.z;
+		EMTYPE temp1 = e * i - h * f;
+		EMTYPE temp3 = g * f - d * i;
+		EMTYPE temp5 = d * h - e * g;
 		//make sure M is not zero
 		if (EP_ISZERO(temp1) && EP_ISZERO(temp3) && EP_ISZERO(temp5)) {
 			return 0;
@@ -352,10 +352,10 @@ struct Vert3D {
 		}
 		M_1 = 1.0 / M;
 
-		EFTYPE j = va.x - vo.x, k = va.y - vo.y, l = va.z - vo.z;
-		EFTYPE temp2 = a * k - j * b;
-		EFTYPE temp4 = j * c - a * l;
-		EFTYPE temp6 = b * l - k * c;
+		EMTYPE j = va.x - vo.x, k = va.y - vo.y, l = va.z - vo.z;
+		EMTYPE temp2 = a * k - j * b;
+		EMTYPE temp4 = j * c - a * l;
+		EMTYPE temp6 = b * l - k * c;
 		//transport forward
 		tran = -(f * (temp2)+ e * (temp4)+ d * (temp6)) * M_1;
 		if (tran < 0 || tran > max) {

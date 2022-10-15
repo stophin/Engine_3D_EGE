@@ -39,9 +39,9 @@ public:
 	//type:
 	//1: Orthographic
 	//2: Oblique
-	INT type;
+	INT cam_type;
 	void initialize(int type) {
-		this->type = type;
+		this->cam_type = type;
 
 		if (type == 1) {
 			//TODO
