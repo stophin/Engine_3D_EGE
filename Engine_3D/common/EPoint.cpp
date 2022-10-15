@@ -5,6 +5,21 @@
 
 #include "Epoint.h"
 
+#ifdef USING_SIMD_INTRINSIC
+__declspec(align(16)) __m256i gatherA12 = _mm256_set_epi32(13, 9, 5, 1, 12, 8, 4, 0);
+__declspec(align(16)) __m256i gatherA34 = _mm256_set_epi32(15, 11, 7, 3, 14, 10, 6, 2);
+
+__declspec(align(16)) __m256i gatherB11 = _mm256_set_epi32(3, 2, 1, 0, 3, 2, 1, 0);
+__declspec(align(16)) __m256i gatherB22 = _mm256_set_epi32(7, 6, 5, 4, 7, 6, 5, 4);
+__declspec(align(16)) __m256i gatherB33 = _mm256_set_epi32(11, 10, 9, 8, 11, 10, 9, 8);
+__declspec(align(16)) __m256i gatherB44 = _mm256_set_epi32(15, 14, 13, 12, 15, 14, 13, 12);
+
+__declspec(align(16)) __m256i gatherAA12 = _mm256_set_epi32(3, 2, 1, 0, 3, 2, 1, 0);
+__declspec(align(16)) __m256i gatherBB11 = _mm256_set_epi32(7, 6, 5, 4, 3, 2, 1, 0);
+__declspec(align(16)) __m256i gatherBB22 = _mm256_set_epi32(15, 14, 13, 12, 11, 10, 9, 8);
+#endif
+
+
 EPoint::EPoint():
 x(0),
 y(0)

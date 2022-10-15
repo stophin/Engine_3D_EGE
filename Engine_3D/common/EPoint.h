@@ -34,11 +34,29 @@
 #define GET_INT16_MIN(x) ((GET_INT16_NOW(x))==0)
 #define RST_INT16_MAX(x) SET_INT16_MAX(GET_INT16_MAX(x))
 
-typedef double	EPTYPE;
-typedef double	EFTYPE;
+typedef float	EPTYPE;
+typedef float	EFTYPE;
 typedef float	EETYPE;
 typedef void	EPVOID;
 typedef bool	EBTYPE;
+
+#define USING_SIMD_INTRINSIC
+
+#ifdef USING_SIMD_INTRINSIC
+#include <xmmintrin.h>
+#include <immintrin.h>
+extern __declspec(align(16)) __m256i gatherA12;
+extern __declspec(align(16)) __m256i gatherA34;
+
+extern __declspec(align(16)) __m256i gatherB11;
+extern __declspec(align(16)) __m256i gatherB22;
+extern __declspec(align(16)) __m256i gatherB33;
+extern __declspec(align(16)) __m256i gatherB44;
+
+extern __declspec(align(16)) __m256i gatherAA12;
+extern __declspec(align(16)) __m256i gatherBB11;
+extern __declspec(align(16)) __m256i gatherBB22;
+#endif
 
 #define EP_ZERO			1e-6
 

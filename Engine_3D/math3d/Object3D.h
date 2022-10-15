@@ -814,7 +814,7 @@ public:
 				// camera coordinate -> view region
 				//v->cut = !this->cam->normalize(v->v_r);
 				v->cut = !this->cam->normalize_cut(*v, *v0, *v1);
-				//v->cut = !this->cam->normalize(v->v_r);
+				v->cut = !this->cam->normalize(v->v_r);
 				if (v->cut) {
 
 					if (1){

@@ -105,10 +105,15 @@ public:
 
 	}
 
-	Mat mx;
-	Mat my;
-	Mat mz;
-	Mat mw;
+	union {
+		struct {
+			Mat mx;
+			Mat my;
+			Mat mz;
+			Mat mw;
+		};
+		EFTYPE _mm[16];
+	};
 
 	Mat3D& set(const Mat3D& m) {
 		this->mx.set(m.mx);
@@ -135,7 +140,52 @@ public:
 		t.w = this->mx.w * m.x + this->my.w * m.y + this->mz.w * m.z + this->mw.w * m.w;
 	}
 
+#ifdef USING_SIMD_INTRINSIC
 	Mat3D& operator * (const Mat3D& m) {
+		__declspec(align(16)) __m256 temp;
+		__declspec(align(16)) __m256 a12, a34;
+		__declspec(align(16)) __m256 b11, b22, b33, b44;
+		a12 = _mm256_i32gather_ps(this->_mm, gatherA12, sizeof(float));
+		a34 = _mm256_i32gather_ps(this->_mm, gatherA34, sizeof(float));
+
+		b11 = _mm256_i32gather_ps(m._mm, gatherB11, sizeof(float));
+		b22 = _mm256_i32gather_ps(m._mm, gatherB22, sizeof(float));
+		b33 = _mm256_i32gather_ps(m._mm, gatherB33, sizeof(float));
+		b44 = _mm256_i32gather_ps(m._mm, gatherB44, sizeof(float));
+
+		temp = _mm256_dp_ps(a12, b11, 0b11110001);
+		this->_mm[0] = temp.m256_f32[0];
+		this->_mm[1] = temp.m256_f32[4];
+		temp = _mm256_dp_ps(a34, b11, 0b11110001);
+		this->_mm[2] = temp.m256_f32[0];
+		this->_mm[3] = temp.m256_f32[4];
+
+		temp = _mm256_dp_ps(a12, b22, 0b11110001);
+		this->_mm[4] = temp.m256_f32[0];
+		this->_mm[5] = temp.m256_f32[4];
+		temp = _mm256_dp_ps(a34, b22, 0b11110001);
+		this->_mm[6] = temp.m256_f32[0];
+		this->_mm[7] = temp.m256_f32[4];
+
+		temp = _mm256_dp_ps(a12, b33, 0b11110001);
+		this->_mm[8] = temp.m256_f32[0];
+		this->_mm[9] = temp.m256_f32[4];
+		temp = _mm256_dp_ps(a34, b33, 0b11110001);
+		this->_mm[10] = temp.m256_f32[0];
+		this->_mm[11] = temp.m256_f32[4];
+
+		temp = _mm256_dp_ps(a12, b44, 0b11110001);
+		this->_mm[12] = temp.m256_f32[0];
+		this->_mm[13] = temp.m256_f32[4];
+		temp = _mm256_dp_ps(a34, b44, 0b11110001);
+		this->_mm[14] = temp.m256_f32[0];
+		this->_mm[15] = temp.m256_f32[4];
+
+		return *this;
+	}
+#else
+
+	Mat3D& operator *(const Mat3D& m) {
 		//Mat mx = this->mx, my = this->my, mz = this->mz, mw = this->mw;
 		Mat mx, my, mz, mw;
 		this->cross(mx, m.mx);
@@ -150,6 +200,7 @@ public:
 
 		return *this;
 	}
+#endif
 
 	Mat3D& operator = (const Mat3D& m) {
 		this->mx = m.mx;

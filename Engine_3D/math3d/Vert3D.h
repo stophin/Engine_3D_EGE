@@ -10,10 +10,15 @@
 typedef struct Vert3D Vert3D;
 struct Vert3D {
 
-	EFTYPE x;
-	EFTYPE y;
-	EFTYPE z;
-	EFTYPE w;
+	union {
+		struct {
+			EFTYPE x;
+			EFTYPE y;
+			EFTYPE z;
+			EFTYPE w;
+		};
+		EFTYPE e[4];
+	};
 
 	INT anti;
 
@@ -51,6 +56,27 @@ struct Vert3D {
 		return *this;
 	}
 
+#ifdef USING_SIMD_INTRINSIC
+	Vert3D& operator *(const Mat3D& m) {
+		__declspec(align(16)) __m256 temp;
+		__declspec(align(16)) __m256 a12, a34;
+		__declspec(align(16)) __m256 b11, b22, b33, b44;
+		a12 = _mm256_i32gather_ps(this->e, gatherAA12, sizeof(float));
+
+		b11 = _mm256_i32gather_ps(m._mm, gatherBB11, sizeof(float));
+		b22 = _mm256_i32gather_ps(m._mm, gatherBB22, sizeof(float));
+
+		temp = _mm256_dp_ps(a12, b11, 0b11111111);
+		this->e[0] = temp.m256_f32[0];
+		this->e[1] = temp.m256_f32[4];
+		temp = _mm256_dp_ps(a12, b22, 0b11111111);
+		this->e[2] = temp.m256_f32[0];
+		this->e[3] = temp.m256_f32[4];
+
+		return *this;
+	}
+
+#else
 
 	Vert3D& operator *(const Mat3D& m) {
 		EFTYPE x = this->x, y = this->y, z = this->z, w = this->w;
@@ -61,6 +87,29 @@ struct Vert3D {
 
 		return *this;
 	}
+#endif
+
+#ifdef USING_SIMD_INTRINSIC
+	Vert3D& operator ^(const Mat3D& m) {
+		__declspec(align(16)) __m256 temp;
+		__declspec(align(16)) __m256 a12, a34;
+		__declspec(align(16)) __m256 b11, b22, b33, b44;
+		a12 = _mm256_i32gather_ps(this->e, gatherAA12, sizeof(float));
+
+		b11 = _mm256_i32gather_ps(m._mm, gatherBB11, sizeof(float));
+		b22 = _mm256_i32gather_ps(m._mm, gatherBB22, sizeof(float));
+
+		temp = _mm256_dp_ps(a12, b11, 0b01111111);
+		this->e[0] = temp.m256_f32[0];
+		this->e[1] = temp.m256_f32[4];
+		temp = _mm256_dp_ps(a12, b22, 0b01111111);
+		this->e[2] = temp.m256_f32[0];
+		//this->e[3] = temp.m256_f32[4];
+
+		return *this;
+	}
+
+#else
 
 	Vert3D& operator ^(const Mat3D& m) {
 		EFTYPE x = this->x, y = this->y, z = this->z;
@@ -70,6 +119,7 @@ struct Vert3D {
 
 		return *this;
 	}
+#endif
 
 	Vert3D& operator *(const Vert3D& v) {
 		EFTYPE x = this->x, y = this->y, z = this->z, w = this->w;
